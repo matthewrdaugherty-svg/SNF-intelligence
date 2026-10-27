@@ -190,6 +190,14 @@ assert "private_equity_company_owner" in cols and "reit_owner" in cols, cols
 # ---------- reconciliation ----------
 print("== Reconciliation")
 rec={}
+# SNF vs Medicaid-only nursing facility (T-022): Care Compare "Provider Type" must agree with CMS's CCN rules (SOM ch.2 §2779A1: Medicare SNFs
+# are 5000-6499 in positions 3-6; §2779B: title XIX-only providers carry an alpha third character, A/B/E/F = NF) and with Medicare enrollment.
+bad=con.execute("""SELECT count(*) FROM facility_master WHERE (provider_type='Medicaid') <> (substr(ccn,3,1) IN ('A','B','E','F'))
+  OR (provider_type<>'Medicaid' AND substr(ccn,3,1) NOT IN ('5','6'))""").fetchone()[0]
+assert bad==0, f"{bad} nursing homes whose Provider Type disagrees with the CCN rule"
+assert con.execute("SELECT count(*) FROM facility_master WHERE provider_type='Medicaid' AND ccn IN (SELECT ccn FROM pecos_snf_enroll)").fetchone()[0]==0, "a Medicaid-only NF has a Medicare SNF enrollment"
+rec["snf_vs_nf_ccn_rule"]=con.execute("SELECT count(*) FILTER (WHERE provider_type<>'Medicaid'), count(*) FILTER (WHERE provider_type='Medicaid'), count(*) FILTER (WHERE provider_type='Medicaid' AND vbp_in_program='Y'), count(*) FILTER (WHERE provider_type='Medicaid' AND qrp_004_ppr_pd_rsrr_fn LIKE '%14%') FROM facility_master").fetchone()
+print("  SNF/NF rule holds for all 14,690; Medicaid-only in VBP:", rec["snf_vs_nf_ccn_rule"][2], "; with QRP footnote 14:", rec["snf_vs_nf_ccn_rule"][3])
 rec["hospital_master_with_pecos_enrollment"]=con.execute("SELECT count(*) FILTER (WHERE hospital_ccn IN (SELECT ccn FROM pecos_hosp_enroll)), count(*) FROM hospital_master").fetchone()
 rec["hospital_master_with_owner_org"]=con.execute("SELECT count(DISTINCT hospital_ccn) FROM hospital_owner_org WHERE in_hospital_master").fetchone()
 rec["facility_master_with_pecos_enrollment"]=con.execute("SELECT count(*) FILTER (WHERE ccn IN (SELECT ccn FROM pecos_snf_enroll)), count(*) FROM facility_master").fetchone()
