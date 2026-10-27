@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router'
 import Papa from 'papaparse'
 import { getDb, q, sqlStr } from '../lib/db'
@@ -27,7 +27,7 @@ export function parseFlowsCsv(text: string): ParsedFlows {
     const nRaw = (r.n_discharges ?? '').trim()
     const ps = (r.period_start ?? '').trim(), pe = (r.period_end ?? '').trim()
     if (!/^[0-9A-Z]{6}$/.test(snf)) { errors.push(`Line ${line}: snf_ccn "${r.snf_ccn}" must be 6 characters (keep leading zeros).`); return }
-    if (!hosp) { errors.push(`Line ${line}: hospital_ccn is empty.`); return }
+    if (!/^[0-9A-Z]{6}$/.test(hosp)) { errors.push(`Line ${line}: hospital_ccn "${r.hospital_ccn}" must be 6 characters (keep leading zeros).`); return }
     if (!/^\d{1,9}$/.test(nRaw)) { errors.push(`Line ${line}: n_discharges "${nRaw}" must be a whole number of 0 or more (digits only).`); return }
     const n = Number(nRaw)
     if (!isoDate(ps) || !isoDate(pe)) { errors.push(`Line ${line}: period_start/period_end must be real dates in YYYY-MM-DD form.`); return }
@@ -71,15 +71,19 @@ export default function Flows() {
     try { const t = localStorage.getItem(STORE); if (t) { const p = parseFlowsCsv(t); if (p.rows.length) { setParsed(p); setFileName('previous upload (this browser)'); loadIntoDb(p.rows).then(() => setLoaded(true)) } } } catch { /* ignore */ }
   }, [])
 
+  const uploadSeq = useRef(0)
   async function onFile(file: File) {
+    const seq = ++uploadSeq.current                      // only the latest upload may save itself or update the screen
     const text = await file.text()
     const p = parseFlowsCsv(text)
     try { localStorage.removeItem(STORE) } catch { /* ignore */ }   // a new upload always replaces the old one, even if it fails
+    if (seq !== uploadSeq.current) return
     setParsed(p); setFileName(file.name); setLoaded(false); setSummary(null); setDest([]); setAlts([]); setHospitals([]); setHospital('')
     try {
       await loadIntoDb(p.rows)
+      if (seq !== uploadSeq.current) return
       if (p.rows.length) { setLoaded(true); try { localStorage.setItem(STORE, text) } catch { /* ignore */ } }
-    } catch (e) { setParsed({ rows: [], errors: [`The file could not be loaded: ${String((e as Error)?.message ?? e)}`], hospitals: [] }) }
+    } catch (e) { if (seq === uploadSeq.current) setParsed({ rows: [], errors: [`The file could not be loaded: ${String((e as Error)?.message ?? e)}`], hospitals: [] }) }
   }
   function clearAll() { setParsed(null); setLoaded(false); setHospital(''); setHospitals([]); setSummary(null); setDest([]); setAlts([]); setFileName(''); try { localStorage.removeItem(STORE) } catch { /* ignore */ } loadIntoDb([]) }
 
@@ -125,7 +129,7 @@ export default function Flows() {
       }
       if (!live) return
       setSummary({ ...s, hasLoc, lat: hh?.lat, lng: hh?.lng }); setDest(dd); setAlts(aa)
-    })()
+    })().catch(e => { if (live) { setParsed({ rows: [], errors: [`The uploaded data could not be summarized: ${String((e as Error)?.message ?? e)}`], hospitals: [] }); setLoaded(false); try { localStorage.removeItem(STORE) } catch { /* ignore */ } } })
     return () => { live = false }
   }, [loaded, hospital, radius])
 
@@ -154,7 +158,7 @@ export default function Flows() {
 
       <div className="mt-5 bg-surface rounded-[10px] px-5 py-4">
         <div className="flex flex-wrap items-center gap-3">
-          <label className="press btn btn-primary text-sm cursor-pointer">Upload CSV<input type="file" accept=".csv,text/csv" className="sr-only" onChange={e => { const f = e.target.files?.[0]; if (f) onFile(f); e.currentTarget.value = '' }} /></label>
+          <label className="press btn btn-primary text-sm cursor-pointer has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-accent">Upload CSV<input type="file" accept=".csv,text/csv" className="sr-only" onChange={e => { const f = e.target.files?.[0]; if (f) onFile(f); e.currentTarget.value = '' }} /></label>
           <a className="press btn btn-surface text-sm" href={`${import.meta.env.BASE_URL}data/discharge_flows_template.csv`} download>Download the template</a>
           {parsed && <button className="press btn btn-quiet text-sm" onClick={clearAll}>Remove uploaded data</button>}
           <div className="text-xs text-ink-3 ml-auto max-w-md">Use aggregated counts (hospital → SNF → number of discharges in a period), never patient records. The file is kept in this browser's storage until you remove it; nothing is sent to a server.</div>
@@ -162,7 +166,7 @@ export default function Flows() {
         <div className="text-xs text-ink-2 mt-3">Columns: <code className="text-ink">hospital_ccn, hospital_name, snf_ccn, period_start, period_end, n_discharges</code> · optional <code className="text-ink">hospital_lat, hospital_lng</code> (needed for distances and nearby alternatives). Dates as YYYY-MM-DD. Keep leading zeros in CCNs.</div>
         {parsed && (
           <div className="mt-3 text-sm">
-            <div>{fileName}: {parsed.headerError ? <span className="font-medium">not loaded</span> : <><span className="font-medium tabular-nums">{parsed.rows.length.toLocaleString()}</span> valid rows, {parsed.hospitals.length} hospital{parsed.hospitals.length === 1 ? '' : 's'}{parsed.errors.length ? <span className="font-medium"> · {parsed.errors.length} row{parsed.errors.length === 1 ? '' : 's'} skipped</span> : null}</>}</div>
+            <div>{fileName}: {parsed.headerError ? <span className="font-medium">not loaded</span> : <><span className="font-medium tabular-nums">{parsed.rows.length.toLocaleString()}</span> valid row{parsed.rows.length === 1 ? '' : 's'}, {parsed.hospitals.length} hospital{parsed.hospitals.length === 1 ? '' : 's'}{parsed.errors.length ? <span className="font-medium"> · {parsed.errors.length} row{parsed.errors.length === 1 ? '' : 's'} skipped</span> : null}</>}</div>
             {parsed.errors.length > 0 && <ul className="mt-1 text-xs text-ink-2 list-disc pl-5">{parsed.errors.slice(0, 12).map((e, i) => <li key={i}>{e}</li>)}{parsed.errors.length > 12 && <li>…and {parsed.errors.length - 12} more</li>}</ul>}
           </div>
         )}

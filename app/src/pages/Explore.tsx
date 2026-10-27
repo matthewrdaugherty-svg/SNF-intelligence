@@ -8,7 +8,7 @@ import DataTable, { type Sort } from '../components/DataTable'
 import { useReference, Empty } from '../components/ui'
 import { fmt } from '../lib/format'
 
-const BASE_COLS = ['ccn', 'provider_name', 'overall_rating', 'health_inspection_rating', 'qm_rating', 'staffing_rating', 'special_focus_status', 'abuse_icon']
+const BASE_COLS = ['ccn', 'provider_name', 'overall_rating', 'overall_rating_footnote', 'health_inspection_rating', 'health_inspection_rating_footnote', 'qm_rating', 'qm_rating_footnote', 'staffing_rating', 'staffing_rating_footnote', 'special_focus_status', 'abuse_icon']
 /** Only these keys may appear in ORDER BY; anything else from the URL is ignored. */
 const SORT_KEYS = new Set<string>(['provider_name', 'overall_rating', 'distance_mi', ...TABLE_COLS.map(c => c.key)])
 const safeSort = (key: string | null, dir: string | null): Sort => ({ key: key && SORT_KEYS.has(key) ? key : 'provider_name', dir: dir === 'desc' ? 'desc' : 'asc' })
@@ -55,8 +55,8 @@ export default function Explore() {
   function exportCsv() {
     if (!rows) return
     // every value with a CMS footnote exports its footnote in the next column (Operating Rule 1.3)
-    const keys = ['ccn', 'provider_name', 'overall_rating', 'health_inspection_rating', 'qm_rating', 'staffing_rating', ...(hasDist ? ['distance_mi'] : []), ...cols.flatMap(c => c.fn ? [c.key, c.fn] : [c.key])]
-    const labels = ['CCN', 'Facility', 'Overall stars', 'Health inspection stars', 'Quality measure stars', 'Staffing stars', ...(hasDist ? ['Miles'] : []), ...cols.flatMap(c => c.fn ? [c.label, `${c.label} — CMS footnote`] : [c.label])]
+    const keys = ['ccn', 'provider_name', 'overall_rating', 'overall_rating_footnote', 'health_inspection_rating', 'health_inspection_rating_footnote', 'qm_rating', 'qm_rating_footnote', 'staffing_rating', 'staffing_rating_footnote', ...(hasDist ? ['distance_mi'] : []), ...cols.flatMap(c => c.fn ? [c.key, c.fn] : [c.key])]
+    const labels = ['CCN', 'Facility', 'Overall stars', 'Overall stars — CMS footnote', 'Health inspection stars', 'Health inspection stars — CMS footnote', 'Quality measure stars', 'Quality measure stars — CMS footnote', 'Staffing stars', 'Staffing stars — CMS footnote', ...(hasDist ? ['Miles'] : []), ...cols.flatMap(c => c.fn ? [c.label, `${c.label} — CMS footnote`] : [c.label])]
     const esc = (v: unknown) => { const s = v == null ? '' : String(v); return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s }
     const lines = [labels.map(esc).join(','), ...rows.map(r => keys.map(k => esc(k === 'distance_mi' && r[k] != null ? Number(r[k]).toFixed(1) : r[k])).join(','))]
     const blob = new Blob(['﻿' + lines.join('\n')], { type: 'text/csv;charset=utf-8' })
@@ -72,7 +72,7 @@ export default function Explore() {
         <div className="flex items-center gap-3 px-4 h-12 shrink-0">
           <button className="press btn btn-surface text-sm md:hidden" onClick={() => setFiltersOpen(o => !o)} aria-expanded={filtersOpen}>Filters</button>
           <div className="text-sm text-ink-2">{rows ? <><span className="text-ink font-medium tabular-nums" data-testid="result-count">{rows.length.toLocaleString()}</span> facilities</> : 'Loading…'}{hasDist && f.place ? <span className="text-ink-3"> · within {f.miles} mi of {f.place}</span> : null}</div>
-          <div className="ml-auto flex items-center gap-2 relative">
+          <div className="ml-auto flex items-center gap-2 relative shrink-0">
             <button className="press btn btn-surface text-sm" onClick={() => setPicker(p => !p)} aria-expanded={picker}>Columns · {cols.length}</button>
             <button className="press btn btn-primary text-sm" onClick={exportCsv} disabled={!rows?.length}>Export CSV</button>
             {picker && (
