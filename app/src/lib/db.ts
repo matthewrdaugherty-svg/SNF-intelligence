@@ -8,7 +8,7 @@ import ehWorker from '@duckdb/duckdb-wasm/dist/duckdb-browser-eh.worker.js?url'
 
 export type Row = Record<string, unknown>
 
-const FILES = ['facility_master', 'penalties', 'citations_gl', 'state_averages', 'inspection_cutpoints', 'ownership', 'hospital_master', 'hospital_service_area', 'snf_utilization', 'hospital_system', 'hospital_owner_org', 'snf_pecos'] as const
+const FILES = ['facility_master', 'penalties', 'citations_gl', 'state_averages', 'inspection_cutpoints', 'ownership', 'hospital_master', 'hospital_service_area', 'snf_utilization', 'hospital_system', 'hospital_owner_org', 'hospital_family', 'hospital_family_member', 'snf_pecos'] as const
 
 let dbPromise: Promise<duckdb.AsyncDuckDBConnection> | null = null
 let progressListeners: ((msg: string) => void)[] = []

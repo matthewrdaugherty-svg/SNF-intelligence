@@ -65,6 +65,8 @@ pq("SELECT hospital_ccn, zip, cases, days, charges, share_of_visible_cases, cumu
 pq("SELECT * FROM snf_utilization", "snf_utilization")
 # PECOS ownership layer (scripts/07_load_pecos.py)
 pq("SELECT owner_id, system_name, n_hospitals_enrolled, n_hospitals_in_care_compare, n_hospitals_with_service_area, n_state_codes FROM hospital_system WHERE n_hospitals_in_care_compare > 0", "hospital_system")
+pq("SELECT family_id, label, n_member_orgs, aliases, n_hospitals, n_with_service_area, n_states FROM hospital_family", "hospital_family")
+pq("SELECT family_id, hospital_ccn, state, has_service_area, direct FROM hospital_family_member", "hospital_family_member")
 pq("SELECT hospital_ccn, owner_id, owner_name, role_code, role_text, pct, since FROM hospital_owner_org WHERE in_hospital_master", "hospital_owner_org")
 pq("""SELECT ccn, legal_entity, dba, affiliation_entity_name, affiliation_entity_id, proprietary_nonprofit, organization_type_structure, incorporation_date,
        n_org_owners, n_individual_owners, n_managing_control, any_private_equity_owner, any_reit_owner, n_chow_since_2016, last_chow_date, last_buyer, last_seller

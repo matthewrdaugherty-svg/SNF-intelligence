@@ -1,18 +1,20 @@
 import { useEffect, useRef, useState } from 'react'
-import { hospitalsByCcn, searchHospitals, searchSystems, systemHospitalCcns, type HospitalLite, type SystemLite } from '../lib/hospitals'
+import { familyMembers, hospitalsByCcn, searchHospitals, searchSystems, type FamilyLite, type FamilyMember, type HospitalLite } from '../lib/hospitals'
 import { titleCase } from '../lib/format'
 import { Segmented } from './ui'
 
 type Mode = 'hospital' | 'system'
-/** Search-and-pick hospitals, one at a time or a whole system (every hospital a PECOS owner organization holds a 5%+ interest in). */
+/** Search-and-pick hospitals, one at a time or a whole system (a PECOS ownership family), optionally limited to chosen states. */
 export default function HospitalPicker({ selected, onChange }: { selected: string[]; onChange: (ccns: string[]) => void }) {
   const [mode, setMode] = useState<Mode>('hospital')
   const [text, setText] = useState('')
   const [hospitals, setHospitals] = useState<HospitalLite[]>([])
-  const [systems, setSystems] = useState<SystemLite[]>([])
+  const [systems, setSystems] = useState<FamilyLite[]>([])
   const [chosen, setChosen] = useState<HospitalLite[]>([])
   const [open, setOpen] = useState(false)
   const [note, setNote] = useState<string | null>(null)
+  // a system picked but not yet added: its members, and which states are ticked
+  const [pending, setPending] = useState<{ fam: FamilyLite; members: FamilyMember[]; states: Set<string> } | null>(null)
   const box = useRef<HTMLDivElement>(null)
   useEffect(() => { let live = true; hospitalsByCcn(selected).then(r => { if (live) setChosen(selected.map(c => r.find(x => x.hospital_ccn === c)).filter(Boolean) as HospitalLite[]) }); return () => { live = false } }, [selected])
   useEffect(() => {
@@ -30,21 +32,29 @@ export default function HospitalPicker({ selected, onChange }: { selected: strin
   }, [])
   const reset = () => { setText(''); setHospitals([]); setSystems([]); setOpen(false) }
   const addHospital = (h: HospitalLite) => { if (!selected.includes(h.hospital_ccn)) onChange([...selected, h.hospital_ccn]); setNote(null); reset() }
-  const addSystem = async (s: SystemLite) => {
-    const ccns = await systemHospitalCcns(s.owner_id)
-    const add = ccns.filter(c => !selected.includes(c))
+  const pickSystem = async (fam: FamilyLite) => {
+    const members = await familyMembers(fam.family_id)
+    setPending({ fam, members, states: new Set(members.map(m => m.state)) })
+    setNote(null); reset()
+  }
+  const addPending = () => {
+    if (!pending) return
+    const usable = pending.members.filter(m => pending.states.has(m.state) && m.has_service_area)
+    const skipped = pending.members.filter(m => pending.states.has(m.state) && !m.has_service_area).length
+    const add = usable.map(m => m.hospital_ccn).filter(c => !selected.includes(c))
     onChange([...selected, ...add])
-    const skipped = s.n_hospitals_in_care_compare - ccns.length
-    setNote(`${titleCase(s.system_name)}: added ${add.length} hospital${add.length === 1 ? '' : 's'}${skipped > 0 ? `; ${skipped} of its hospitals have no service-area data and were left out` : ''}.`)
-    reset()
+    setNote(`${titleCase(pending.fam.label)}: added ${add.length} hospital${add.length === 1 ? '' : 's'}${skipped > 0 ? `; ${skipped} in the chosen states have no service-area data and were left out` : ''}.`)
+    setPending(null)
   }
   const results = mode === 'hospital' ? hospitals.length : systems.length
+  const stateCounts = pending ? [...pending.members.reduce((m, x) => m.set(x.state, (m.get(x.state) ?? 0) + 1), new Map<string, number>())].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])) : []
+  const pendingCount = pending ? pending.members.filter(m => pending.states.has(m.state) && m.has_service_area).length : 0
   return (
     <div ref={box} className="relative">
       <div className="mb-1.5"><Segmented value={mode} onChange={m => { setMode(m as Mode); reset() }} options={[{ value: 'hospital', label: 'One hospital' }, { value: 'system', label: 'Whole system' }]} ariaLabel="Pick by" /></div>
       <input className="control w-full" value={text} onChange={e => setText(e.target.value)} onFocus={() => results && setOpen(true)}
-        onKeyDown={e => { if (e.key === 'Escape') setOpen(false); if (e.key === 'Enter') { if (mode === 'hospital' && hospitals[0]) addHospital(hospitals[0]); if (mode === 'system' && systems[0]) addSystem(systems[0]) } }}
-        placeholder={mode === 'hospital' ? 'Hospital name, city or CCN' : 'System or owner name, e.g. Johns Hopkins'} aria-label={mode === 'hospital' ? 'Find a hospital' : 'Find a hospital system'} role="combobox" aria-expanded={open} aria-controls="hosp-results" />
+        onKeyDown={e => { if (e.key === 'Escape') setOpen(false); if (e.key === 'Enter') { if (mode === 'hospital' && hospitals[0]) addHospital(hospitals[0]); if (mode === 'system' && systems[0]) pickSystem(systems[0]) } }}
+        placeholder={mode === 'hospital' ? 'Hospital name, city or CCN' : 'System or owner name, e.g. Johns Hopkins, HCA'} aria-label={mode === 'hospital' ? 'Find a hospital' : 'Find a hospital system'} role="combobox" aria-expanded={open} aria-controls="hosp-results" />
       {open && results > 0 && (
         <ul id="hosp-results" role="listbox" className="absolute left-0 right-0 top-full mt-1 max-h-72 overflow-auto bg-surface rounded-[8px] z-30 py-1" style={{ boxShadow: 'var(--shadow-float)' }}>
           {mode === 'hospital' ? hospitals.map(h => (
@@ -55,16 +65,33 @@ export default function HospitalPicker({ selected, onChange }: { selected: strin
               </button>
             </li>
           )) : systems.map(s => (
-            <li key={s.owner_id} role="option" aria-selected={false}>
-              <button className="press w-full text-left px-3 py-1.5 hover:bg-paper" onClick={() => addSystem(s)} disabled={s.n_hospitals_with_service_area === 0}>
-                <div className="text-sm text-ink truncate">{titleCase(s.system_name)}</div>
-                <div className="text-[11px] text-ink-3">{s.n_hospitals_in_care_compare} hospital{s.n_hospitals_in_care_compare === 1 ? '' : 's'} in Care Compare · {s.n_state_codes} state{s.n_state_codes === 1 ? '' : 's'}{s.n_hospitals_with_service_area < s.n_hospitals_in_care_compare ? ` · ${s.n_hospitals_with_service_area} with service-area data` : ''}</div>
+            <li key={s.family_id} role="option" aria-selected={false}>
+              <button className="press w-full text-left px-3 py-1.5 hover:bg-paper" onClick={() => pickSystem(s)} disabled={s.n_with_service_area === 0}>
+                <div className="text-sm text-ink truncate">{titleCase(s.label)}</div>
+                <div className="text-[11px] text-ink-3">{s.n_hospitals} hospital{s.n_hospitals === 1 ? '' : 's'} · {s.n_states} state{s.n_states === 1 ? '' : 's'}{s.n_with_service_area < s.n_hospitals ? ` · ${s.n_with_service_area} with service-area data` : ''}{s.n_member_orgs > 1 ? ` · ${s.n_member_orgs} owner names` : ''}</div>
+                {s.aliases && <div className="text-[11px] text-ink-3 truncate">also {titleCase(s.aliases.split(' | ').slice(0, 4).join(', '))}{s.aliases.split(' | ').length > 4 ? ', …' : ''}</div>}
               </button>
             </li>
           ))}
         </ul>
       )}
-      {mode === 'system' && <div className="text-[11px] text-ink-3 mt-1">A system is an organization holding a 5%-or-greater direct or indirect ownership interest in the hospital, from CMS's PECOS ownership file. Large chains appear under several holding-company names.</div>}
+      {pending && (
+        <div className="mt-2 rounded-[8px] bg-well px-3 py-2" data-testid="system-states">
+          <div className="text-sm text-ink">{titleCase(pending.fam.label)} <span className="text-ink-3">· {pending.members.length} hospitals in {stateCounts.length} state{stateCounts.length === 1 ? '' : 's'}</span></div>
+          <div className="text-[11px] text-ink-3 mt-0.5">Keep the states you want, then add.</div>
+          <div className="flex flex-wrap gap-1 mt-1.5" role="group" aria-label="States">
+            {stateCounts.map(([st, n]) => {
+              const on = pending.states.has(st)
+              return <button key={st} className={`press text-xs px-2 py-0.5 rounded-[5px] ${on ? 'bg-accent text-white' : 'bg-surface text-ink-2'}`} aria-pressed={on} onClick={() => setPending(p => { if (!p) return p; const s = new Set(p.states); if (s.has(st)) s.delete(st); else s.add(st); return { ...p, states: s } })}>{st} · {n}</button>
+            })}
+          </div>
+          <div className="flex items-center gap-2 mt-2">
+            <button className="press btn btn-primary text-xs" onClick={addPending} disabled={pendingCount === 0}>Add {pendingCount} hospital{pendingCount === 1 ? '' : 's'}</button>
+            <button className="press btn btn-quiet text-xs" onClick={() => setPending(null)}>Cancel</button>
+          </div>
+        </div>
+      )}
+      {mode === 'system' && !pending && <div className="text-[11px] text-ink-3 mt-1">A system is a PECOS owner organization (5%-or-greater direct or indirect interest) grouped with its holding companies; see Methodology for the rule.</div>}
       {note && <div className="text-[12px] text-ink-2 mt-1.5" role="status">{note}</div>}
       {chosen.length > 0 && (
         <ul className="mt-2 space-y-1 max-h-56 overflow-auto">

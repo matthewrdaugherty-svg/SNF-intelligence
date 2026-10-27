@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router'
 import { q, type Row } from '../lib/db'
-import { hospitalDetail, hospitalOwners, qualityMix, serviceArea, snfsServing, searchHospitals, systemHospitalCcns, type HospitalLite, type Mix } from '../lib/hospitals'
+import { familyMembers, hospitalDetail, hospitalFamilies, hospitalOwners, qualityMix, serviceArea, snfsServing, searchHospitals, type HospitalLite, type Mix } from '../lib/hospitals'
 import { fmtInt, fmtPct, fmtUsd, titleCase, countyLabel } from '../lib/format'
 import { Empty, Fn, QualityStrip, Stars, Stat, useReference } from '../components/ui'
 
@@ -48,7 +48,7 @@ export default function Hospital() {
   const [snfs, setSnfs] = useState<Row[]>([])
   const [mix, setMix] = useState<Mix | null>(null)
   const [owners, setOwners] = useState<Row[]>([])
-  const [sysLink, setSysLink] = useState<{ name: string; ccns: string[] } | null>(null)
+  const [sysLink, setSysLink] = useState<{ name: string; ccns: string[]; stateCcns: string[]; n: number } | null>(null)
   const [showAllZips, setShowAllZips] = useState(false)
   const [tier, setTier] = useState<'all' | 'high' | 'mid' | 'low'>('all')
   const ref = useReference()
@@ -57,8 +57,12 @@ export default function Hospital() {
     setH(undefined); setArea([]); setSnfs([]); setMix(null); setOwners([]); setSysLink(null)
     Promise.all([hospitalDetail(ccn), serviceArea(ccn), snfsServing(ccn), qualityMix(ccn), hospitalOwners(ccn)]).then(async ([d, a, s, m, o]) => {
       if (!live) return; setH(d); setArea(a); setSnfs(s); setMix(m); setOwners(o)
-      const top = o.find(x => x.role_code === '34') ?? o[0]
-      if (top) { const ccns = await systemHospitalCcns(String(top.owner_id)); if (live && ccns.length > 1) setSysLink({ name: titleCase(String(top.owner_name)), ccns }) }
+      const fams = await hospitalFamilies(ccn)
+      if (fams[0] && Number(fams[0].n_hospitals) > 1) {
+        const mem = await familyMembers(Number(fams[0].family_id))
+        const usable = mem.filter(m => m.has_service_area)
+        if (live) setSysLink({ name: titleCase(String(fams[0].label)), n: mem.length, ccns: usable.map(m => m.hospital_ccn), stateCcns: usable.filter(m => m.state === String(d?.state)).map(m => m.hospital_ccn) })
+      }
     }).catch(() => { if (live) setH(null) })
     return () => { live = false }
   }, [ccn])
@@ -85,7 +89,7 @@ export default function Hospital() {
         <div className="shrink-0 flex flex-col items-start md:items-end gap-2">
           <Link to={exploreLink} className="press btn btn-primary text-sm">Explore SNFs in this service area</Link>
           <Link to={`/map?h=${ccn}`} className="text-xs text-accent hover:underline">Show on the map</Link>
-          {sysLink && <Link to={`/explore?h=${sysLink.ccns.join(',')}`} className="text-xs text-accent hover:underline" data-testid="system-link">All {sysLink.ccns.length} {sysLink.name} hospitals' service areas</Link>}
+          {sysLink && <span className="text-xs text-ink-2 text-left md:text-right" data-testid="system-link">Part of <span className="text-ink">{sysLink.name}</span> ({sysLink.n} hospitals): SNFs serving its <Link to={`/explore?h=${sysLink.stateCcns.join(',')}`} className="text-accent hover:underline">{state} hospitals ({sysLink.stateCcns.length})</Link>{sysLink.ccns.length > sysLink.stateCcns.length ? <> or <Link to={`/explore?h=${sysLink.ccns.join(',')}`} className="text-accent hover:underline">all with service-area data ({sysLink.ccns.length})</Link></> : null}</span>}
         </div>
       </div>
 

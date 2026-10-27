@@ -65,7 +65,13 @@ export default function About() {
       )}
 
       {tab === 'limits' && (
-        <ol className="mt-5 text-sm max-w-3xl space-y-2">{ref.limitations.map((l, i) => <li key={i} className="pl-1">{l.replace(/^\d+\.\s*/, '')}</li>)}</ol>
+        <div className="mt-5 text-sm max-w-3xl">
+          <ol className="space-y-2">{ref.limitations.map((l, i) => <li key={i} className="pl-1">{l.replace(/^\d+\.\s*/, '')}</li>)}</ol>
+          <h2 className="font-medium mt-6">Hospital service areas (modeled)</h2>
+          <p className="mt-1 text-ink-2">CMS publishes no hospital-to-SNF discharge flows. A nursing home is "in" a hospital's service area when its ZIP code is one of the ZIPs the hospital's Medicare inpatients come from (CMS Hospital Service Area File, 2025; ZIPs with fewer than 11 cases are suppressed by CMS and cannot be used). The modeled share is the ZIP's share of the hospital's visible cases times the nursing home's share of Medicare SNF stays among the homes in that ZIP (CMS Post-Acute Care PUF, 2024). It is a proxy for referral exposure, not an observed flow; every number built on it is tagged "Modeled".</p>
+          <h2 className="font-medium mt-6">Hospital systems (PECOS ownership)</h2>
+          <p className="mt-1 text-ink-2">Owners come from CMS's PECOS "Hospital All Owners" file ({ref.meta.hospital_layer?.pecos_release?.slice(0, 10)}): organizations holding a 5%-or-greater direct or indirect ownership interest. Because a hospital lists every owner up its chain, one system appears under several holding-company names. A "system" here groups them with two mechanical rules and no fuzzy matching: owner records with the exact same name are one organization, and an organization whose hospitals are at least 80% contained in a larger organization's hospitals is treated as its subsidiary. The group is labelled with its largest member that is not named as a holding or acquisition vehicle, and every member name is kept as a searchable alias. Hospitals that are their own top-level entity have no system. A joint-venture hospital belongs to each of its owners' systems. Ownership percentages and private-equity/REIT flags are as self-reported to CMS.</p>
+        </div>
       )}
 
       {tab === 'checks' && (
