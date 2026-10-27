@@ -66,7 +66,7 @@ export default function MapPage() {
     if (disposed || !mapEl.current) return
     setNoBasemap(fallback)
     const m = new maplibregl.Map({ container: mapEl.current, style, center: [-96, 38.5], zoom: 3.6, attributionControl: false })
-    m.addControl(new maplibregl.AttributionControl({ compact: true, customAttribution: fallback ? 'Basemap unavailable' : '© OpenFreeMap · © OpenMapTiles · © OpenStreetMap contributors' }), 'bottom-right')
+    m.addControl(new maplibregl.AttributionControl({ compact: true, customAttribution: fallback ? 'Basemap unavailable' : undefined }), 'bottom-right')  // the OpenFreeMap style carries its own credits
     m.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right')
     map.current = m; created = m
     m.on('load', () => {
