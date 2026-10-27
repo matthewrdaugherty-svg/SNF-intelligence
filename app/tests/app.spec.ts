@@ -205,3 +205,13 @@ test('facility not in VBP says so instead of showing blanks; comparisons never s
   await expect(page.getByText(/\b0 (better|worse) than state/)).toHaveCount(0)
   await expect(page.getByText(/0\.0% (better|worse) than state/)).toHaveCount(0)
 })
+
+test('search box accepts spaces mid-phrase and commits the whole phrase', async ({ page }) => {
+  await page.goto('/explore?st=MD')
+  await ready(page)
+  const box = page.getByLabel('Name, city, chain or CCN')
+  await box.pressSequentially('glen burnie', { delay: 40 })
+  await expect(box).toHaveValue('glen burnie')
+  await expect(page).toHaveURL(/q=glen\+burnie|q=glen%20burnie/)
+  await expect(count(page)).not.toHaveText('221', { timeout: 15_000 })
+})

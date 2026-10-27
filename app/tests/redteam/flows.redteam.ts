@@ -10,7 +10,7 @@ async function dump(p: Page) {
     const t = (e: Element | null | undefined) => (e as HTMLElement | null)?.innerText.trim() ?? null
     const main = document.querySelector('main')!
     const status = t([...main.querySelectorAll('div.mt-3.text-sm')][0])
-    const cards = [...main.querySelectorAll('div.grid.grid-cols-5 > div')].map(d => [...d.children].map(t))
+    const cards = [...main.querySelectorAll('div.mt-4.grid.gap-3 > div')].map(d => [...d.children].map(t))
     const weighted = t([...main.querySelectorAll('div.mt-3.text-sm.text-ink-2')][0])
     const tables = [...main.querySelectorAll('table')].map(tb => [...tb.querySelectorAll('tr')].map(tr => [...tr.querySelectorAll('td,th')].map(t)))
     const hospitalSel = (main.querySelector('select') as HTMLSelectElement | null)

@@ -1,10 +1,10 @@
-﻿CCN,Facility,Overall stars,Health inspection stars,Quality measure stars,Staffing stars,City,State,Beds,Ownership,Special focus,Short-stay residents rehospitalized (QM 521),Potentially preventable readmissions within 30 days of SNF discharge (QRP 004),Successful discharge to community (QRP 005),Total fines,Total nurse hours per resident-day,"Harm or jeopardy deficiencies (G–L), three cycles",ZIP,County
-405000,ALTERNATIVE HEALTHCARE SOLUTIONS LLC,4,3,,5,SAN JUAN,PR,22,For profit - Limited Liability company,,,,,0,4.53942,0,00910,San Juan
-405033,CENTRO DE CUIDADO PROLONGADO SAN LUCAS,1,1,,1,RIO PIEDRAS,PR,25,Non profit - Church related,,,,,0,,4,00928,San Juan
-405025,CENTRO MEDICO WILMA N VAZQUEZ SNF,3,2,,5,VEGA BAJA,PR,45,For profit - Corporation,,,10.9,57.43,29997,5.03744,2,00693,Vega Baja
-405023,DAMAS HOSPITAL SNF,5,5,,5,PONCE,PR,25,Non profit - Corporation,,,10.69,59.13,10839,4.91874,1,00717,Ponce
-405032,HOSPITAL DE LA CONCEPCION INC,2,2,,3,SAN GERMAN,PR,30,Non profit - Corporation,,,,,0,3.2425,0,00683,San German
-405030,MILLENNIUM INSTITUTE FOR ADVANCE NURSING CARE INC,5,5,,5,RIO PIEDRAS,PR,35,For profit - Corporation,,,10.87,59.42,0,4.40719,0,00926,San Juan
-405034,MULTY MEDICAL SKILLED NURSING FACILITY,1,1,,2,RIO PIEDRAS,PR,35,For profit - Corporation,,,,,0,1.8923,0,00935,San Juan
-405018,RYDER MEMORIAL HOSPITAL INC,3,3,,2,HUMACAO,PR,62,Non profit - Corporation,,,11.98,63.54,0,3.06892,0,00792,Humacao
-405029,SERVICIOS INTEGRADOS DE REHABILITACION (SIRO) INC,3,4,,1,HORMIGUEROS,PR,20,For profit - Corporation,,,10.25,57.15,0,3.27731,0,00660,Hormigueros
+﻿CCN,Facility,Overall stars,Health inspection stars,Quality measure stars,Staffing stars,City,State,Beds,Ownership,Special focus,Short-stay residents rehospitalized (QM 521),Short-stay residents rehospitalized (QM 521) — CMS footnote,Potentially preventable readmissions within 30 days of SNF discharge (QRP 004),Potentially preventable readmissions within 30 days of SNF discharge (QRP 004) — CMS footnote,Successful discharge to community (QRP 005),Successful discharge to community (QRP 005) — CMS footnote,Total fines,Total nurse hours per resident-day,Total nurse hours per resident-day — CMS footnote,"Harm or jeopardy deficiencies (G–L), three cycles",ZIP,County
+405000,ALTERNATIVE HEALTHCARE SOLUTIONS LLC,4,3,,5,SAN JUAN,PR,22,For profit - Limited Liability company,,,10,,10,,10,0,4.53942,,0,00910,San Juan
+405033,CENTRO DE CUIDADO PROLONGADO SAN LUCAS,1,1,,1,RIO PIEDRAS,PR,25,Non profit - Church related,,,9,,10,,10,0,,23,4,00928,San Juan
+405025,CENTRO MEDICO WILMA N VAZQUEZ SNF,3,2,,5,VEGA BAJA,PR,45,For profit - Corporation,,,9,10.9,,57.43,,29997,5.03744,,2,00693,Vega Baja
+405023,DAMAS HOSPITAL SNF,5,5,,5,PONCE,PR,25,Non profit - Corporation,,,9,10.69,,59.13,,10839,4.91874,,1,00717,Ponce
+405032,HOSPITAL DE LA CONCEPCION INC,2,2,,3,SAN GERMAN,PR,30,Non profit - Corporation,,,9,,10,,10,0,3.2425,,0,00683,San German
+405030,MILLENNIUM INSTITUTE FOR ADVANCE NURSING CARE INC,5,5,,5,RIO PIEDRAS,PR,35,For profit - Corporation,,,9,10.87,,59.42,,0,4.40719,,0,00926,San Juan
+405034,MULTY MEDICAL SKILLED NURSING FACILITY,1,1,,2,RIO PIEDRAS,PR,35,For profit - Corporation,,,9,,10,,10,0,1.8923,,0,00935,San Juan
+405018,RYDER MEMORIAL HOSPITAL INC,3,3,,2,HUMACAO,PR,62,Non profit - Corporation,,,9,11.98,,63.54,,0,3.06892,,0,00792,Humacao
+405029,SERVICIOS INTEGRADOS DE REHABILITACION (SIRO) INC,3,4,,1,HORMIGUEROS,PR,20,For profit - Corporation,,,9,10.25,,57.15,,0,3.27731,,0,00660,Hormigueros

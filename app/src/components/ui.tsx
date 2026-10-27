@@ -3,23 +3,29 @@ import { onProgress } from '../lib/db'
 import { getReference, type Reference } from '../lib/reference'
 
 /** One star-rating cell on the quality ramp. Unrated renders as an empty well. */
+/** Text color that reads on each rating tier's background. */
+export const starFg = (n: number) => (n <= 2 || n === 5 ? '#fff' : 'var(--color-ink)')
+export const tierWord = (n: number | null) => n == null ? 'not rated' : n <= 2 ? 'poor' : n === 3 ? 'average' : 'good'
+
+/** One star-rating cell. Color says what the number means: red = 1–2 (poor), amber = 3 (average), green = 4–5 (good). */
 export function Stars({ value, size = 'md', label }: { value: unknown; size?: 'sm' | 'md' | 'lg'; label?: string }) {
   const n = value == null ? null : Number(value)
   const cls = { sm: 'h-4 min-w-7 text-[11px]', md: 'h-6 min-w-9 text-xs', lg: 'h-8 min-w-12 text-sm' }[size]
   if (n == null || Number.isNaN(n)) return <span className={`inline-flex items-center justify-center rounded px-1 bg-well text-ink-3 ${cls}`} title={label ? `${label}: not rated` : 'Not rated'}>–</span>
-  const bg = `var(--color-q${Math.round(n)})`
-  const fg = n >= 4 ? '#fff' : 'var(--color-ink)'
-  return <span className={`inline-flex items-center justify-center rounded px-1 font-semibold ${cls}`} style={{ background: bg, color: fg }} title={label ? `${label}: ${n} of 5` : `${n} of 5`}>{n}</span>
+  return <span className={`inline-flex items-center justify-center rounded px-1 font-semibold ${cls}`} style={{ background: `var(--color-q${Math.round(n)})`, color: starFg(n) }} title={`${label ? label + ': ' : ''}${n} of 5 stars (${tierWord(n)})`}>{n}</span>
 }
 
-/** The signature strip: overall · health inspection · quality measures · staffing. */
-export function QualityStrip({ row, size = 'sm' }: { row: Record<string, unknown>; size?: 'sm' | 'md' }) {
+const STRIP = [['overall_rating', 'Overall', 'overall'], ['health_inspection_rating', 'Health inspection', 'inspection'], ['qm_rating', 'Quality measures', 'quality'], ['staffing_rating', 'Staffing', 'staffing']] as const
+/** The four CMS star ratings side by side, each captioned so the reader knows what it rates. */
+export function QualityStrip({ row, size = 'sm', captions = true }: { row: Record<string, unknown>; size?: 'sm' | 'md'; captions?: boolean }) {
   return (
-    <span className="inline-flex gap-0.5" aria-label="Star ratings: overall, health inspection, quality measures, staffing">
-      <Stars value={row.overall_rating} size={size} label="Overall" />
-      <Stars value={row.health_inspection_rating} size={size} label="Health inspection" />
-      <Stars value={row.qm_rating} size={size} label="Quality measures" />
-      <Stars value={row.staffing_rating} size={size} label="Staffing" />
+    <span className="inline-flex gap-1" aria-label={STRIP.map(([k, l]) => `${l}: ${row[k] == null ? 'not rated' : row[k] + ' of 5'}`).join(', ')}>
+      {STRIP.map(([k, l, c]) => (
+        <span key={k} className="inline-flex flex-col items-center gap-px">
+          <Stars value={row[k]} size={size} label={l} />
+          {captions && <span className="text-[9px] leading-none text-ink-3" aria-hidden>{c}</span>}
+        </span>
+      ))}
     </span>
   )
 }

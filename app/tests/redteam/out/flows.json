@@ -1,7 +1,37 @@
 {
  "a_jhh_15": {
   "status": "a_wellformed.csv: 12 valid rows, 2 hospitals",
-  "cards": [],
+  "cards": [
+   [
+    "Discharges to SNFs",
+    "161",
+    "10 facilities"
+   ],
+   [
+    "To 4–5★ facilities",
+    "10%",
+    "16 discharges",
+    ""
+   ],
+   [
+    "To 3★ facilities",
+    "19%",
+    "30 discharges",
+    ""
+   ],
+   [
+    "To 1–2★ facilities",
+    "66%",
+    "106 discharges",
+    ""
+   ],
+   [
+    "Unrated or unmatched CCN",
+    "5%",
+    "0 to CCNs not in the CMS file",
+    ""
+   ]
+  ],
   "weighted": "Volume-weighted averages of the destinations' CMS measures:\noverall stars 2.09\nshort-stay rehospitalization 20.2%\n30-day preventable readmission after SNF discharge 11.3%\ndischarge to community 49.3%\nWeighted by discharges; facilities with a suppressed value are left out of that average. These are facility-level CMS rates, not this hospital's own patients' outcomes.",
   "tables": [
    [
@@ -548,7 +578,37 @@
  },
  "a_jhh_5": {
   "status": "a_wellformed.csv: 12 valid rows, 2 hospitals",
-  "cards": [],
+  "cards": [
+   [
+    "Discharges to SNFs",
+    "161",
+    "10 facilities"
+   ],
+   [
+    "To 4–5★ facilities",
+    "10%",
+    "16 discharges",
+    ""
+   ],
+   [
+    "To 3★ facilities",
+    "19%",
+    "30 discharges",
+    ""
+   ],
+   [
+    "To 1–2★ facilities",
+    "66%",
+    "106 discharges",
+    ""
+   ],
+   [
+    "Unrated or unmatched CCN",
+    "5%",
+    "0 to CCNs not in the CMS file",
+    ""
+   ]
+  ],
   "weighted": "Volume-weighted averages of the destinations' CMS measures:\noverall stars 2.09\nshort-stay rehospitalization 20.2%\n30-day preventable readmission after SNF discharge 11.3%\ndischarge to community 49.3%\nWeighted by discharges; facilities with a suppressed value are left out of that average. These are facility-level CMS rates, not this hospital's own patients' outcomes.",
   "tables": [
    [
@@ -819,7 +879,37 @@
  },
  "a_lac": {
   "status": "a_wellformed.csv: 12 valid rows, 2 hospitals",
-  "cards": [],
+  "cards": [
+   [
+    "Discharges to SNFs",
+    "35",
+    "2 facilities"
+   ],
+   [
+    "To 4–5★ facilities",
+    "37%",
+    "13 discharges",
+    ""
+   ],
+   [
+    "To 3★ facilities",
+    "0%",
+    "0 discharges",
+    ""
+   ],
+   [
+    "To 1–2★ facilities",
+    "63%",
+    "22 discharges",
+    ""
+   ],
+   [
+    "Unrated or unmatched CCN",
+    "0%",
+    "0 to CCNs not in the CMS file",
+    ""
+   ]
+  ],
   "weighted": "Volume-weighted averages of the destinations' CMS measures:\noverall stars 2.74\nshort-stay rehospitalization 20.6%\n30-day preventable readmission after SNF discharge 11.1%\ndischarge to community 35.7%\nWeighted by discharges; facilities with a suppressed value are left out of that average. These are facility-level CMS rates, not this hospital's own patients' outcomes.",
   "tables": [
    [
@@ -1030,7 +1120,37 @@
  },
  "a_after_reload": {
   "status": "previous upload (this browser): 12 valid rows, 2 hospitals",
-  "cards": [],
+  "cards": [
+   [
+    "Discharges to SNFs",
+    "161",
+    "10 facilities"
+   ],
+   [
+    "To 4–5★ facilities",
+    "10%",
+    "16 discharges",
+    ""
+   ],
+   [
+    "To 3★ facilities",
+    "19%",
+    "30 discharges",
+    ""
+   ],
+   [
+    "To 1–2★ facilities",
+    "66%",
+    "106 discharges",
+    ""
+   ],
+   [
+    "Unrated or unmatched CCN",
+    "5%",
+    "0 to CCNs not in the CMS file",
+    ""
+   ]
+  ],
   "weighted": "Volume-weighted averages of the destinations' CMS measures:\noverall stars 2.09\nshort-stay rehospitalization 20.2%\n30-day preventable readmission after SNF discharge 11.3%\ndischarge to community 49.3%\nWeighted by discharges; facilities with a suppressed value are left out of that average. These are facility-level CMS rates, not this hospital's own patients' outcomes.",
   "tables": [
    [
@@ -1599,7 +1719,37 @@
  },
  "b_edge.csv": {
   "status": "b_edge.csv: 7 valid rows, 1 hospital · 1 row skipped\nLine 8: n_discharges \"\" must be a whole number of 0 or more (digits only).",
-  "cards": [],
+  "cards": [
+   [
+    "Discharges to SNFs",
+    "48",
+    "6 facilities"
+   ],
+   [
+    "To 4–5★ facilities",
+    "0%",
+    "0 discharges",
+    ""
+   ],
+   [
+    "To 3★ facilities",
+    "27%",
+    "13 discharges",
+    ""
+   ],
+   [
+    "To 1–2★ facilities",
+    "52%",
+    "25 discharges",
+    ""
+   ],
+   [
+    "Unrated or unmatched CCN",
+    "21%",
+    "10 to CCNs not in the CMS file",
+    ""
+   ]
+  ],
   "weighted": "Volume-weighted averages of the destinations' CMS measures:\noverall stars 1.68\nshort-stay rehospitalization 20.1%\n30-day preventable readmission after SNF discharge 11.5%\ndischarge to community 48.1%\nWeighted by discharges; facilities with a suppressed value are left out of that average. These are facility-level CMS rates, not this hospital's own patients' outcomes.",
   "tables": [
    [
@@ -2116,7 +2266,37 @@
  },
  "c2_bad_rows.csv": {
   "status": "c2_bad_rows.csv: 1 valid rows, 1 hospital · 6 rows skipped\nLine 3: period_start/period_end must be real dates in YYYY-MM-DD form.\nLine 4: n_discharges \"-3\" must be a whole number of 0 or more (digits only).\nLine 5: n_discharges \"2.5\" must be a whole number of 0 or more (digits only).\nLine 6: n_discharges \"abc\" must be a whole number of 0 or more (digits only).\nLine 7: snf_ccn \"15009\" must be 6 characters (keep leading zeros).\nLine 8: period_end 2025-01-01 is before period_start 2025-12-31.",
-  "cards": [],
+  "cards": [
+   [
+    "Discharges to SNFs",
+    "5",
+    "1 facilities"
+   ],
+   [
+    "To 4–5★ facilities",
+    "0%",
+    "0 discharges",
+    ""
+   ],
+   [
+    "To 3★ facilities",
+    "0%",
+    "0 discharges",
+    ""
+   ],
+   [
+    "To 1–2★ facilities",
+    "100%",
+    "5 discharges",
+    ""
+   ],
+   [
+    "Unrated or unmatched CCN",
+    "0%",
+    "0 to CCNs not in the CMS file",
+    ""
+   ]
+  ],
   "weighted": "Volume-weighted averages of the destinations' CMS measures:\noverall stars 1.00\nshort-stay rehospitalization 21.9%\n30-day preventable readmission after SNF discharge 11.9%\ndischarge to community 43.4%\nWeighted by discharges; facilities with a suppressed value are left out of that average. These are facility-level CMS rates, not this hospital's own patients' outcomes.",
   "tables": [
    [
@@ -2158,7 +2338,37 @@
  },
  "c3_impossible_date.csv": {
   "status": "c3_impossible_date.csv: 1 valid rows, 1 hospital · 1 row skipped\nLine 3: period_start/period_end must be real dates in YYYY-MM-DD form.",
-  "cards": [],
+  "cards": [
+   [
+    "Discharges to SNFs",
+    "5",
+    "1 facilities"
+   ],
+   [
+    "To 4–5★ facilities",
+    "0%",
+    "0 discharges",
+    ""
+   ],
+   [
+    "To 3★ facilities",
+    "0%",
+    "0 discharges",
+    ""
+   ],
+   [
+    "To 1–2★ facilities",
+    "100%",
+    "5 discharges",
+    ""
+   ],
+   [
+    "Unrated or unmatched CCN",
+    "0%",
+    "0 to CCNs not in the CMS file",
+    ""
+   ]
+  ],
   "weighted": "Volume-weighted averages of the destinations' CMS measures:\noverall stars 1.00\nshort-stay rehospitalization 21.9%\n30-day preventable readmission after SNF discharge 11.9%\ndischarge to community 43.4%\nWeighted by discharges; facilities with a suppressed value are left out of that average. These are facility-level CMS rates, not this hospital's own patients' outcomes.",
   "tables": [
    [

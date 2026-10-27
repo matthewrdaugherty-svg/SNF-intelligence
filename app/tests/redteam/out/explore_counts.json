@@ -90,12 +90,12 @@
   "pageErrors": []
  },
  "q_percent_wildcard": {
-  "count": "14,690",
+  "count": "0",
   "error": null,
   "pageErrors": []
  },
  "q_underscore_wildcard": {
-  "count": "14,690",
+  "count": "0",
   "error": null,
   "pageErrors": []
  },
@@ -145,13 +145,13 @@
   "pageErrors": []
  },
  "invalid_own": {
-  "count": null,
-  "error": "The query failed.\nError: Parser Error: syntax error at or near \")\" LINE 1: ..., reported_staffing_footnote FROM facility_master WHERE () ORDER BY provider_name ASC NULLS LAST, provider_name ASC ^ LINE 1: ..., reported_staffing_footnote FROM facility_master WHERE () ORDER BY provider_name ASC NULLS LAST, provider_name ASC ^",
+  "count": "14,690",
+  "error": null,
   "pageErrors": []
  },
  "invalid_mi_inf": {
-  "count": null,
-  "error": "The query failed.\nError: Binder Error: Referenced column \"Infinity\" not found in FROM clause! Candidate bindings: \"own_indirect_owners\", \"number_of_administrators_who_have_left_the_nursing_home\", \"staffing_rating_footnote\", \"number_of_facilities_in_chain\", \"ownership_type\" LINE 1: ...)) * pow(sin(radians(longitude - (-76.61)) / 2), 2))) <= Infinity ORDER BY distance_mi ASC NULLS LAST, provider_name... ^",
+  "count": "14,690",
+  "error": null,
   "pageErrors": []
  },
  "stars_out_of_range": {

@@ -4,9 +4,10 @@ Map
 Compare
 Discharge flows
 Methodology & trust
+Reference data (footnote meanings, state and national averages) could not be loaded: Unexpected token '<', "<!doctype "... is not valid JSON. Facility values are unaffected; comparisons are hidden. Reload to retry.
 Explore / MD
 Carroll Park Healthcare
-3330 Wilkens Avenue, Baltimore, MD 21229 · Baltimore City County · CCN 215085
+3330 Wilkens Avenue, Baltimore, MD 21229 · Baltimore City · CCN 215085
 For profit - Limited Liability company · 140 certified beds · 95.8 residents per day · Engage Healthcare (5 facilities) · Medicare and Medicaid · certified since 1972
 Abuse icon
 Add to compare
@@ -115,11 +116,14 @@ Net Part A payment change (derived: multiplier − 1)
 Our arithmetic, not a CMS value.
 -1.69%
 FY2024 risk-standardized readmission rate (SNFRM)
+CMS publishes this as a fraction (e.g. 0.20); shown here as a percentage.
 Case minimum not met - not reported
 FY2024 risk-standardized infection rate
+CMS publishes this as a fraction; shown here as a percentage.
 Case minimum not met - not reported
 FY2024 total nursing staff turnover
-0.5804
+CMS publishes this as a fraction (e.g. 0.58); shown here as a percentage.
+58.0%
 FY2024 adjusted nurse hours per resident-day
 3.90
 Inspections, penalties and complaints
@@ -266,7 +270,7 @@ Flu vaccine given (QM 454)
 87.0%
 Ownership and control
 
-As reported to CMS. Legal business name: Gwynnfalls Md Opco.
+Ownership interests, operational/managerial control and partnership roles as reported to CMS; officers, directors, managing employees and lenders are in the workbook's Ownership sheet. Legal business name: Gwynnfalls Md Opco.
 
 5% Or Greater Direct Ownership Interest
 Gwynnfalls Md Holdco LLC · 100% · since 2023-08-01

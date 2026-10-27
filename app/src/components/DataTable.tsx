@@ -38,14 +38,14 @@ export default function DataTable({ rows, cols, sort, onSort, ref, showDistance 
       </div>
     )
   }
-  const width = 36 + 300 + 140 + (showDistance ? 72 : 0) + cols.reduce((a, c) => a + (c.width ?? 96), 0)
+  const width = 36 + 300 + 150 + (showDistance ? 72 : 0) + cols.reduce((a, c) => a + (c.width ?? 96), 0)
   return (
     <div ref={parent} className="h-full overflow-auto bg-surface" role="table" aria-rowcount={rows.length}>
       <div style={{ minWidth: width }}>
         <div className="flex sticky top-0 z-10 bg-surface" role="row">
           <div role="columnheader" className="w-9 shrink-0 border-b border-hairline" aria-label="Compare" />
           {head('provider_name', 'Facility', false, 300)}
-          {head('overall_rating', 'Stars', false, 140)}
+          {head('overall_rating', 'Star ratings (1–2 poor · 3 average · 4–5 good)', false, 150)}
           {showDistance && head('distance_mi', 'Miles', true, 72)}
           {cols.map(c => head(c.key, c.short ?? c.label, c.unit !== 'text', c.width ?? 96))}
         </div>
@@ -58,10 +58,10 @@ export default function DataTable({ rows, cols, sort, onSort, ref, showDistance 
                   <input type="checkbox" className="accent-ink" checked={inCmp} onChange={() => compareStore.toggle(ccn)} aria-label={`Compare ${r.provider_name}`} title={inCmp ? 'Remove from compare' : 'Add to compare'} />
                 </div>
                 <div role="cell" className="shrink-0 px-2 min-w-0" style={{ width: 300 }}>
-                  <Link to={`/facility/${ccn}`} className="block truncate text-sm text-ink hover:underline underline-offset-2">{titleCase(String(r.provider_name))}</Link>
+                  <Link to={`/facility/${ccn}`} className="block truncate text-sm text-ink hover:text-accent hover:underline underline-offset-2">{titleCase(String(r.provider_name))}</Link>
                   <div className="text-[11px] text-ink-3 truncate">{r.special_focus_status ? <span className="text-rust font-medium">{String(r.special_focus_status)} · </span> : null}{r.abuse_icon === 'Y' ? <span className="text-rust font-medium">Abuse icon · </span> : null}CCN {ccn}</div>
                 </div>
-                <div role="cell" className="shrink-0 px-2" style={{ width: 140 }} title="Overall · health inspection · quality measures · staffing"><QualityStrip row={r} /></div>
+                <div role="cell" className="shrink-0 px-2" style={{ width: 150 }}><QualityStrip row={r} /></div>
                 {showDistance && <div role="cell" className="shrink-0 px-2 text-right text-sm tabular-nums" style={{ width: 72 }}>{r.distance_mi == null ? '' : Number(r.distance_mi).toFixed(1)}</div>}
                 {cols.map(c => {
                   const val = r[c.key]; const fn = c.fn ? r[c.fn] : null

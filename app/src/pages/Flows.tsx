@@ -183,9 +183,9 @@ export default function Flows() {
           <div className="mt-4 grid grid-cols-2 md:grid-cols-5 gap-3">
             {[
               { label: 'Discharges to SNFs', v: fmtInt(Number(summary.total)), sub: `${fmtInt(Number(summary.n_snf))} facilities` },
-              { label: 'To 4–5★ facilities', v: `${shares?.high ?? 0}%`, sub: `${fmtInt(Number(summary.high))} discharges`, bar: 'var(--color-q5)' },
-              { label: 'To 3★ facilities', v: `${shares?.mid ?? 0}%`, sub: `${fmtInt(Number(summary.mid))} discharges`, bar: 'var(--color-q3)' },
-              { label: 'To 1–2★ facilities', v: `${shares?.low ?? 0}%`, sub: `${fmtInt(Number(summary.low))} discharges`, bar: 'var(--color-q2)' },
+              { label: 'To 4–5★ facilities (good)', v: `${shares?.high ?? 0}%`, sub: `${fmtInt(Number(summary.high))} discharges`, bar: 'var(--color-q5)' },
+              { label: 'To 3★ facilities (average)', v: `${shares?.mid ?? 0}%`, sub: `${fmtInt(Number(summary.mid))} discharges`, bar: '#dc6803' },
+              { label: 'To 1–2★ facilities (poor)', v: `${shares?.low ?? 0}%`, sub: `${fmtInt(Number(summary.low))} discharges`, bar: 'var(--color-q2)' },
               { label: 'Unrated or unmatched CCN', v: `${shares?.other ?? 0}%`, sub: `${fmtInt(Number(summary.unmatched))} to CCNs not in the CMS file`, bar: 'var(--color-ink-3)' },
             ].map(c => (
               <div key={c.label} className="bg-surface rounded-[10px] p-4">

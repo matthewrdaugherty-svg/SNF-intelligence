@@ -21,7 +21,7 @@ async function loadStyle(): Promise<{ style: maplibregl.StyleSpecification | str
     return { style: (await r.json()) as maplibregl.StyleSpecification, fallback: false }
   } catch { return { style: FALLBACK_STYLE, fallback: true } }
 }
-const RAMP = ['#d6e3df', '#a9cbc3', '#6faea2', '#3c8c7e', '#1f6659']
+const RAMP = ['#912018', '#d92d20', '#fedf89', '#abefc6', '#067647']   // same tiers as the star cells: red poor, amber average, green good
 
 function circlePolygon(lat: number, lng: number, miles: number): Feature {
   const km = miles * 1.609344, pts: [number, number][] = []
@@ -74,13 +74,13 @@ export default function MapPage() {
     m.on('load', () => {
       m.addSource('fac', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } })
       m.addSource('radius', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } })
-      m.addLayer({ id: 'radius-fill', type: 'fill', source: 'radius', paint: { 'fill-color': '#15221e', 'fill-opacity': 0.05 } })
-      m.addLayer({ id: 'radius-line', type: 'line', source: 'radius', paint: { 'line-color': '#15221e', 'line-width': 1.2, 'line-dasharray': [2, 2] } })
+      m.addLayer({ id: 'radius-fill', type: 'fill', source: 'radius', paint: { 'fill-color': '#1d4ed8', 'fill-opacity': 0.05 } })
+      m.addLayer({ id: 'radius-line', type: 'line', source: 'radius', paint: { 'line-color': '#1d4ed8', 'line-width': 1.2, 'line-dasharray': [2, 2] } })
       m.addLayer({ id: 'fac', type: 'circle', source: 'fac', paint: {
         'circle-radius': ['interpolate', ['linear'], ['zoom'], 4, 3, 9, 6, 13, 9],
         'circle-color': ['match', ['get', 'stars'], 1, RAMP[0], 2, RAMP[1], 3, RAMP[2], 4, RAMP[3], 5, RAMP[4], '#ffffff'],
-        'circle-stroke-color': ['case', ['boolean', ['get', 'flag'], false], '#b4532a', '#15221e'],
-        'circle-stroke-width': ['case', ['boolean', ['get', 'flag'], false], 1.8, 0.6],
+        'circle-stroke-color': ['case', ['boolean', ['get', 'flag'], false], '#b42318', '#111827'],
+        'circle-stroke-width': ['case', ['boolean', ['get', 'flag'], false], 2.2, 0.6],
         'circle-opacity': 0.92,
       } })
       m.on('mouseenter', 'fac', () => { m.getCanvas().style.cursor = 'pointer' })
@@ -90,7 +90,7 @@ export default function MapPage() {
         if (!p) return
         setSelected(String(p.ccn))
         new maplibregl.Popup({ closeButton: false, offset: 10 }).setLngLat((e.features![0].geometry as GPoint).coordinates as [number, number])
-          .setHTML(`<div style="font-size:13px;font-weight:600;color:#15221e">${titleCase(String(p.name))}</div><div style="font-size:12px;color:#4a5753">${titleCase(String(p.city))}, ${p.state} · ${p.stars ? p.stars + '★ overall' : 'not rated'}</div><a href="/facility/${p.ccn}" style="font-size:12px;color:#15221e;text-decoration:underline">Open profile</a>`)
+          .setHTML(`<div style="font-size:13px;font-weight:600;color:#111827">${titleCase(String(p.name))}</div><div style="font-size:12px;color:#475467">${titleCase(String(p.city))}, ${p.state} · ${p.stars ? p.stars + '★ overall' : 'not rated'}</div><a href="/facility/${p.ccn}" style="font-size:12px;color:#1d4ed8;text-decoration:underline">Open profile</a>`)
           .addTo(m)
       })
       m.on('click', (e: maplibregl.MapMouseEvent) => {
@@ -143,9 +143,9 @@ export default function MapPage() {
           {noBasemap && <div className="bg-surface here rounded-[6px] px-3 py-1.5 text-xs text-ink-2">The street basemap could not be reached; facilities are still shown.</div>}
         </div>
         <div className="absolute bottom-3 left-3 bg-surface here rounded-[6px] px-3 py-2 text-[11px] text-ink-2 flex items-center gap-2 z-10">
-          <span>Overall stars</span>{RAMP.map((c, i) => <span key={i} className="inline-flex items-center gap-1"><span className="inline-block w-3 h-3 rounded-full" style={{ background: c, border: '0.6px solid #15221e' }} />{i + 1}</span>)}
-          <span className="inline-flex items-center gap-1 ml-2"><span className="inline-block w-3 h-3 rounded-full bg-white" style={{ border: '0.6px solid #15221e' }} />not rated</span>
-          <span className="inline-flex items-center gap-1 ml-2"><span className="inline-block w-3 h-3 rounded-full bg-white" style={{ border: '1.8px solid #b4532a' }} />special focus or abuse icon</span>
+          <span>Overall stars</span>{RAMP.map((c, i) => <span key={i} className="inline-flex items-center gap-1"><span className="inline-block w-3 h-3 rounded-full" style={{ background: c, border: '0.6px solid #111827' }} />{i + 1}{i === 0 ? ' poor' : i === 2 ? ' average' : i === 4 ? ' good' : ''}</span>)}
+          <span className="inline-flex items-center gap-1 ml-2"><span className="inline-block w-3 h-3 rounded-full bg-white" style={{ border: '0.6px solid #111827' }} />not rated</span>
+          <span className="inline-flex items-center gap-1 ml-2"><span className="inline-block w-3 h-3 rounded-full bg-white" style={{ border: '2.2px solid #b42318' }} />special focus or abuse icon</span>
         </div>
       </section>
       <aside className="hidden lg:block w-80 shrink-0 border-l border-hairline bg-surface overflow-y-auto" aria-label="Facilities on the map">

@@ -3,34 +3,39 @@
 
 @theme static {
   --font-sans: "Public Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --color-paper: #f2f4f3;
+  /* neutral, cool, modern */
+  --color-paper: #f4f6f8;
   --color-surface: #ffffff;
-  --color-ink: #15221e;
-  --color-ink-2: #4a5753;
-  --color-ink-3: #66716d;   /* 4.6:1 on white */
-  --color-hairline: #e1e6e4;
-  --color-well: #e9edec;
-  /* quality ramp: one hue, lighter = worse. Used ONLY for star ratings / quality tiers. */
-  --color-q1: #d6e3df;
-  --color-q2: #a9cbc3;
-  --color-q3: #6faea2;
-  --color-q4: #2f7a6c;   /* white text 4.6:1 */
-  --color-q5: #1a5a4e;
-  /* enforcement / harm. Used ONLY for fines, payment denials, actual-harm & immediate-jeopardy, abuse icon, SFF. */
-  --color-rust: #9a4421;   /* 4.6:1 on rust-soft */
-  --color-rust-soft: #f3e3da;
+  --color-ink: #111827;
+  --color-ink-2: #475467;
+  --color-ink-3: #667085;   /* 4.7:1 on white */
+  --color-hairline: #e4e7ec;
+  --color-well: #eef1f4;
+  /* interactive accent: links, primary actions, selected state */
+  --color-accent: #1d4ed8;
+  --color-accent-hover: #1e40af;
+  --color-accent-soft: #e8efff;
+  /* star-rating semantics: 1–2 bad (red), 3 barely OK (amber), 4–5 good (green). Darker shade = the stronger end of its tier. */
+  --color-q1: #912018;   /* white text */
+  --color-q2: #d92d20;   /* white text 4.5:1 */
+  --color-q3: #fedf89;   /* dark text */
+  --color-q4: #abefc6;   /* dark text */
+  --color-q5: #067647;   /* white text */
+  /* danger: enforcement and harm (fines, denials, actual harm, immediate jeopardy, abuse icon, special focus). Same red family as a 1–2★ rating because both mean danger. */
+  --color-rust: #b42318;
+  --color-rust-soft: #fee4e2;
   --radius-control: 6px;
   --radius-panel: 10px;
-  --shadow-here: 0 1px 2px rgba(21, 34, 30, 0.06), 0 6px 18px rgba(21, 34, 30, 0.10);
-  --shadow-float: 0 2px 6px rgba(21, 34, 30, 0.08), 0 16px 40px rgba(21, 34, 30, 0.16);
+  --shadow-here: 0 1px 2px rgba(16, 24, 40, 0.06), 0 6px 18px rgba(16, 24, 40, 0.10);
+  --shadow-float: 0 2px 6px rgba(16, 24, 40, 0.08), 0 16px 40px rgba(16, 24, 40, 0.16);
 }
 
 @layer base {
   html { font-family: var(--font-sans); font-feature-settings: "tnum" 1, "ss01" 1; }
   body { background: var(--color-paper); color: var(--color-ink); margin: 0; -webkit-font-smoothing: antialiased; }
   * { box-sizing: border-box; }
-  ::selection { background: #cfe3de; }
-  :focus-visible { outline: 2px solid var(--color-ink); outline-offset: 2px; border-radius: 4px; }
+  ::selection { background: #dbe4ff; }
+  :focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; border-radius: 4px; }
   button, input, select { font: inherit; color: inherit; }   /* base layer, so utilities win */
 }
 
@@ -46,10 +51,11 @@
   padding: 6px 10px;
   line-height: 1.25;
 }
-.control:hover { border-color: #c6cfcc; }
+.control:hover { border-color: #c2c9d2; }
+.control:focus { border-color: var(--color-accent); outline: none; box-shadow: 0 0 0 3px var(--color-accent-soft); }
 .btn { border-radius: var(--radius-control); padding: 7px 12px; font-weight: 500; }
-.btn-primary { background: var(--color-ink); color: #fff; }
-.btn-primary:hover { background: #22332e; }
+.btn-primary { background: var(--color-accent); color: #fff; }
+.btn-primary:hover { background: var(--color-accent-hover); }
 .btn-quiet { background: transparent; color: var(--color-ink-2); }
 .btn-quiet:hover { background: var(--color-well); color: var(--color-ink); }
 .btn-surface { background: var(--color-surface); border: 1px solid var(--color-hairline); }
@@ -58,4 +64,4 @@
 
 .maplibregl-popup-content { font-family: var(--font-sans); border-radius: 8px; box-shadow: var(--shadow-float); padding: 10px 12px; }
 .maplibregl-ctrl-group { box-shadow: var(--shadow-here) !important; border-radius: 6px !important; }
-input[type="range"] { accent-color: var(--color-ink); }
+input[type="range"] { accent-color: var(--color-accent); }

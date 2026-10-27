@@ -21,7 +21,14 @@ def check(name, flows, hosp, lat, lng, radius, dump):
     def w(k):
         num = sum(n * F[s][k] for s, n in d.items() if s in F and F[s][k] is not None); den = sum(n for s, n in d.items() if s in F and F[s][k] is not None)
         return num / den if den else None
-    exp_cards = [[str(tot), f"{len(d)} facilities"], [pct0(hi, tot), f"{hi} discharges"], [pct0(mid, tot), f"{mid} discharges"], [pct0(lo, tot), f"{lo} discharges"], [pct0(unr + unm, tot), f"{unm} to CCNs not in the CMS file"]]
+    import math as _m
+    parts = [hi, mid, lo, unr + unm]
+    raw = [100 * p / tot for p in parts]; fl = [_m.floor(r) for r in raw]; rem = 100 - sum(fl)
+    for i in sorted(range(4), key=lambda i: -(raw[i] - fl[i])):
+        if rem <= 0: break
+        fl[i] += 1; rem -= 1
+    lr = [f"{x}%" for x in fl]
+    exp_cards = [[str(tot), f"{len(d)} facilities"], [lr[0], f"{hi} discharges"], [lr[1], f"{mid} discharges"], [lr[2], f"{lo} discharges"], [lr[3], f"{unm} to CCNs not in the CMS file"]]
     act_cards = [[x[1], x[2]] for x in dump['cards']]
     out = [f"## {name} / hospital {hosp}", f"cards expected {exp_cards}", f"cards shown    {act_cards}", f"cards match: {exp_cards == act_cards}"]
     ws = {'overall stars': (w('overall_rating'), 2, ''), 'short-stay rehospitalization': (w('qm_521_adj'), 1, '%'), '30-day preventable readmission after SNF discharge': (w('qrp_004_ppr_pd_rsrr'), 1, '%'), 'discharge to community': (w('qrp_005_dtc_rs_rate'), 1, '%')}
@@ -46,7 +53,7 @@ def check(name, flows, hosp, lat, lng, radius, dump):
     return out
 lines = []
 a = list(csv.DictReader(open('flows/a_wellformed.csv')))
-for hosp, dk, rad in [('210009', 'a_jhh_15', 15), ('210009', 'a_jhh_5', 5), ('050600', 'a_lac', 15), ('210009', 'a_after_reload', 15)]:
+for hosp, dk, rad in [('210009', 'a_jhh_15', 15), ('210009', 'a_jhh_5', 5), ('050600', 'a_lac', 5), ('210009', 'a_after_reload', 15)]:
     rows = [r for r in a if r['hospital_ccn'] == hosp]
     lines += check(dk, [(r['snf_ccn'], int(r['n_discharges'])) for r in rows], hosp, float(rows[0]['hospital_lat']), float(rows[0]['hospital_lng']), rad, R[dk])
 # b: what a careful parser SHOULD accept: blank count rejected

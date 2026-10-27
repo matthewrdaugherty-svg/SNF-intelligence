@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { EMPTY, STATES, countActive, type Filters } from '../lib/filters'
+import { starFg, tierWord } from './ui'
 
 export async function geocode(query: string): Promise<{ lat: number; lng: number; label: string } | null> {
   const r = await fetch(`https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=us&q=${encodeURIComponent(query)}`, { headers: { Accept: 'application/json' } })
@@ -14,7 +15,8 @@ export async function geocode(query: string): Promise<{ lat: number; lng: number
 function Debounced({ value, onCommit, delay = 250, ...rest }: { value: string; onCommit: (v: string) => void; delay?: number } & Omit<React.InputHTMLAttributes<HTMLInputElement>, 'value' | 'onChange'>) {
   const [local, setLocal] = useState(value)
   const last = useRef(value)
-  useEffect(() => { if (value !== last.current) { last.current = value; setLocal(value) } }, [value])
+  // the URL stores a trimmed copy; a value that only differs by surrounding spaces must not reset what the person is typing
+  useEffect(() => { if (value !== last.current && value !== last.current.trim()) { last.current = value; setLocal(value) } }, [value])
   useEffect(() => {
     if (local === last.current) return
     const t = setTimeout(() => { last.current = local; onCommit(local) }, delay)
@@ -85,7 +87,7 @@ export default function FilterPanel({ f, onPatch, onClear, resultCount, open, on
         {[1, 2, 3, 4, 5].map(s => (
           <button key={s} aria-pressed={f.stars.includes(s)} onClick={() => toggleIn('stars', s as never)}
             className={`press h-7 w-9 rounded-[6px] text-sm font-semibold ${f.stars.includes(s) ? 'here ring-1 ring-ink' : 'opacity-80 hover:opacity-100'}`}
-            style={{ background: `var(--color-q${s})`, color: s >= 4 ? '#fff' : 'var(--color-ink)' }}>{s}</button>
+            style={{ background: `var(--color-q${s})`, color: starFg(s) }} title={`${s} stars (${tierWord(s)})`}>{s}</button>
         ))}
       </div>
 
@@ -118,7 +120,7 @@ export default function FilterPanel({ f, onPatch, onClear, resultCount, open, on
       <div className="grid grid-cols-6 gap-1 mb-4" role="group" aria-label="State">
         {STATES.map(s => (
           <button key={s} aria-pressed={f.states.includes(s)} onClick={() => toggleIn('states', s as never)}
-            className={`press h-6 rounded-[5px] text-[11px] tabular-nums ${f.states.includes(s) ? 'bg-ink text-white font-semibold' : 'bg-paper text-ink-2 hover:text-ink'}`}>{s}</button>
+            className={`press h-6 rounded-[5px] text-[11px] tabular-nums ${f.states.includes(s) ? 'bg-accent text-white font-semibold' : 'bg-paper text-ink-2 hover:text-ink'}`}>{s}</button>
         ))}
       </div>
       {resultCount != null && <div className="text-xs text-ink-3">{resultCount.toLocaleString()} facilities match</div>}
