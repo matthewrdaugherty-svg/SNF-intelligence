@@ -86,7 +86,7 @@ export const GROUPS: Group[] = [
       { key: 'pen_total_denial_days', label: 'Payment denial days', unit: 'count', direction: 'lower' },
       { key: 'total_weighted_health_survey_score', label: 'Weighted health survey score (feeds the health-inspection stars)', unit: 'score', direction: 'lower', decimals: 1 },
     ] },
-  { id: 'services', title: 'Services and who is in the beds', blurb: 'From the CMS-671 facility application (Q2 2026), self-reported by the facility and updated at each survey. Dedicated special-care-unit beds show what a home has set up to handle; a zero does not prove a home cannot take such a patient. Census is the resident count by payer on the day of the last survey.',
+  { id: 'services', title: 'Services and who is in the beds', blurb: 'From the CMS-671 facility application (Q2 2026), self-reported by the facility and updated at each survey. Dedicated special-care-unit beds show what a facility has set up to handle; a zero does not prove a facility cannot take such a patient. Census is the resident count by payer on the day of the last survey.',
     measures: [
       { key: 'certification_detail', label: 'Certification (CMS-671)', unit: 'text', direction: 'none' },
       { key: 'beds_ventilator', label: 'Ventilator unit beds', short: 'Vent beds', unit: 'count', direction: 'none' },

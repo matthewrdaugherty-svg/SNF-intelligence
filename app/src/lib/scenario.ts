@@ -5,7 +5,7 @@ import { q, sqlStr, type Row } from './db'
 export interface ScenarioParams {
   hospital: string          // hospital CCN
   minStars: number          // viable SNF must have overall rating >= this (1–5)
-  excludeFlags: boolean     // drop special-focus and abuse-icon homes from the viable set
+  excludeFlags: boolean     // drop special-focus and abuse-icon facilities from the viable set
   snfOnly: boolean          // Medicare-certified SNFs only
   units: string[]           // required dedicated units: vent, dialysis, alz, hospice, trauma, rehab
   minOverlap: number | null // minimum case-mix overlap 0–1, or null to ignore
@@ -74,8 +74,8 @@ export const viableSql = (s: ScenarioParams) => {
 
 export interface Outcome {
   source: 'reported' | 'modeled'; before: Row; after: Row
-  belowBar: number          // share of baseline volume in homes that do not meet the bar (independent of shift)
-  unreachable: number       // share of baseline volume in such homes with no acceptable home within maxMiles (independent of shift)
+  belowBar: number          // share of baseline volume in facilities that do not meet the bar (independent of shift)
+  unreachable: number       // share of baseline volume in such facilities with no acceptable facility within maxMiles (independent of shift)
   moved: number             // share actually moved = (belowBar − unreachable) × shift
   unplaced: number          // unreachable × shift (the part of the shift that could not happen)
   unknownShare: number      // reported baseline only: share of uploaded discharges at CCNs not in Care Compare, left out

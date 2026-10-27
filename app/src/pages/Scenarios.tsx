@@ -43,7 +43,7 @@ export default function Scenarios() {
     return () => { live = false }
   }, [s])
 
-  /** 'SNF(s)' when the acceptable set is Medicare-certified SNFs only, else 'facility / facilities' — never a bare 'home', which reads as the patient's home. */
+  /** 'SNF(s)' when the acceptable set is Medicare-certified SNFs only, else 'facility / facilities' — never a bare 'facility', which reads as the patient's home. */
   const F = s?.snfOnly ? 'SNFs' : 'facilities', F1 = s?.snfOnly ? 'SNF' : 'facility'
   const objWord = s ? OBJECTIVE_WORD[s.objective] : ''
   /** Shares as whole percentages; anything that would round to 0% but is not zero reads "<1%". */

@@ -109,11 +109,11 @@ export default function FilterPanel({ f, onPatch, onClear, resultCount, open, on
 
       <section className="fgroup" aria-labelledby="fg-services">
         <div id="fg-services" className="fgroup-title">Services</div>
-        <div className="flabel">Dedicated units the home reports</div>
+        <div className="flabel">Dedicated units the facility reports</div>
         {SERVICE_KEYS.filter(k => k !== 'hospbased').map(k => <Check key={k} checked={f.services.includes(k)} onChange={() => toggleIn('services', k as never)}>{SERVICE_LABELS[k]}</Check>)}
         <div className="flabel mt-3">Setting</div>
         <Check checked={f.services.includes('hospbased')} onChange={() => toggleIn('services', 'hospbased' as never)}>{SERVICE_LABELS.hospbased} (CMS-671)</Check>
-        <div className="fhelp">Self-reported on the CMS-671 facility application (Q2 2026). A home without a dedicated unit may still take such patients. "Hospital-based" here is the 671 answer; Care Compare's own "located in a hospital" flag differs for 41 homes.</div>
+        <div className="fhelp">Self-reported on the CMS-671 facility application (Q2 2026). A facility without a dedicated unit may still take such patients. "Hospital-based" here is the 671 answer; Care Compare's own "located in a hospital" flag differs for 41 facilities.</div>
       </section>
 
       <section className="fgroup" aria-labelledby="fg-facility">

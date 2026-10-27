@@ -13,7 +13,7 @@ export interface Filters {
   hospital: boolean         // resides in a hospital
   vbp: boolean              // in VBP
   cert: '' | 'snf' | 'nf'   // Medicare-certified SNF vs Medicaid-only nursing facility
-  services: string[]        // dedicated special-care units the home reports (CMS-671): vent, dialysis, alz, hospice, trauma, rehab, hospbased
+  services: string[]        // dedicated special-care units the facility reports (CMS-671): vent, dialysis, alz, hospice, trauma, rehab, hospbased
   bedsMin: number | null
   bedsMax: number | null
   lat: number | null; lng: number | null; miles: number | null  // catchment radius

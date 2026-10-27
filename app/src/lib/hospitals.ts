@@ -59,7 +59,7 @@ export const overlapSql = (ccn: string) => `SELECT s.ccn, CASE WHEN k.known >= 0
   FROM hospital_chapter_mix h JOIN snf_chapter_mix s USING (chapter) JOIN (SELECT ccn, sum(share) AS known FROM snf_chapter_mix GROUP BY 1) k ON k.ccn = s.ccn
   WHERE h.hospital_ccn = ${sqlStr(ccn)} GROUP BY s.ccn, k.known`
 // Overlap is only reported when the SNF's published diagnosis shares cover at least 60% of its stays; CMS suppresses chapters with few stays ('*'), so a
-// small home's mix is mostly unknown and an overlap computed from it would be meaningless.
+// small facility's mix is mostly unknown and an overlap computed from it would be meaningless.
 /** The hospital's 2024 Medicare discharges by plain-English family, largest first. */
 export const dischargeMix = (ccn: string) => q(`SELECT family, discharges, share_of_visible, avg_medicare_payment FROM hospital_drg_mix WHERE hospital_ccn = ${sqlStr(ccn)} ORDER BY discharges DESC`)
 
