@@ -1,0 +1,26 @@
+{
+ "Hospital_All_Owners_2026.09.29.csv": {
+  "lines_transcoded_cp1252": 41,
+  "chars_unrecoverable": 0
+ },
+ "Hospital_CHOW_2026.09.29.csv": {
+  "lines_transcoded_cp1252": 1,
+  "chars_unrecoverable": 0
+ },
+ "Hospital_Enrollments_2026.09.29.csv": {
+  "lines_transcoded_cp1252": 3,
+  "chars_unrecoverable": 0
+ },
+ "SNF_All_Owners_2026.09.29.csv": {
+  "lines_transcoded_cp1252": 19,
+  "chars_unrecoverable": 0
+ },
+ "SNF_CHOW_2026.09.29.csv": {
+  "lines_transcoded_cp1252": 2,
+  "chars_unrecoverable": 0
+ },
+ "SNF_Enrollments_2026.09.29.csv": {
+  "lines_transcoded_cp1252": 6,
+  "chars_unrecoverable": 0
+ }
+}

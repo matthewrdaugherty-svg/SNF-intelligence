@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router'
 import { q, type Row } from '../lib/db'
-import { hospitalDetail, qualityMix, serviceArea, snfsServing, searchHospitals, type HospitalLite, type Mix } from '../lib/hospitals'
+import { hospitalDetail, hospitalOwners, qualityMix, serviceArea, snfsServing, searchHospitals, systemHospitalCcns, type HospitalLite, type Mix } from '../lib/hospitals'
 import { fmtInt, fmtPct, fmtUsd, titleCase, countyLabel } from '../lib/format'
 import { Empty, Fn, QualityStrip, Stars, Stat, useReference } from '../components/ui'
 
@@ -47,13 +47,19 @@ export default function Hospital() {
   const [area, setArea] = useState<Row[]>([])
   const [snfs, setSnfs] = useState<Row[]>([])
   const [mix, setMix] = useState<Mix | null>(null)
+  const [owners, setOwners] = useState<Row[]>([])
+  const [sysLink, setSysLink] = useState<{ name: string; ccns: string[] } | null>(null)
   const [showAllZips, setShowAllZips] = useState(false)
   const [tier, setTier] = useState<'all' | 'high' | 'mid' | 'low'>('all')
   const ref = useReference()
   useEffect(() => {
     let live = true
-    setH(undefined); setArea([]); setSnfs([]); setMix(null)
-    Promise.all([hospitalDetail(ccn), serviceArea(ccn), snfsServing(ccn), qualityMix(ccn)]).then(([d, a, s, m]) => { if (!live) return; setH(d); setArea(a); setSnfs(s); setMix(m) }).catch(() => { if (live) setH(null) })
+    setH(undefined); setArea([]); setSnfs([]); setMix(null); setOwners([]); setSysLink(null)
+    Promise.all([hospitalDetail(ccn), serviceArea(ccn), snfsServing(ccn), qualityMix(ccn), hospitalOwners(ccn)]).then(async ([d, a, s, m, o]) => {
+      if (!live) return; setH(d); setArea(a); setSnfs(s); setMix(m); setOwners(o)
+      const top = o.find(x => x.role_code === '34') ?? o[0]
+      if (top) { const ccns = await systemHospitalCcns(String(top.owner_id)); if (live && ccns.length > 1) setSysLink({ name: titleCase(String(top.owner_name)), ccns }) }
+    }).catch(() => { if (live) setH(null) })
     return () => { live = false }
   }, [ccn])
   if (h === undefined) return <div className="p-8 text-sm text-ink-2">Loading…</div>
@@ -72,10 +78,14 @@ export default function Hospital() {
           <h1 className="text-2xl font-semibold tracking-tight">{name}</h1>
           <div className="text-sm text-ink-2 mt-1">{titleCase(String(h.address))}, {titleCase(String(h.city))}, {state} {String(h.zip)} · {countyLabel(String(h.county), state)} · CCN {ccn}</div>
           <div className="text-sm text-ink-2 mt-1">{String(h.hospital_type)} · {String(h.hospital_ownership)}{h.emergency_services === 'Yes' ? ' · emergency services' : ''}{h.ruca ? ` · ${String(h.ruca)}` : ''}</div>
+          {owners.length > 0 && (
+            <div className="text-sm text-ink-2 mt-1" data-testid="hospital-owners">Owned by {owners.map((o, i) => <span key={i}>{i > 0 ? (i === owners.length - 1 ? ' and ' : ', ') : ''}<span className="text-ink">{titleCase(String(o.owner_name))}</span>{o.role_code === '35' ? ' (indirect)' : ''}{o.pct != null && Number(o.pct) > 0 ? ` ${Number(o.pct).toFixed(0)}%` : ''}</span>)} <span className="text-ink-3">· PECOS, 5%-or-greater interests</span></div>
+          )}
         </div>
         <div className="shrink-0 flex flex-col items-start md:items-end gap-2">
           <Link to={exploreLink} className="press btn btn-primary text-sm">Explore SNFs in this service area</Link>
           <Link to={`/map?h=${ccn}`} className="text-xs text-accent hover:underline">Show on the map</Link>
+          {sysLink && <Link to={`/explore?h=${sysLink.ccns.join(',')}`} className="text-xs text-accent hover:underline" data-testid="system-link">All {sysLink.ccns.length} {sysLink.name} hospitals' service areas</Link>}
         </div>
       </div>
 

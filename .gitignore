@@ -10,3 +10,4 @@ app/test-results/
 app/tests/screenshots/
 .DS_Store
 __pycache__/
+app/scripts/

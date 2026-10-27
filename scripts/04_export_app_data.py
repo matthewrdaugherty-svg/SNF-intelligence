@@ -63,8 +63,14 @@ pq("""SELECT hospital_ccn, hospital_name, address, city, state, zip, county, hos
        readm_hf, readm_pn, readm_ami, readm_copd, readm_hip_knee, n_zips_visible, cases_visible, n_zips_total FROM hospital_master""", "hospital_master")
 pq("SELECT hospital_ccn, zip, cases, days, charges, share_of_visible_cases, cumulative_share, zip_rank FROM hospital_service_area", "hospital_service_area")
 pq("SELECT * FROM snf_utilization", "snf_utilization")
+# PECOS ownership layer (scripts/07_load_pecos.py)
+pq("SELECT owner_id, system_name, n_hospitals_enrolled, n_hospitals_in_care_compare, n_hospitals_with_service_area, n_state_codes FROM hospital_system WHERE n_hospitals_in_care_compare > 0", "hospital_system")
+pq("SELECT hospital_ccn, owner_id, owner_name, role_code, role_text, pct, since FROM hospital_owner_org WHERE in_hospital_master", "hospital_owner_org")
+pq("""SELECT ccn, legal_entity, dba, affiliation_entity_name, affiliation_entity_id, proprietary_nonprofit, organization_type_structure, incorporation_date,
+       n_org_owners, n_individual_owners, n_managing_control, any_private_equity_owner, any_reit_owner, n_chow_since_2016, last_chow_date, last_buyer, last_seller
+       FROM snf_pecos WHERE in_facility_master""", "snf_pecos")
 hm=json.load(open(f"{OUT}/meta.json")); hm.update({"hospital_layer": {"service_area_year": 2025, "inpatient_year": 2024, "pacpuf_year": 2024, "care_compare_hospitals_release": "2026-07-22 (general info), 2026-09-10 (unplanned visits), 2026-01-26 (spending by claim)",
-  "hwr_note": "The hospital-wide readmission measure (Hybrid HWR) is 'Not Available' for every hospital in this release (CMS footnote 4); condition-specific 30-day readmission rates are shown instead."}})
+  "pecos_release": "2026-09-29 (Hospital/SNF All Owners, Enrollments, Change of Ownership; data.cms.gov)", "hwr_note": "The hospital-wide readmission measure (Hybrid HWR) is 'Not Available' for every hospital in this release (CMS footnote 4); condition-specific 30-day readmission rates are shown instead."}})
 json.dump(hm, open(f"{OUT}/meta.json","w"), indent=1)
 open(f"{OUT}/discharge_flows_template.csv","w").write("hospital_ccn,hospital_name,snf_ccn,period_start,period_end,n_discharges\n210009,Johns Hopkins Hospital (example row - delete),215001,2025-01-01,2025-12-31,0\n")
 print("footnotes:", len(fn), "| lineage rows:", len(lin), "| done")

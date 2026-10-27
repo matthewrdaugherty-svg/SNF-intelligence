@@ -154,7 +154,7 @@ export default function Flows() {
   return (
     <div className="max-w-6xl mx-auto px-4 md:px-6 py-6">
       <h1 className="text-xl font-semibold tracking-tight">Discharge flows</h1>
-      <p className="text-sm text-ink-2 mt-1 max-w-3xl">Where a hospital's patients go after discharge, and how much of that volume lands in high- versus low-rated facilities. CMS publishes no hospital-to-SNF flows, so this page runs on counts a hospital provides. The schema is fixed so real data drops in without any rework; a modeled catchment option (built from public Medicare utilization and hospital service-area files) is planned and will carry a “modeled” label everywhere it appears.</p>
+      <p className="text-sm text-ink-2 mt-1 max-w-3xl">Where a hospital's patients go after discharge, and how much of that volume lands in high- versus low-rated facilities. CMS publishes no hospital-to-SNF flows, so this page runs on counts a hospital provides; the schema is fixed so real data drops in without any rework. Until a hospital shares its data, the <Link to="/hospitals" className="underline">Hospitals</Link> pages give a modeled view of the same question, built from CMS's public service-area and utilization files and labelled “Modeled” everywhere it appears.</p>
 
       <div className="mt-5 bg-surface rounded-[10px] px-5 py-4">
         <div className="flex flex-wrap items-center gap-3">
@@ -172,7 +172,7 @@ export default function Flows() {
         )}
       </div>
 
-      {!loaded && !parsed && <Empty title="No discharge data loaded.">Upload a CSV to see the quality mix of a hospital's post-acute destinations. Meanwhile, <Link to="/map" className="underline">the Map</Link> can show every SNF within a radius of any hospital address.</Empty>}
+      {!loaded && !parsed && <Empty title="No discharge data loaded.">Upload a CSV to see the quality mix of a hospital's post-acute destinations. Without one, <Link to="/hospitals" className="underline">find the hospital</Link> for a modeled quality mix of its service area, or use <Link to="/map" className="underline">the Map</Link> to see every SNF within a radius of any hospital address.</Empty>}
 
       {loaded && hospitals.length > 0 && summary && (
         <>

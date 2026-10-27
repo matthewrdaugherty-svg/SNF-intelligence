@@ -1,0 +1,9 @@
+table,column,type,raw_nonblank,typed,sentinels
+pecos_hosp_owners,percentage_ownership,DOUBLE,58469,58469,
+pecos_hosp_owners,association_date_owner,DATE,146948,146948,
+pecos_snf_owners,percentage_ownership,DOUBLE,96997,96997,
+pecos_snf_owners,association_date_owner,DATE,300738,300738,
+pecos_hosp_enroll,incorporation_date,DATE,5752,5752,
+pecos_snf_enroll,incorporation_date,DATE,8404,8404,
+pecos_hosp_chow,effective_date,DATE,779,779,
+pecos_snf_chow,effective_date,DATE,5340,5340,

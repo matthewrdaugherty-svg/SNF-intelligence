@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router'
 import { q, sqlStr } from '../lib/db'
-import { GROUPS, type Measure } from '../lib/measures'
-import { fmt, fmtUsd, titleCase, countyLabel } from '../lib/format'
+import { GROUPS, MEASURE_COLS, type Measure } from '../lib/measures'
+import { fmt, fmtUsd, fmtPct, titleCase, countyLabel } from '../lib/format'
 import { useCompare, compareStore, MAX_COMPARE } from '../lib/compare'
-import { Fn, Flag, Stars, Empty, useReference, ReferenceError } from '../components/ui'
+import { Fn, Flag, Stars, Empty, Stat, tierWord, useReference, ReferenceError } from '../components/ui'
 import type { Reference } from '../lib/reference'
 
 type Row = Record<string, unknown>
@@ -37,6 +37,42 @@ function Delta({ value, cmp, m }: { value: number | null; cmp: number | null; m:
   const better = m.direction === 'lower' ? d < 0 : d > 0
   const abs = m.unit === 'pct' || m.unit === 'fraction_pct' ? `${shown.toFixed(dec)} pts` : m.unit === 'usd' ? fmtUsd(shown) : m.unit === 'count' ? shown.toFixed(1) : fmt(shown, m.unit, dec)
   return <span className={better ? 'text-ink font-medium' : 'text-ink-2'}>{abs} {better ? 'better' : 'worse'} than state</span>
+}
+
+const ALL_MEASURES: Measure[] = [...GROUPS.flatMap(g => g.measures), ...MEASURE_COLS.map(c => ({ key: c.key, label: c.label, unit: c.unit, direction: c.direction, fn: c.fn } as Measure))]
+const measure = (k: string) => { const m = ALL_MEASURES.find(m => m.key === k); if (!m) throw new Error(`Unknown measure ${k}`); return m }
+const num = (v: unknown) => v == null || v === '' ? null : Number(v)
+/** Provenance text straight from the lineage file: source CMS file, original column, derivation. Nothing is written by hand. */
+function howText(key: string, ref: Reference | null, m: Measure) {
+  const l = ref?.lineage.find(x => x['db column'] === key)
+  if (!l) return m.note ?? null
+  const file = l.source_file.replace(/^[a-z0-9]{4}-[a-z0-9]{4}_\d{4}-\d{2}-\d{2}_/, '').replace(/_Sep2026_\d\.csv$/, '').replace(/_/g, ' ')
+  return <>{m.note ? m.note + ' ' : ''}From CMS file “{file}”, column “{l.original_header}”: {l.how_derived.replace(/ — scripts\/.*$/, '')}.</>
+}
+const tone = (v: number | null, cmp: number | null, m: Measure): 'good' | 'mid' | 'bad' | undefined => {
+  if (v == null || cmp == null || m.direction === 'none') return undefined
+  const d = m.direction === 'lower' ? cmp - v : v - cmp
+  const rel = Math.abs(d) / (Math.abs(cmp) || 1)
+  return rel < 0.05 ? 'mid' : d > 0 ? 'good' : 'bad'
+}
+/** One-paragraph snapshot in plain words. Every number comes from the row or the CMS averages; a sentence is dropped when its value is blank. */
+function Snapshot({ row, ref, state }: { row: Row; ref: Reference | null; state: string }) {
+  const st = (m: Measure) => m.state ? ref?.stateAvg[state]?.[m.state] ?? null : null
+  const stars = num(row.overall_rating)
+  const m521 = measure('qm_521_adj'), v521 = num(row.qm_521_adj), s521 = st(m521)
+  const m004 = measure('qrp_004_ppr_pd_rsrr'), v004 = num(row.qrp_004_ppr_pd_rsrr), n004 = ref?.national[m004.national!] ?? null
+  const fines = num(row.pen_total_fines_usd), harm = num(row.hc_n_severity_G_or_worse)
+  const mStaff = measure('reported_total_nurse_staffing_hours_per_resident_per_day'), staff = num(row.reported_total_nurse_staffing_hours_per_resident_per_day), sStaff = st(mStaff)
+  const beds = num(row.number_of_certified_beds)
+  const own = String(row.ownership_type ?? '').split(' - ')[0].toLowerCase()
+  const cmpWord = (v: number, c: number, lowerBetter: boolean, dec = 1) => { const d = Number((v - c).toFixed(dec)); return d === 0 ? 'the same as' : (lowerBetter ? d < 0 : d > 0) ? 'better than' : 'worse than' }
+  const parts: React.ReactNode[] = []
+  parts.push(<>{titleCase(String(row.provider_name))} is {stars != null ? <>a <b>{stars}-star</b> ({tierWord(stars)})</> : 'an unrated'}{beds != null ? <>, {beds.toLocaleString()}-bed</> : null} {own} nursing home in {titleCase(String(row.city_town))}, {state}.</>)
+  if (v521 != null) parts.push(<> <b>{fmtPct(v521, 1)}</b> of its short-stay residents were rehospitalized{s521 != null ? <>, {cmpWord(v521, s521, true)} the {state} average of {fmtPct(s521, 1)}</> : null}.</>)
+  if (v004 != null) parts.push(<> After discharge from this facility, <b>{fmtPct(v004, 1)}</b> of Medicare stays had a potentially preventable readmission within 30 days{n004 != null ? <> (nation {fmtPct(n004, 1)})</> : null}.</>)
+  if (fines != null || harm != null) parts.push(<> Over the last three inspection cycles CMS recorded <b>{harm != null ? `${harm} harm-or-jeopardy deficienc${harm === 1 ? 'y' : 'ies'}` : 'no harm count'}</b>{fines != null ? <> and <b>{fmtUsd(fines)}</b> in fines</> : null}.</>)
+  if (staff != null) parts.push(<> Nurses provide <b>{staff.toFixed(2)} hours</b> per resident-day{sStaff != null ? <>, {cmpWord(staff, sStaff, false, 2)} the state average of {sStaff.toFixed(2)}</> : null}.</>)
+  return <p className="text-[15px] leading-relaxed text-ink max-w-3xl mt-4" data-testid="snapshot">{parts.map((p, i) => <span key={i}>{p}</span>)}</p>
 }
 
 /** Averages are shown to one decimal for stars and counts so the same number never appears two ways. */
@@ -74,19 +110,21 @@ export default function Facility() {
   const [pen, setPen] = useState<Row[]>([])
   const [cit, setCit] = useState<Row[]>([])
   const [own, setOwn] = useState<Row[]>([])
+  const [pecos, setPecos] = useState<Row | null>(null)
   const ref = useReference()
   const compare = useCompare()
   const [loadError, setLoadError] = useState<string | null>(null)
   useEffect(() => {
     let live = true
-    setRow(undefined); setPen([]); setCit([]); setOwn([]); setLoadError(null)
+    setRow(undefined); setPen([]); setCit([]); setOwn([]); setPecos(null); setLoadError(null)
     const c = sqlStr(ccn)
     Promise.all([
       q(`SELECT * FROM facility_master WHERE ccn = ${c}`),
       q(`SELECT * FROM penalties WHERE ccn = ${c} ORDER BY penalty_date DESC`),
       q(`SELECT * FROM citations_gl WHERE ccn = ${c} ORDER BY survey_date DESC`),
       q(`SELECT * FROM ownership WHERE ccn = ${c} ORDER BY role, owner_name`),
-    ]).then(([f, p, ci, o]) => { if (!live) return; setRow(f[0] ?? null); setPen(p); setCit(ci); setOwn(o) }).catch(e => { if (live) { setLoadError(String(e?.message ?? e)); setRow(null) } })
+      q(`SELECT * FROM snf_pecos WHERE ccn = ${c}`),
+    ]).then(([f, p, ci, o, pe]) => { if (!live) return; setRow(f[0] ?? null); setPen(p); setCit(ci); setOwn(o); setPecos(pe[0] ?? null) }).catch(e => { if (live) { setLoadError(String(e?.message ?? e)); setRow(null) } })
     return () => { live = false }
   }, [ccn])
   const state = String(row?.state ?? '')
@@ -132,14 +170,31 @@ export default function Facility() {
         </div>
       </div>
 
-      <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-3">
-        {GROUPS[0].measures.slice(0, 1).concat(GROUPS[0].measures.slice(1, 3), GROUPS[0].measures.slice(5, 6)).map(m => (
-          <div key={m.key} className="bg-surface rounded-[10px] p-4">
-            <div className="text-xs text-ink-2 mb-2">{m.label}{m.key === 'overall_rating' ? ' rating' : ''}</div>
-            <div className="flex flex-wrap items-end gap-2"><Stars value={row[m.key]} size="lg" /><Fn code={m.fn ? row[m.fn] : null} ref={ref} />
-              {m.state && ref?.stateAvg[state]?.[m.state] != null && <span className="text-xs text-ink-3 ml-auto whitespace-nowrap">state avg {Number(ref.stateAvg[state][m.state]).toFixed(1)}</span>}</div>
-          </div>
-        ))}
+      <Snapshot row={row} ref={ref} state={state} />
+
+      <div className="mt-5 grid grid-cols-2 md:grid-cols-4 gap-3">
+        {GROUPS[0].measures.slice(0, 1).concat(GROUPS[0].measures.slice(1, 3), GROUPS[0].measures.slice(5, 6)).map(m => {
+          const v = num(row[m.key]); const sa = m.state && ref?.stateAvg[state]?.[m.state] != null ? Number(ref.stateAvg[state][m.state]) : null
+          return (
+            <div key={m.key} className="bg-surface rounded-[10px] p-4" style={{ boxShadow: '0 1px 0 rgba(16,24,40,0.04)' }}>
+              <div className="text-xs text-ink-2">{m.label}{m.key === 'overall_rating' ? ' rating' : ''}</div>
+              <div className="mt-2 flex items-center gap-2"><Stars value={row[m.key]} size="lg" /><span className="text-sm text-ink">{v != null ? tierWord(v) : 'not rated'}</span><Fn code={m.fn ? row[m.fn] : null} ref={ref} /></div>
+              {sa != null && <div className="text-[12px] text-ink-2 mt-1.5">state average {sa.toFixed(1)}</div>}
+            </div>
+          )
+        })}
+      </div>
+
+      <div className="mt-3 grid grid-cols-2 md:grid-cols-4 gap-3">
+        {(['qm_521_adj', 'qrp_004_ppr_pd_rsrr', 'hc_n_severity_G_or_worse', 'pen_total_fines_usd'] as const).map(k => {
+          const m = measure(k); const v = num(row[k]); const fn = m.fn ? row[m.fn] : null
+          const sa = m.state ? ref?.stateAvg[state]?.[m.state] ?? null : null
+          const na = m.national ? ref?.national[m.national] ?? null : m.state ? ref?.stateAvg['NATION']?.[m.state] ?? null : null
+          const cmp = sa ?? na
+          return <Stat key={k} label={m.label} value={v == null ? <span className="text-ink-3">{fn ? <Fn code={fn} ref={ref} /> : '–'}</span> : fmt(v, m.unit, m.decimals)} source="CMS" tone={tone(v, cmp, m)}
+            note={cmp != null ? <>{sa != null ? `${state} average ${avg(sa, m)}` : ''}{sa != null && na != null ? ' · ' : ''}{na != null ? `nation ${avg(na, m)}` : ''}{v != null && sa != null ? <> · <Delta value={v} cmp={sa} m={m} /></> : null}</> : m.note}
+            how={howText(k, ref, m)} />
+        })}
       </div>
 
       {GROUPS.map(g => (
@@ -180,6 +235,17 @@ export default function Facility() {
       <section className="mt-8 bg-surface rounded-[10px] px-5 py-4">
         <h2 className="font-medium text-ink">Ownership and control</h2>
         <p className="text-xs text-ink-2 mt-0.5 mb-2">Ownership interests, operational/managerial control and partnership roles as reported to CMS; officers, directors, managing employees and lenders are in the workbook's Ownership sheet. {row.own_data_available === 'N' ? 'CMS lists no ownership data for this facility.' : `Legal business name: ${titleCase(String(row.legal_business_name ?? ''))}.`}</p>
+        {pecos && (
+          <div className="text-sm text-ink mb-3 rounded-[8px] bg-well px-3 py-2" data-testid="pecos">
+            <span className="text-ink-2">Medicare enrollment (PECOS, {ref?.meta.hospital_layer?.pecos_release?.slice(0, 10) ?? 'latest'}): </span>
+            enrolled as {titleCase(String(pecos.legal_entity))}{pecos.dba && String(pecos.dba).toUpperCase() !== String(pecos.legal_entity).toUpperCase() ? <> doing business as {titleCase(String(pecos.dba))}</> : null}
+            {pecos.affiliation_entity_name ? <>; CMS affiliation entity {titleCase(String(pecos.affiliation_entity_name))}</> : null}
+            {pecos.proprietary_nonprofit === 'N' ? '; non-profit' : pecos.proprietary_nonprofit === 'P' ? '; proprietary' : ''}
+            {Number(pecos.n_chow_since_2016) > 0 ? <>; <b>{Number(pecos.n_chow_since_2016)} change{Number(pecos.n_chow_since_2016) === 1 ? '' : 's'} of ownership since 2016</b>, most recently {String(pecos.last_chow_date)}{pecos.last_buyer ? <> (buyer {titleCase(String(pecos.last_buyer))})</> : null}</> : '; no change of ownership recorded since 2016'}
+            {pecos.any_private_equity_owner ? <>; <b>an owner self-identifies as a private-equity company</b></> : null}
+            {pecos.any_reit_owner ? <>; <b>an owner self-identifies as a REIT</b></> : null}.
+          </div>
+        )}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8">
           {ownerGroups.map(([role, rows]) => (
             <div key={role} className="mb-3">

@@ -36,7 +36,7 @@ export function fromParams(p: URLSearchParams): Filters {
     sff: p.get('sff') === '1', abuse: p.get('abuse') === '1', hospital: p.get('hosp') === '1', vbp: p.get('vbp') === '1',
     bedsMin: num('bmin', 0, 5000), bedsMax: num('bmax', 0, 5000),
     lat: hasRadius ? lat : null, lng: hasRadius ? lng : null, miles: hasRadius ? miles : null, place: hasRadius ? clean(p.get('place'), 120) : '',
-    hospitals: [...new Set((p.get('h') ?? '').split(',').filter(x => /^[0-9A-Z]{6}$/.test(x)))].slice(0, 20),
+    hospitals: [...new Set((p.get('h') ?? '').split(',').filter(x => /^[0-9A-Z]{6}$/.test(x)))].slice(0, 200),
   }
 }
 export function toParams(f: Filters, base?: URLSearchParams): URLSearchParams {

@@ -1,0 +1,19 @@
+{
+ "hospital_master_with_pecos_enrollment": [
+  5133,
+  5419
+ ],
+ "hospital_master_with_owner_org": [
+  3188
+ ],
+ "facility_master_with_pecos_enrollment": [
+  14210,
+  14690
+ ],
+ "chain_vs_affiliation": [
+  9973,
+  211,
+  57,
+  9960
+ ]
+}

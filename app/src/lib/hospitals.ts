@@ -12,6 +12,18 @@ export async function searchHospitals(text: string, limit = 25): Promise<Hospita
     ORDER BY (cases_visible IS NULL), medicare_discharges_2024 DESC NULLS LAST, hospital_name LIMIT ${limit}`) as Promise<HospitalLite[]>
 }
 export const hospitalsByCcn = (ccns: string[]) => ccns.length ? q<HospitalLite & Row>(`SELECT hospital_ccn, hospital_name, city, state, hospital_type, hospital_overall_rating, medicare_discharges_2024, cases_visible FROM hospital_master WHERE hospital_ccn IN (${ccns.map(sqlStr).join(',')})`) as Promise<HospitalLite[]> : Promise.resolve([])
+export interface SystemLite { owner_id: string; system_name: string; n_hospitals_in_care_compare: number; n_hospitals_with_service_area: number; n_state_codes: number }
+/** Hospital systems = owner organizations in PECOS holding a 5%-or-greater direct or indirect ownership interest in one or more hospitals. */
+export async function searchSystems(text: string, limit = 20): Promise<SystemLite[]> {
+  const t = text.trim().toUpperCase().replace(/[%_\\]/g, m => '\\' + m)
+  if (!t) return []
+  return q<SystemLite & Row>(`SELECT owner_id, system_name, n_hospitals_in_care_compare, n_hospitals_with_service_area, n_state_codes FROM hospital_system
+    WHERE upper(system_name) LIKE ${sqlStr('%' + t + '%')} ESCAPE '\\' ORDER BY n_hospitals_with_service_area DESC, system_name LIMIT ${limit}`) as Promise<SystemLite[]>
+}
+/** CCNs of a system's hospitals that have service-area data (the only ones a SNF filter can use). */
+export const systemHospitalCcns = (ownerId: string) => q<{ hospital_ccn: string } & Row>(`SELECT DISTINCT o.hospital_ccn FROM hospital_owner_org o WHERE o.owner_id = ${sqlStr(ownerId)} AND o.hospital_ccn IN (SELECT hospital_ccn FROM hospital_service_area) ORDER BY 1`).then(r => r.map(x => x.hospital_ccn))
+/** Owner organizations of one hospital (direct first, then indirect), for the hospital page. */
+export const hospitalOwners = (ccn: string) => q(`SELECT owner_id, owner_name, role_code, role_text, pct, since FROM hospital_owner_org WHERE hospital_ccn = ${sqlStr(ccn)} ORDER BY role_code, owner_name`)
 export const hospitalDetail = (ccn: string) => q(`SELECT * FROM hospital_master WHERE hospital_ccn = ${sqlStr(ccn)}`).then(r => r[0] ?? null)
 
 /** The hospital's visible service area: ZIPs with ≥11 cases, largest first, with cumulative share. */
