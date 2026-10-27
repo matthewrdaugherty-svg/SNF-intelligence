@@ -1,0 +1,350 @@
+{
+ "215085": {
+  "h1": "Carroll Park Healthcare",
+  "snapshot": "Carroll Park Healthcare is a 2-star (poor), 140-bed for profit nursing home in Baltimore, MD. 20.2% of its short-stay residents were rehospitalized, better than the MD average of 21.0%. After discharge from this facility, 11.6% of Medicare stays had a potentially preventable readmission within 30 days (nation 10.7%). Over the last three inspection cycles CMS recorded 4 harm-or-jeopardy deficiencies and $306,550 in fines. Nurses provide 3.32 hours per resident-day, worse than the state average of 3.87.",
+  "pecos": "Medicare enrollment (PECOS, 2026-09-29): enrolled as Gwynnfalls Md Opco doing business as Carroll Park Healthcare; CMS affiliation entity Engage Healthcare; proprietary; 1 change of ownership since 2016, most recently 2023-08-01 (buyer Gwynnfalls Md Opco).",
+  "ownIntro": "Ownership interests, operational/managerial control and partnership roles as reported to CMS; officers, directors, managing employees and lenders are in the workbook's Ownership sheet. Legal business name: Gwynnfalls Md Opco.",
+  "starCards": [
+   {
+    "label": "Overall rating",
+    "body": "2\npoor",
+    "avg": "state average 3.2"
+   },
+   {
+    "label": "Health inspection",
+    "body": "2\npoor",
+    "avg": "state average 2.9"
+   },
+   {
+    "label": "Quality measures",
+    "body": "4\ngood",
+    "avg": "state average 3.9"
+   },
+   {
+    "label": "Staffing",
+    "body": "2\npoor",
+    "avg": "state average 3.2"
+   }
+  ],
+  "statCards": [
+   {
+    "label": "Short-stay residents rehospitalized (QM 521)",
+    "value": "20.2%",
+    "note": "MD average 21.0% · nation 23.8% · 0.8 pts better than state",
+    "tone": "rgb(220, 104, 3)",
+    "how": "Risk-adjusted. Calendar 2025. From CMS file “NH QualityMsr Claims”, column “Adjusted Score”: row where Measure Code = 521.",
+    "source": "CMS"
+   },
+   {
+    "label": "Potentially preventable readmissions within 30 days of SNF discharge (QRP 004)",
+    "value": "11.6%",
+    "note": "nation 10.7%",
+    "tone": "var(--color-q2)",
+    "how": "Risk-standardized. National figure is the unadjusted average. From CMS file “Skilled Nursing Facility Quality Reporting Program Provider Data”, column “Score”: row where Measure Code = S_004_01_PPR_PD_RSRR ('Not Available' → blank).",
+    "source": "CMS"
+   },
+   {
+    "label": "Harm or jeopardy deficiencies (G–L), three cycles",
+    "value": "4",
+    "note": "CMS\nHow this is calculated",
+    "tone": null,
+    "how": "From CMS file “NH HealthCitations”, column “(aggregate)”: count of rows with Scope Severity Code in G,H,I,J,K,L.",
+    "source": "CMS"
+   },
+   {
+    "label": "Total fines",
+    "value": "$306,550",
+    "note": "MD average $21,934 · nation $30,972 · $284,616 worse than state",
+    "tone": "var(--color-q2)",
+    "how": "From CMS file “NH Penalties”, column “(aggregate)”: sum of Fine Amount where Penalty Type = Fine.",
+    "source": "CMS"
+   }
+  ],
+  "m521": [
+   "Short-stay residents rehospitalized (QM 521)\nRisk-adjusted. Calendar 2025.",
+   "20.2%",
+   "",
+   "State avg 21.0% · Nation 23.8%\n0.8 pts better than state"
+  ],
+  "mStaff": [
+   "Total nurse hours per resident-day",
+   "3.32",
+   "",
+   "State avg 3.87 · Nation 3.86\n0.56 worse than state"
+  ],
+  "m004": [
+   "Potentially preventable readmissions within 30 days of SNF discharge (QRP 004)\nRisk-standardized. National figure is the unadjusted average.",
+   "11.6%",
+   "",
+   "Nation 10.7%\nNo Different than the National Rate\n72 eligible stays"
+  ],
+  "mFines": [
+   "Total fines",
+   "$306,550",
+   "",
+   "State avg $21,934 · Nation $30,972\n$284,616 worse than state"
+  ],
+  "errors": []
+ },
+ "395288": {
+  "h1": "Sapphire Care and Rehab Center",
+  "snapshot": "Sapphire Care and Rehab Center is a 1-star (poor), 127-bed for profit nursing home in East Stroudsburg, PA. 25.5% of its short-stay residents were rehospitalized, worse than the PA average of 22.5%. After discharge from this facility, 10.6% of Medicare stays had a potentially preventable readmission within 30 days (nation 10.7%). Over the last three inspection cycles CMS recorded 0 harm-or-jeopardy deficiencies and $0 in fines. Nurses provide 3.40 hours per resident-day, worse than the state average of 3.89.",
+  "pecos": "Medicare enrollment (PECOS, 2026-09-29): enrolled as Diamond Healthcare at Stroud LLC doing business as Sapphire Care and Rehab Center; proprietary; 2 changes of ownership since 2016, most recently 2024-12-01 (buyer Diamond Healthcare at Stroud LLC).",
+  "ownIntro": "Ownership interests, operational/managerial control and partnership roles as reported to CMS; officers, directors, managing employees and lenders are in the workbook's Ownership sheet. Legal business name: Diamond Healthcare at Stroud LLC.",
+  "starCards": [
+   {
+    "label": "Overall rating",
+    "body": "1\npoor",
+    "avg": "state average 3.0"
+   },
+   {
+    "label": "Health inspection",
+    "body": "2\npoor",
+    "avg": "state average 2.8"
+   },
+   {
+    "label": "Quality measures",
+    "body": "4\ngood",
+    "avg": "state average 3.6"
+   },
+   {
+    "label": "Staffing",
+    "body": "1\npoor",
+    "avg": "state average 3.0"
+   }
+  ],
+  "statCards": [
+   {
+    "label": "Short-stay residents rehospitalized (QM 521)",
+    "value": "25.5%",
+    "note": "PA average 22.5% · nation 23.8% · 3.0 pts worse than state",
+    "tone": "var(--color-q2)",
+    "how": "Risk-adjusted. Calendar 2025. From CMS file “NH QualityMsr Claims”, column “Adjusted Score”: row where Measure Code = 521.",
+    "source": "CMS"
+   },
+   {
+    "label": "Potentially preventable readmissions within 30 days of SNF discharge (QRP 004)",
+    "value": "10.6%",
+    "note": "nation 10.7%",
+    "tone": "rgb(220, 104, 3)",
+    "how": "Risk-standardized. National figure is the unadjusted average. From CMS file “Skilled Nursing Facility Quality Reporting Program Provider Data”, column “Score”: row where Measure Code = S_004_01_PPR_PD_RSRR ('Not Available' → blank).",
+    "source": "CMS"
+   },
+   {
+    "label": "Harm or jeopardy deficiencies (G–L), three cycles",
+    "value": "0",
+    "note": "CMS\nHow this is calculated",
+    "tone": null,
+    "how": "From CMS file “NH HealthCitations”, column “(aggregate)”: count of rows with Scope Severity Code in G,H,I,J,K,L.",
+    "source": "CMS"
+   },
+   {
+    "label": "Total fines",
+    "value": "$0",
+    "note": "PA average $25,774 · nation $30,972 · $25,774 better than state",
+    "tone": "var(--color-q5)",
+    "how": "From CMS file “NH Penalties”, column “(aggregate)”: sum of Fine Amount where Penalty Type = Fine.",
+    "source": "CMS"
+   }
+  ],
+  "m521": [
+   "Short-stay residents rehospitalized (QM 521)\nRisk-adjusted. Calendar 2025.",
+   "25.5%",
+   "",
+   "State avg 22.5% · Nation 23.8%\n3.0 pts worse than state"
+  ],
+  "mStaff": [
+   "Total nurse hours per resident-day",
+   "3.40",
+   "",
+   "State avg 3.89 · Nation 3.86\n0.49 worse than state"
+  ],
+  "m004": [
+   "Potentially preventable readmissions within 30 days of SNF discharge (QRP 004)\nRisk-standardized. National figure is the unadjusted average.",
+   "10.6%",
+   "",
+   "Nation 10.7%\nNo Different than the National Rate\n134 eligible stays"
+  ],
+  "mFines": [
+   "Total fines",
+   "$0",
+   "",
+   "State avg $25,774 · Nation $30,972\n$25,774 better than state"
+  ],
+  "errors": []
+ },
+ "025025": {
+  "h1": "Centennial Post Acute",
+  "snapshot": "Centennial Post Acute is a 1-star (poor), 102-bed for profit nursing home in Anchorage, AK. 19.5% of its short-stay residents were rehospitalized, worse than the AK average of 15.0%. After discharge from this facility, 9.8% of Medicare stays had a potentially preventable readmission within 30 days (nation 10.7%). Over the last three inspection cycles CMS recorded 8 harm-or-jeopardy deficiencies and $232,502 in fines. Nurses provide 4.47 hours per resident-day, worse than the state average of 6.88.",
+  "pecos": null,
+  "ownIntro": "Ownership interests, operational/managerial control and partnership roles as reported to CMS; officers, directors, managing employees and lenders are in the workbook's Ownership sheet. Legal business name: Centennial SNF Healthcare LLC.",
+  "starCards": [
+   {
+    "label": "Overall rating",
+    "body": "1\npoor",
+    "avg": "state average 3.4"
+   },
+   {
+    "label": "Health inspection",
+    "body": "1\npoor",
+    "avg": "state average 2.9"
+   },
+   {
+    "label": "Quality measures",
+    "body": "3\naverage",
+    "avg": "state average 3.9"
+   },
+   {
+    "label": "Staffing",
+    "body": "4\ngood",
+    "avg": "state average 4.5"
+   }
+  ],
+  "statCards": [
+   {
+    "label": "Short-stay residents rehospitalized (QM 521)",
+    "value": "19.5%",
+    "note": "AK average 15.0% · nation 23.8% · 4.5 pts worse than state",
+    "tone": "var(--color-q2)",
+    "how": "Risk-adjusted. Calendar 2025. From CMS file “NH QualityMsr Claims”, column “Adjusted Score”: row where Measure Code = 521.",
+    "source": "CMS"
+   },
+   {
+    "label": "Potentially preventable readmissions within 30 days of SNF discharge (QRP 004)",
+    "value": "9.8%",
+    "note": "nation 10.7%",
+    "tone": "var(--color-q5)",
+    "how": "Risk-standardized. National figure is the unadjusted average. From CMS file “Skilled Nursing Facility Quality Reporting Program Provider Data”, column “Score”: row where Measure Code = S_004_01_PPR_PD_RSRR ('Not Available' → blank).",
+    "source": "CMS"
+   },
+   {
+    "label": "Harm or jeopardy deficiencies (G–L), three cycles",
+    "value": "8",
+    "note": "CMS\nHow this is calculated",
+    "tone": null,
+    "how": "From CMS file “NH HealthCitations”, column “(aggregate)”: count of rows with Scope Severity Code in G,H,I,J,K,L.",
+    "source": "CMS"
+   },
+   {
+    "label": "Total fines",
+    "value": "$232,502",
+    "note": "AK average $26,572 · nation $30,972 · $205,930 worse than state",
+    "tone": "var(--color-q2)",
+    "how": "From CMS file “NH Penalties”, column “(aggregate)”: sum of Fine Amount where Penalty Type = Fine.",
+    "source": "CMS"
+   }
+  ],
+  "m521": [
+   "Short-stay residents rehospitalized (QM 521)\nRisk-adjusted. Calendar 2025.",
+   "19.5%",
+   "",
+   "State avg 15.0% · Nation 23.8%\n4.5 pts worse than state"
+  ],
+  "mStaff": [
+   "Total nurse hours per resident-day",
+   "4.47",
+   "",
+   "State avg 6.88 · Nation 3.86\n2.41 worse than state"
+  ],
+  "m004": [
+   "Potentially preventable readmissions within 30 days of SNF discharge (QRP 004)\nRisk-standardized. National figure is the unadjusted average.",
+   "9.8%",
+   "",
+   "Nation 10.7%\nNo Different than the National Rate\n262 eligible stays"
+  ],
+  "mFines": [
+   "Total fines",
+   "$232,502",
+   "",
+   "State avg $26,572 · Nation $30,972\n$205,930 worse than state"
+  ],
+  "errors": []
+ },
+ "015463": {
+  "h1": "Knollwood Healthcare",
+  "snapshot": "Knollwood Healthcare is an unrated, 71-bed for profit nursing home in Mobile, AL. 34.4% of its short-stay residents were rehospitalized, worse than the AL average of 24.8%. After discharge from this facility, 11.7% of Medicare stays had a potentially preventable readmission within 30 days (nation 10.7%). Over the last three inspection cycles CMS recorded 12 harm-or-jeopardy deficiencies and $318,070 in fines. Nurses provide 3.42 hours per resident-day, worse than the state average of 3.88.",
+  "pecos": "Medicare enrollment (PECOS, 2026-09-29): enrolled as Knollwood Healthcare and Rehabilitation LLC doing business as Knollwood Healthcare; CMS affiliation entity Ephram Lahasky; proprietary; 1 change of ownership since 2016, most recently 2022-10-27 (buyer Knollwood Healthcare and Rehabilitation LLC).",
+  "ownIntro": "Ownership interests, operational/managerial control and partnership roles as reported to CMS; officers, directors, managing employees and lenders are in the workbook's Ownership sheet. Legal business name: Knollwood Healthcare and Rehabilitation LLC.",
+  "starCards": [
+   {
+    "label": "Overall rating",
+    "body": "–\nnot rated\nfn 18",
+    "avg": "state average 3.0"
+   },
+   {
+    "label": "Health inspection",
+    "body": "–\nnot rated\nfn 18",
+    "avg": "state average 2.8"
+   },
+   {
+    "label": "Quality measures",
+    "body": "–\nnot rated\nfn 18",
+    "avg": "state average 3.2"
+   },
+   {
+    "label": "Staffing",
+    "body": "–\nnot rated\nfn 18",
+    "avg": "state average 3.6"
+   }
+  ],
+  "statCards": [
+   {
+    "label": "Short-stay residents rehospitalized (QM 521)",
+    "value": "34.4%",
+    "note": "AL average 24.8% · nation 23.8% · 9.6 pts worse than state",
+    "tone": "var(--color-q2)",
+    "how": "Risk-adjusted. Calendar 2025. From CMS file “NH QualityMsr Claims”, column “Adjusted Score”: row where Measure Code = 521.",
+    "source": "CMS"
+   },
+   {
+    "label": "Potentially preventable readmissions within 30 days of SNF discharge (QRP 004)",
+    "value": "11.7%",
+    "note": "nation 10.7%",
+    "tone": "var(--color-q2)",
+    "how": "Risk-standardized. National figure is the unadjusted average. From CMS file “Skilled Nursing Facility Quality Reporting Program Provider Data”, column “Score”: row where Measure Code = S_004_01_PPR_PD_RSRR ('Not Available' → blank).",
+    "source": "CMS"
+   },
+   {
+    "label": "Harm or jeopardy deficiencies (G–L), three cycles",
+    "value": "12",
+    "note": "CMS\nHow this is calculated",
+    "tone": null,
+    "how": "From CMS file “NH HealthCitations”, column “(aggregate)”: count of rows with Scope Severity Code in G,H,I,J,K,L.",
+    "source": "CMS"
+   },
+   {
+    "label": "Total fines",
+    "value": "$318,070",
+    "note": "AL average $12,315 · nation $30,972 · $305,755 worse than state",
+    "tone": "var(--color-q2)",
+    "how": "From CMS file “NH Penalties”, column “(aggregate)”: sum of Fine Amount where Penalty Type = Fine.",
+    "source": "CMS"
+   }
+  ],
+  "m521": [
+   "Short-stay residents rehospitalized (QM 521)\nRisk-adjusted. Calendar 2025.",
+   "34.4%",
+   "",
+   "State avg 24.8% · Nation 23.8%\n9.6 pts worse than state"
+  ],
+  "mStaff": [
+   "Total nurse hours per resident-day",
+   "3.42",
+   "",
+   "State avg 3.88 · Nation 3.86\n0.46 worse than state"
+  ],
+  "m004": [
+   "Potentially preventable readmissions within 30 days of SNF discharge (QRP 004)\nRisk-standardized. National figure is the unadjusted average.",
+   "11.7%",
+   "",
+   "Nation 10.7%\nNo Different than the National Rate\n66 eligible stays"
+  ],
+  "mFines": [
+   "Total fines",
+   "$318,070",
+   "",
+   "State avg $12,315 · Nation $30,972\n$305,755 worse than state"
+  ],
+  "errors": []
+ }
+}

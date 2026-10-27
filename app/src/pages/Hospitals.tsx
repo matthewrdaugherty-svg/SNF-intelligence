@@ -3,7 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router'
 import { q, type Row } from '../lib/db'
 import { familyMembers, hospitalDetail, hospitalFamilies, hospitalOwners, qualityMix, serviceArea, snfsServing, searchHospitals, type HospitalLite, type Mix } from '../lib/hospitals'
 import { fmtInt, fmtPct, fmtUsd, titleCase, countyLabel } from '../lib/format'
-import { Empty, Fn, QualityStrip, Stars, Stat, useReference } from '../components/ui'
+import { Empty, Fn, QualityStrip, STRIP_HEADER, Stars, Stat, useReference } from '../components/ui'
 
 const pct = (x: unknown, d = 1) => x == null ? '' : fmtPct(100 * Number(x), d)
 
@@ -150,7 +150,7 @@ export default function Hospital() {
           </div>
         </div>
         <div className="overflow-x-auto"><table className="w-full text-sm mt-2">
-          <thead><tr className="text-[11px] text-ink-3 text-left"><th className="font-normal py-1">Facility</th><th className="font-normal">Ratings</th><th className="font-normal text-right">Modeled share</th><th className="font-normal text-right">ZIP share</th><th className="font-normal text-right">Medicare stays 2024</th><th className="font-normal text-right">Beds</th><th className="font-normal text-right">Rehosp. %</th><th className="font-normal text-right">Readmit %</th><th className="font-normal text-right">To community %</th><th className="font-normal text-right">Fines 3-yr</th><th className="font-normal text-right">G–L deficiencies</th></tr></thead>
+          <thead><tr className="text-[11px] text-ink-3 text-left"><th className="font-normal py-1">Facility</th><th className="font-normal">{STRIP_HEADER}</th><th className="font-normal text-right">Modeled share</th><th className="font-normal text-right">ZIP share</th><th className="font-normal text-right">Medicare stays 2024</th><th className="font-normal text-right">Beds</th><th className="font-normal text-right">Rehosp. %</th><th className="font-normal text-right">Readmit %</th><th className="font-normal text-right">To community %</th><th className="font-normal text-right">Fines 3-yr</th><th className="font-normal text-right">G–L deficiencies</th></tr></thead>
           <tbody>{filtered.map(s => (
             <tr key={String(s.ccn)} className="border-t border-hairline/60">
               <td className="py-1.5 pr-2"><Link to={`/facility/${s.ccn}`} className="hover:text-accent hover:underline underline-offset-2">{titleCase(String(s.provider_name))}</Link><div className="text-[11px] text-ink-3">{titleCase(String(s.city_town))} {String(s.zip_code)}{s.special_focus_status ? <span className="text-rust"> · {String(s.special_focus_status)}</span> : ''}{s.abuse_icon === 'Y' ? <span className="text-rust"> · abuse icon</span> : ''}</div></td>

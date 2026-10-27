@@ -16,8 +16,10 @@ export function Stars({ value, size = 'md', label }: { value: unknown; size?: 's
 }
 
 const STRIP = [['overall_rating', 'Overall', 'overall'], ['health_inspection_rating', 'Health inspection', 'inspection'], ['qm_rating', 'Quality measures', 'quality'], ['staffing_rating', 'Staffing', 'staffing']] as const
-/** The four CMS star ratings side by side, each captioned so the reader knows what it rates. */
-export function QualityStrip({ row, size = 'sm', captions = true }: { row: Record<string, unknown>; size?: 'sm' | 'md'; captions?: boolean }) {
+/** Header text that names the four chips once, in order, instead of captioning every row. */
+export const STRIP_HEADER = 'Stars: overall · inspection · quality · staffing'
+/** The four CMS star ratings side by side, always in the same order (overall, inspection, quality, staffing); the column header names them once. */
+export function QualityStrip({ row, size = 'sm', captions = false }: { row: Record<string, unknown>; size?: 'sm' | 'md'; captions?: boolean }) {
   return (
     <span className="inline-flex gap-1" aria-label={STRIP.map(([k, l]) => `${l}: ${row[k] == null ? 'not rated' : row[k] + ' of 5'}`).join(', ')}>
       {STRIP.map(([k, l, c]) => (
@@ -98,13 +100,14 @@ export function Stat({ label, value, unit, note, source, how, tone }: { label: s
   const bar = tone === 'good' ? 'var(--color-q5)' : tone === 'mid' ? '#dc6803' : tone === 'bad' ? 'var(--color-q2)' : 'transparent'
   return (
     <div className="bg-surface rounded-[10px] p-4 flex flex-col min-w-0" style={{ boxShadow: '0 1px 0 rgba(16,24,40,0.04)' }}>
-      <div className="text-xs text-ink-2 leading-snug">{label}</div>
-      <div className="mt-2 flex items-baseline gap-1.5 flex-wrap">
-        <span className="text-[28px] leading-none font-semibold tracking-tight tabular-nums text-ink">{value}</span>
+      {/* Fixed rows: label (2 lines), number, note (2 lines), tone bar, footer — so every card in a row lines up. */}
+      <div className="text-xs text-ink-2 leading-4 h-8 line-clamp-2" title={label}>{label}</div>
+      <div className="mt-2 h-8 flex items-baseline gap-1.5 overflow-hidden whitespace-nowrap">
+        <span className="text-[28px] leading-8 font-semibold tracking-tight tabular-nums text-ink">{value}</span>
         {unit && <span className="text-sm text-ink-2">{unit}</span>}
       </div>
-      {note && <div className="text-[12px] text-ink-2 mt-1.5 leading-snug">{note}</div>}
-      {tone && <div className="h-1 rounded mt-2" style={{ background: bar, width: 40 }} />}
+      <div className="text-[12px] text-ink-2 mt-1.5 leading-4 h-8 line-clamp-2">{note}</div>
+      <div className="h-1 rounded mt-2" style={{ background: tone ? bar : 'transparent', width: 40 }} />
       <div className="mt-auto pt-3 flex items-center gap-2 text-[11px] text-ink-3">
         <span className="inline-flex items-center gap-1"><span className={`inline-block w-1.5 h-1.5 rounded-full ${source === 'CMS' ? 'bg-ink-3' : source === 'Modeled' ? 'bg-accent' : 'bg-ink-2'}`} aria-hidden />{source}</span>
         {how && <button className="press underline underline-offset-2 hover:text-ink" onClick={() => setOpen(o => !o)} aria-expanded={open}>How this is calculated</button>}

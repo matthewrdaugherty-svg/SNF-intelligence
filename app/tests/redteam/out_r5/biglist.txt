@@ -1,0 +1,5 @@
+stars20000 1841 ms {"n":"14,565","rows":1,"desc":"Overall star rating is any of 1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,","descLen":40029,"err":null,"urlLen":80018}
+hosp3000 1847 ms {"n":"209","rows":1,"desc":"In a hospital's service area (hospital CCN) is any of (CCNs, comma-separated) 210009,210009,210009,210009,210009,210009,","descLen":21077,"err":null,"urlLen":27017}
+hosp3000distinct 1825 ms {"n":"793","rows":1,"desc":"In a hospital's service area (hospital CCN) is any of (CCNs, comma-separated) 100000,100001,100002,100003,100004,100005,","descLen":21077,"err":null,"urlLen":27017}
+conds500 1817 ms {"n":"11,700","rows":20,"desc":"Short-stay residents rehospitalized (QM 521) at least 0 · Short-stay residents rehospitalized (QM 521) at least 1 · Shor","descLen":1157,"err":null,"urlLen":9000}
+pageerrors []

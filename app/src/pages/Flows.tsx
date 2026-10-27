@@ -4,7 +4,7 @@ import Papa from 'papaparse'
 import { getDb, q, sqlStr } from '../lib/db'
 import { distExpr } from '../lib/filters'
 import { fmtInt, fmtPct, fmtUsd, titleCase } from '../lib/format'
-import { QualityStrip, Empty, Fn, useReference } from '../components/ui'
+import { QualityStrip, STRIP_HEADER, Empty, Fn, useReference } from '../components/ui'
 
 type Row = Record<string, unknown>
 const REQUIRED = ['hospital_ccn', 'hospital_name', 'snf_ccn', 'period_start', 'period_end', 'n_discharges']
@@ -212,7 +212,7 @@ export default function Flows() {
           <section className="mt-6 bg-surface rounded-[10px] px-5 py-4">
             <h2 className="font-medium">Destinations <span className="text-ink-3 font-normal">· {dest.length}</span></h2>
             <div className="overflow-x-auto"><table className="w-full text-sm mt-2">
-              <thead><tr className="text-[11px] text-ink-3 text-left"><th className="font-normal py-1">Facility</th><th className="font-normal text-right">Discharges</th><th className="font-normal text-right">Share</th><th className="font-normal pl-3">Stars</th>{summary.hasLoc ? <th className="font-normal text-right">Miles</th> : null}<th className="font-normal text-right">Rehosp. %</th><th className="font-normal text-right">Readmit %</th><th className="font-normal text-right">To community %</th><th className="font-normal text-right">Fines 3-yr</th><th className="font-normal text-right">G–L deficiencies</th></tr></thead>
+              <thead><tr className="text-[11px] text-ink-3 text-left"><th className="font-normal py-1">Facility</th><th className="font-normal text-right">Discharges</th><th className="font-normal text-right">Share</th><th className="font-normal pl-3">{STRIP_HEADER}</th>{summary.hasLoc ? <th className="font-normal text-right">Miles</th> : null}<th className="font-normal text-right">Rehosp. %</th><th className="font-normal text-right">Readmit %</th><th className="font-normal text-right">To community %</th><th className="font-normal text-right">Fines 3-yr</th><th className="font-normal text-right">G–L deficiencies</th></tr></thead>
               <tbody>
                 {dest.map(d => (
                   <tr key={String(d.snf_ccn)} className="border-t border-hairline/60">
@@ -244,7 +244,7 @@ export default function Flows() {
                 </div>
                 <div className="text-xs text-ink-3 mt-1">Arithmetic on CMS facility averages, for sizing the conversation. It does not say these facilities have capacity or are clinically right for the patients, and it is not an estimate of readmissions avoided.</div>
                 <div className="overflow-x-auto"><table className="w-full text-sm mt-3">
-                  <thead><tr className="text-[11px] text-ink-3 text-left"><th className="font-normal py-1">Facility</th><th className="font-normal text-right">Miles</th><th className="font-normal pl-3">Stars</th><th className="font-normal text-right">Beds</th><th className="font-normal text-right">Residents/day</th><th className="font-normal text-right">Rehosp. %</th><th className="font-normal text-right">Readmit %</th><th className="font-normal text-right">To community %</th><th className="font-normal text-right">Fines 3-yr</th><th className="font-normal">Already a destination</th></tr></thead>
+                  <thead><tr className="text-[11px] text-ink-3 text-left"><th className="font-normal py-1">Facility</th><th className="font-normal text-right">Miles</th><th className="font-normal pl-3">{STRIP_HEADER}</th><th className="font-normal text-right">Beds</th><th className="font-normal text-right">Residents/day</th><th className="font-normal text-right">Rehosp. %</th><th className="font-normal text-right">Readmit %</th><th className="font-normal text-right">To community %</th><th className="font-normal text-right">Fines 3-yr</th><th className="font-normal">Already a destination</th></tr></thead>
                   <tbody>
                     {alts.map(a => (
                       <tr key={String(a.ccn)} className="border-t border-hairline/60">

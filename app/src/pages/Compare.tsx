@@ -4,7 +4,7 @@ import { q, sqlStr } from '../lib/db'
 import { GROUPS } from '../lib/measures'
 import { fmt, titleCase } from '../lib/format'
 import { useCompare, compareStore, MAX_COMPARE } from '../lib/compare'
-import { Fn, QualityStrip, Empty, useReference } from '../components/ui'
+import { Fn, QualityStrip, STRIP_HEADER, Empty, useReference } from '../components/ui'
 
 type Row = Record<string, unknown>
 
@@ -29,7 +29,7 @@ export default function Compare() {
       </div>
       <div className="bg-surface rounded-[10px] px-5 py-4" style={{ minWidth: 320 + rows.length * 160 }}>
         <div className="grid gap-4 items-end border-b border-hairline pb-3" style={{ gridTemplateColumns: `320px repeat(${rows.length}, ${colW})` }}>
-          <div className="text-xs text-ink-3">Best value in each row is in bold (by our reading of the measure's direction).</div>
+          <div className="text-xs text-ink-3">Best value in each row is in bold (by our reading of the measure's direction).<div className="mt-1">{STRIP_HEADER}</div></div>
           {rows.map(r => (
             <div key={String(r.ccn)} className="min-w-0">
               <Link to={`/facility/${r.ccn}`} className="block text-sm font-medium text-ink hover:underline underline-offset-2 leading-tight">{titleCase(String(r.provider_name))}</Link>

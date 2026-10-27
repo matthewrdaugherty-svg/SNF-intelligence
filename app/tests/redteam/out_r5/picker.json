@@ -1,0 +1,152 @@
+{
+ "hopkins_results": [
+  "The Johns Hopkins Health System Corporation\n7 hospitals · 3 states · 5 with service-area data"
+ ],
+ "hopkins_pending": {
+  "head": "The Johns Hopkins Health System Corporation · 7 hospitals in 3 states\nKeep the states you want, then add.\nMD · 5\nDC · 1\nFL · 1\nAdd 5 hospitals\nCancel",
+  "chips": [
+   "MD · 5|true",
+   "DC · 1|true",
+   "FL · 1|true"
+  ],
+  "add": "Add 5 hospitals|disabled=false"
+ },
+ "hopkins_all": {
+  "note": "The Johns Hopkins Health System Corporation: added 5 hospitals; 2 in the chosen states have no service-area data and were left out.",
+  "count": "235",
+  "url": "http://localhost:4180/explore?h=090005%2C210009%2C210022%2C210029%2C210048"
+ },
+ "hopkins_md_pending": {
+  "head": "The Johns Hopkins Health System Corporation · 7 hospitals in 3 states\nKeep the states you want, then add.\nMD · 5\nDC · 1\nFL · 1\nAdd 4 hospitals\nCancel",
+  "chips": [
+   "MD · 5|true",
+   "DC · 1|false",
+   "FL · 1|false"
+  ],
+  "add": "Add 4 hospitals|disabled=false"
+ },
+ "hopkins_md": {
+  "note": "The Johns Hopkins Health System Corporation: added 4 hospitals; 1 in the chosen states have no service-area data and were left out.",
+  "count": "226"
+ },
+ "hca_results": [
+  "Hca Healthcare Inc\n156 hospitals · 18 states · 153 with service-area data · 98 owner names\nalso Frisco Holding Ii, Hercules Holding Ii, Hca Inc, Healthtrust Inc - the Hospital Company, …",
+  "Commonspirit Health\n114 hospitals · 18 states · 109 with service-area data · 21 owner names\nalso Chi Nebraska, St. Lukes Health System Corporation, Dignity Community Care, St Lukes Health Clinical Operations, …",
+  "Universal Health Services Inc\n141 hospitals · 39 states · 77 with service-area data · 86 owner names\nalso Psychiatric Solutions, Inc., Uhs of Delaware Inc, Psychiatric Solutions Hospitals LLC, Behavioral Healthcare LLC, …",
+  "Lifepoint Health Inc\n80 hospitals · 25 states · 65 with service-area data · 72 owner names\nalso Dsb Acquisition LLC, Legacy Lifepoint Health LLC, Historic Lifepoint Hospitals LLC, Lifepoint Hospitals Holdings LLC, …",
+  "Tenet Healthcare Corporation\n65 hospitals · 11 states · 57 with service-area data · 102 owner names\nalso Hcn Surgery Center Holdings Inc, United Surgical Partners International Inc, Usp Domestic Holdings Inc, Uspi Group Holdings Inc, …",
+  "Trinity Health Corporation\n57 hospitals · 16 states · 56 with service-area data · 19 owner names\nalso Mercy Health Network Inc, Trinity Health-Michigan, Mercy Health Services-Iowa Corp, Saint Alphonsus Health System Inc, …",
+  "Chs Community Health Systems Inc\n53 hospitals · 13 states · 52 with service-area data · 52 owner names\nalso Community Health Systems Inc, Hma-Tri Holdings LLC, Tennyson Holdings LLC, Triad Healthcare LLC, …",
+  "Adventist Health System Sunbelt Healthcare Corporation\n44 hospitals · 9 states · 8 owner names\nalso Adventist Health System Sunbelt Inc, Adventist Midwest Health, Adventisit Health Mid-America Inc, Memorial Health Systems Inc, …",
+  "Bon Secours Mercy Health Inc\n39 hospitals · 4 states · 17 owner names\nalso Mercy Health Cincinnati LLC, Bon Secours - Richmond Health System, Bon Secours Richmond LLC, Healthspan Partners, …",
+  "Prime Healthcare Services, Inc\n36 hospitals · 13 states · 15 owner names\nalso Prime Healthcare Holdings Inc, Kasp Trust, Dallas Sv Health Care, LLC, Kasp Trust No 1, …",
+  "Acadia Healthcare Company Inc\n53 hospitals · 23 states · 26 with service-area data · 43 owner names\nalso Acadia Healthcare Intermediate Holdings LLC, Acute Bh Services LLC, Acadia Jv Holdings LLC, Acute Midwest Holdco LLC, …",
+  "Ahp Health Partners, Inc\n26 hospitals · 6 states · 24 owner names\nalso Ardent Health Inc, Ardent Legacy Holdings LLC, Ahs Hillcrest Healthcare System LLC, Ahs Oklahoma, LLC, …",
+  "Upmc\n26 hospitals · 2 states · 25 with service-area data · 6 owner names\nalso Upmc Pinnacle, Upmc Susquehanna, Hanover Healthcare Plus Inc, Upmc Hamot, …",
+  "Dignity Health\n26 hospitals · 3 states · 24 with service-area data · 6 owner names\nalso Port City Operating Company LLC, Childrens Healthcare of Arizona Inc, Community Hospital of San Bernardino, De Jv LLC, …",
+  "Oceans Buyer, Inc.\n30 hospitals · 9 states · 21 with service-area data · 14 owner names\nalso Oceans Midco, Inc., Oceans Topco, Inc., Oceans Ultimate Holdco, Lp, Wasque Partners Ii Spe, Lp, …",
+  "Northwell, Inc.\n19 hospitals · 2 states · 7 owner names\nalso Northwell Healthcare Inc, Northwell Health Inc, Northwell Health System, Inc., Nuvance Health, …",
+  "Prime Healthcare Foundation Inc\n14 hospitals · 6 states · 2 owner names\nalso Prime Healthcare Foundation - Mission LLC",
+  "Covenant Health\n12 hospitals · 3 states · 3 owner names\nalso St. Joseph Healthcare Foundation, Inc, St. Marys Health System",
+  "Orlando Health Inc\n12 hospitals · 2 states · 5 owner names\nalso Alabama Healthcare Holdings, LLC, Brookwood Baptist Health 2, LLC, Baptists Health System, Inc., Brookwood Baptist Health 1 LLC",
+  "The Charlotte-Mecklenburg Hospital Authority\n11 hospitals · 3 states · 4 owner names\nalso Ah Georgia Inc, Navicent Health Inc, Floyd Healthcare Management Inc"
+ ],
+ "hca_tx_pending": {
+  "head": "Hca Healthcare Inc · 156 hospitals in 18 states\nKeep the states you want, then add.\nFL · 44\nTX · 37\nTN · 11\nVA · 11\nUT · 8\nCO · 6\nGA · 6\nNC · 6\nMO · 5\nNH · 4\nCA · 3\nKS · 3\nNV · 3\nSC · 3\nID · 2\nKY · 2\nAK · 1\nLA · 1\nAdd 36 hospitals\nCancel",
+  "chips": [
+   "FL · 44|false",
+   "TX · 37|true",
+   "TN · 11|false",
+   "VA · 11|false",
+   "UT · 8|false",
+   "CO · 6|false",
+   "GA · 6|false",
+   "NC · 6|false",
+   "MO · 5|false",
+   "NH · 4|false",
+   "CA · 3|false",
+   "KS · 3|false",
+   "NV · 3|false",
+   "SC · 3|false",
+   "ID · 2|false",
+   "KY · 2|false",
+   "AK · 1|false",
+   "LA · 1|false"
+  ],
+  "add": "Add 36 hospitals|disabled=false"
+ },
+ "hca_tx": {
+  "note": "Hca Healthcare Inc: added 36 hospitals; 1 in the chosen states have no service-area data and were left out.",
+  "count": "898"
+ },
+ "uk_results": [
+  "University of Kentucky\n4 hospitals · 2 states · 3 with service-area data · 3 owner names\nalso Beyond Blue Corporation, Royal Blue Health, LLC"
+ ],
+ "uk_pending": {
+  "head": "University of Kentucky · 4 hospitals in 2 states\nKeep the states you want, then add.\nKY · 3\nOH · 1\nAdd 3 hospitals\nCancel",
+  "chips": [
+   "KY · 3|true",
+   "OH · 1|true"
+  ],
+  "add": "Add 3 hospitals|disabled=false"
+ },
+ "uk_all": {
+  "note": "University of Kentucky: added 3 hospitals; 1 in the chosen states have no service-area data and were left out.",
+  "count": "153"
+ },
+ "uk_oh_only": {
+  "head": "University of Kentucky · 4 hospitals in 2 states\nKeep the states you want, then add.\nKY · 3\nOH · 1\nAdd 0 hospitals\nCancel",
+  "chips": [
+   "KY · 3|false",
+   "OH · 1|true"
+  ],
+  "add": "Add 0 hospitals|disabled=true"
+ },
+ "enter_Providence": "Universal Health Services Inc · 141 hospitals in 39 states\nKeep the states you want, then add.\nTX · 17\nFL · 13\nCA · 11\nNV · 10\nPA · 8\nGA · 6\nKY · 6\nSC · 5\nAZ · 4\nIL · 4\nIN · 4\nMA · 4\nMI · 4\nMS · 4\nAR · 3\nCO · 3\nNC · 3\nVA · 3\nDC · 2\nDE · 2\nLA · 2\nOH · 2\nOK · 2\nTN · 2\nUT · 2\nWA · 2\nAK · 1\nAL · 1\nIA · 1\nID · 1\nMO · 1\nND · 1\nNJ · 1\nNM · 1\nOR · 1\nPR · 1\nWI · 1\nWV · 1\nWY · 1\nAdd 77 hospitals\nCancel",
+ "enter_Henry Ford": "Ascension Health · 31 hospitals in 6 states\nKeep the states you want, then add.\nMI · 13\nTN · 13\nKS · 2\nAL · 1\nMD · 1\nTX · 1\nAdd 29 hospitals\nCancel",
+ "enter_HonorHealth": "Universal Health Services Inc · 141 hospitals in 39 states\nKeep the states you want, then add.\nTX · 17\nFL · 13\nCA · 11\nNV · 10\nPA · 8\nGA · 6\nKY · 6\nSC · 5\nAZ · 4\nIL · 4\nIN · 4\nMA · 4\nMI · 4\nMS · 4\nAR · 3\nCO · 3\nNC · 3\nVA · 3\nDC · 2\nDE · 2\nLA · 2\nOH · 2\nOK · 2\nTN · 2\nUT · 2\nWA · 2\nAK · 1\nAL · 1\nIA · 1\nID · 1\nMO · 1\nND · 1\nNJ · 1\nNM · 1\nOR · 1\nPR · 1\nWI · 1\nWV · 1\nWY · 1\nAdd 77 hospitals\nCancel",
+ "enter_Memorial Hermann": "Tenet Healthcare Corporation · 65 hospitals in 11 states\nKeep the states you want, then add.\nTX · 27\nAZ · 9\nCA · 8\nFL · 5\nMI · 5\nOK · 3\nTN · 3\nMA · 2\nPA · 1\nSC · 1\nSD · 1\nAdd 57 hospitals\nCancel",
+ "enter_Baylor": "Commonspirit Health · 114 hospitals in 18 states\nKeep the states you want, then add.\nCA · 23\nTX · 14\nNE · 11\nCO · 10\nND · 9\nWA · 7\nAZ · 6\nKY · 6\nAR · 4\nIA · 4\nMN · 4\nKS · 3\nNV · 3\nOH · 3\nUT · 3\nOR · 2\nGA · 1\nTN · 1\nAdd 109 hospitals\nCancel",
+ "chipStyles": [
+  {
+   "t": "MD · 5",
+   "color": "rgb(255, 255, 255)",
+   "bg": "rgb(29, 78, 216)",
+   "parentBg": "rgb(238, 241, 244)",
+   "fontSize": "12px"
+  },
+  {
+   "t": "DC · 1",
+   "color": "rgb(255, 255, 255)",
+   "bg": "rgb(29, 78, 216)",
+   "parentBg": "rgb(238, 241, 244)",
+   "fontSize": "12px"
+  },
+  {
+   "t": "FL · 1",
+   "color": "rgb(71, 84, 103)",
+   "bg": "rgb(29, 78, 216)",
+   "parentBg": "rgb(238, 241, 244)",
+   "fontSize": "12px"
+  }
+ ],
+ "focusOrder": [
+  "INPUT[combobox] \"Find a hospital system\" outline=none/3px shadow=yes",
+  "BUTTON \"MD · 5\" outline=solid/2px shadow=none",
+  "BUTTON \"DC · 1\" outline=solid/2px shadow=none",
+  "BUTTON \"FL · 1\" outline=solid/2px shadow=none",
+  "BUTTON \"Add 5 hospitals\" outline=solid/2px shadow=none",
+  "BUTTON \"Cancel\" outline=solid/2px shadow=none",
+  "INPUT \"Place for radius\" outline=none/3px shadow=yes",
+  "BUTTON \"Set\" outline=solid/2px shadow=none",
+  "BUTTON \"1\" outline=solid/2px shadow=none",
+  "BUTTON \"2\" outline=solid/2px shadow=none",
+  "BUTTON \"3\" outline=solid/2px shadow=none",
+  "BUTTON \"4\" outline=solid/2px shadow=none",
+  "BUTTON \"5\" outline=solid/2px shadow=none",
+  "INPUT \"\" outline=solid/2px shadow=none"
+ ],
+ "arrowDown": "INPUT Find a hospital system activedescendant=null",
+ "tabFromInput": "BUTTON \"Commonspirit Health\n114 hospitals · 18 states · 10\"",
+ "errors": []
+}

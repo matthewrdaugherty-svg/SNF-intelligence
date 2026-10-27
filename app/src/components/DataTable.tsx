@@ -1,10 +1,10 @@
-import { useRef } from 'react'
+import { type ReactNode, useRef } from 'react'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import { Link } from 'react-router'
 import { fmt, titleCase } from '../lib/format'
 import type { TableCol } from '../lib/measures'
 import { useCompare, compareStore } from '../lib/compare'
-import { Fn, QualityStrip } from './ui'
+import { Fn, QualityStrip, STRIP_HEADER } from './ui'
 import type { Reference } from '../lib/reference'
 
 export interface Sort { key: string; dir: 'asc' | 'desc' }
@@ -27,13 +27,13 @@ export default function DataTable({ rows, cols, sort, onSort, ref, showDistance,
   const parent = useRef<HTMLDivElement>(null)
   const v = useVirtualizer({ count: rows.length, getScrollElement: () => parent.current, estimateSize: () => ROW, overscan: 12 })
   const compare = useCompare()
-  const head = (key: string, label: string, numeric = false, w?: number) => {
+  const head = (key: string, label: string, numeric = false, w?: number, node?: ReactNode) => {
     const on = sort.key === key
     return (
       <div key={key} role="columnheader" aria-sort={on ? (sort.dir === 'asc' ? 'ascending' : 'descending') : 'none'} className="shrink-0 border-b border-hairline" style={{ width: w }}>
         <button onClick={() => onSort({ key, dir: on && sort.dir === 'desc' ? 'asc' : 'desc' })}
           className={`press w-full text-left text-xs px-2 h-12 flex items-end gap-1 ${on ? 'text-ink font-semibold' : 'text-ink-2 hover:text-ink'} ${numeric ? 'justify-end' : ''}`} title={`Sort by ${label}`}>
-          <span className="leading-tight line-clamp-3">{label}</span>{on && <span aria-hidden>{sort.dir === 'desc' ? '↓' : '↑'}</span>}
+          <span className="leading-tight line-clamp-3">{node ?? label}</span>{on && <span aria-hidden>{sort.dir === 'desc' ? '↓' : '↑'}</span>}
         </button>
       </div>
     )
@@ -45,7 +45,7 @@ export default function DataTable({ rows, cols, sort, onSort, ref, showDistance,
         <div className="flex sticky top-0 z-10 bg-surface" role="row">
           <div role="columnheader" className="w-9 shrink-0 border-b border-hairline" aria-label="Compare" />
           {head('provider_name', 'Facility', false, 300)}
-          {head('overall_rating', 'Star ratings (1–2 poor · 3 average · 4–5 good)', false, 150)}
+          {head('overall_rating', STRIP_HEADER, false, 150, <>Stars<span className="block font-normal text-ink-3 text-[11px]">overall · inspection · quality · staffing</span></>)}
           {showDistance && head('distance_mi', 'Miles', true, 72)}
           {showShare && head('modeled_share', 'Modeled share of hospital SNF volume', true, 96)}
           {cols.map(c => head(c.key, c.short ?? c.label, c.unit !== 'text', c.width ?? 96))}

@@ -6,7 +6,7 @@ import type { Feature, Point as GPoint } from 'geojson'
 import { q } from '../lib/db'
 import { EMPTY, fromParams, toParams, whereClause, distExpr, type Filters } from '../lib/filters'
 import FilterPanel from '../components/FilterPanel'
-import { QualityStrip, Empty } from '../components/ui'
+import { QualityStrip, STRIP_HEADER, Empty } from '../components/ui'
 import { titleCase } from '../lib/format'
 
 // MapLibre 6 loads its worker from a sibling file the bundler doesn't copy; point it at the bundled copy.
@@ -149,7 +149,7 @@ export default function MapPage() {
         </div>
       </section>
       <aside className="hidden lg:block w-80 shrink-0 border-l border-hairline bg-surface overflow-y-auto" aria-label="Facilities on the map">
-        <div className="px-4 py-3 text-sm text-ink-2 border-b border-hairline">{rows ? <><span className="text-ink font-medium tabular-nums" data-testid="result-count">{rows.length.toLocaleString()}</span> facilities{hasDist ? ', nearest first' : ''}</> : 'Loading…'}</div>
+        <div className="px-4 py-3 text-sm text-ink-2 border-b border-hairline">{rows ? <><span className="text-ink font-medium tabular-nums" data-testid="result-count">{rows.length.toLocaleString()}</span> facilities{hasDist ? ', nearest first' : ''}<span className="block text-[11px] text-ink-3 mt-0.5">{STRIP_HEADER}</span></> : 'Loading…'}</div>
         {rows && rows.length === 0 && <Empty title="Nothing here.">Widen the radius or clear a filter.</Empty>}
         {list.slice(0, 400).map(r => {
           const ccn = String(r.ccn)

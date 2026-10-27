@@ -1,0 +1,176 @@
+{
+ "035106": {
+  "h1": "Tempe Post Acute",
+  "snapshot": "Tempe Post Acute is a 4-star (good), 60-bed for profit nursing home in Tempe, AZ. 23.7% of its short-stay residents were rehospitalized, worse than the AZ average of 23.7%. After discharge from this facility, 10.9% of Medicare stays had a potentially preventable readmission within 30 days (nation 10.7%). Over the last three inspection cycles CMS recorded 1 harm-or-jeopardy deficiency and $0 in fines.",
+  "pecos": "Medicare enrollment (PECOS, 2026-09-29): enrolled as Western Canal Healthcare LLC doing business as Tempe Post Acute; CMS affiliation entity The Ensign Group; proprietary; 1 change of ownership since 2016, most recently 2020-08-01 (buyer Western Canal Healthcare LLC).",
+  "ownIntro": "Ownership interests, operational/managerial control and partnership roles as reported to CMS; officers, directors, managing employees and lenders are in the workbook's Ownership sheet. Legal business name: Western Canal Healthcare LLC.",
+  "starCards": [
+   {
+    "label": "Overall rating",
+    "body": "4\ngood",
+    "avg": "state average 3.3"
+   },
+   {
+    "label": "Health inspection",
+    "body": "4\ngood",
+    "avg": "state average 2.8"
+   },
+   {
+    "label": "Quality measures",
+    "body": "5\ngood",
+    "avg": "state average 4.5"
+   },
+   {
+    "label": "Staffing",
+    "body": "1\npoor\nfn 25",
+    "avg": "state average 2.9"
+   }
+  ],
+  "statCards": [
+   {
+    "label": "Short-stay residents rehospitalized (QM 521)",
+    "value": "23.7%",
+    "note": "AZ average 23.7% · nation 23.8% · 0.1 pts worse than state",
+    "tone": "rgb(220, 104, 3)",
+    "how": "Risk-adjusted. Calendar 2025. From CMS file “NH QualityMsr Claims”, column “Adjusted Score”: row where Measure Code = 521.",
+    "source": "CMS"
+   },
+   {
+    "label": "Potentially preventable readmissions within 30 days of SNF discharge (QRP 004)",
+    "value": "10.9%",
+    "note": "nation 10.7%",
+    "tone": "rgb(220, 104, 3)",
+    "how": "Risk-standardized. National figure is the unadjusted average. From CMS file “Skilled Nursing Facility Quality Reporting Program Provider Data”, column “Score”: row where Measure Code = S_004_01_PPR_PD_RSRR ('Not Available' → blank).",
+    "source": "CMS"
+   },
+   {
+    "label": "Harm or jeopardy deficiencies (G–L), three cycles",
+    "value": "1",
+    "note": "CMS\nHow this is calculated",
+    "tone": null,
+    "how": "From CMS file “NH HealthCitations”, column “(aggregate)”: count of rows with Scope Severity Code in G,H,I,J,K,L.",
+    "source": "CMS"
+   },
+   {
+    "label": "Total fines",
+    "value": "$0",
+    "note": "AZ average $8,928 · nation $30,972 · $8,928 better than state",
+    "tone": "var(--color-q5)",
+    "how": "From CMS file “NH Penalties”, column “(aggregate)”: sum of Fine Amount where Penalty Type = Fine.",
+    "source": "CMS"
+   }
+  ],
+  "m521": [
+   "Short-stay residents rehospitalized (QM 521)\nRisk-adjusted. Calendar 2025.",
+   "23.7%",
+   "",
+   "State avg 23.7% · Nation 23.8%\n0.1 pts worse than state"
+  ],
+  "mStaff": [
+   "Total nurse hours per resident-day",
+   "fn 25",
+   "",
+   "State avg 3.98 · Nation 3.86"
+  ],
+  "m004": [
+   "Potentially preventable readmissions within 30 days of SNF discharge (QRP 004)\nRisk-standardized. National figure is the unadjusted average.",
+   "10.9%",
+   "",
+   "Nation 10.7%\nNo Different than the National Rate\n94 eligible stays"
+  ],
+  "mFines": [
+   "Total fines",
+   "$0",
+   "",
+   "State avg $8,928 · Nation $30,972\n$8,928 better than state"
+  ],
+  "errors": []
+ },
+ "055906": {
+  "h1": "Rinaldi Convalescent Hospital",
+  "snapshot": "Rinaldi Convalescent Hospital is a 1-star (poor), 99-bed for profit nursing home in Granada Hills, CA. 22.9% of its short-stay residents were rehospitalized, the same as the CA average of 23.0%. After discharge from this facility, 11.1% of Medicare stays had a potentially preventable readmission within 30 days (nation 10.7%). Over the last three inspection cycles CMS recorded 2 harm-or-jeopardy deficiencies and $0 in fines. Nurses provide 4.06 hours per resident-day, worse than the state average of 4.52.",
+  "pecos": "Medicare enrollment (PECOS, 2026-09-29): enrolled as Kf Rinaldi LLC doing business as Rinaldi Convalescent Hospital; CMS affiliation entity Cambridge Healthcare Services; proprietary; no change of ownership recorded since 2016.",
+  "ownIntro": "Ownership interests, operational/managerial control and partnership roles as reported to CMS; officers, directors, managing employees and lenders are in the workbook's Ownership sheet. Legal business name: Kf Rinaldi LLC.",
+  "starCards": [
+   {
+    "label": "Overall rating",
+    "body": "1\npoor",
+    "avg": "state average 3.2"
+   },
+   {
+    "label": "Health inspection",
+    "body": "1\npoor",
+    "avg": "state average 2.8"
+   },
+   {
+    "label": "Quality measures",
+    "body": "3\naverage",
+    "avg": "state average 4.1"
+   },
+   {
+    "label": "Staffing",
+    "body": "3\naverage",
+    "avg": "state average 3.3"
+   }
+  ],
+  "statCards": [
+   {
+    "label": "Short-stay residents rehospitalized (QM 521)",
+    "value": "22.9%",
+    "note": "CA average 23.0% · nation 23.8% · about the same as state",
+    "tone": "rgb(220, 104, 3)",
+    "how": "Risk-adjusted. Calendar 2025. From CMS file “NH QualityMsr Claims”, column “Adjusted Score”: row where Measure Code = 521.",
+    "source": "CMS"
+   },
+   {
+    "label": "Potentially preventable readmissions within 30 days of SNF discharge (QRP 004)",
+    "value": "11.1%",
+    "note": "nation 10.7%",
+    "tone": "rgb(220, 104, 3)",
+    "how": "Risk-standardized. National figure is the unadjusted average. From CMS file “Skilled Nursing Facility Quality Reporting Program Provider Data”, column “Score”: row where Measure Code = S_004_01_PPR_PD_RSRR ('Not Available' → blank).",
+    "source": "CMS"
+   },
+   {
+    "label": "Harm or jeopardy deficiencies (G–L), three cycles",
+    "value": "2",
+    "note": "CMS\nHow this is calculated",
+    "tone": null,
+    "how": "From CMS file “NH HealthCitations”, column “(aggregate)”: count of rows with Scope Severity Code in G,H,I,J,K,L.",
+    "source": "CMS"
+   },
+   {
+    "label": "Total fines",
+    "value": "$0",
+    "note": "CA average $23,986 · nation $30,972 · $23,986 better than state",
+    "tone": "var(--color-q5)",
+    "how": "From CMS file “NH Penalties”, column “(aggregate)”: sum of Fine Amount where Penalty Type = Fine.",
+    "source": "CMS"
+   }
+  ],
+  "m521": [
+   "Short-stay residents rehospitalized (QM 521)\nRisk-adjusted. Calendar 2025.",
+   "22.9%",
+   "",
+   "State avg 23.0% · Nation 23.8%\nabout the same as state"
+  ],
+  "mStaff": [
+   "Total nurse hours per resident-day",
+   "4.06",
+   "",
+   "State avg 4.52 · Nation 3.86\n0.45 worse than state"
+  ],
+  "m004": [
+   "Potentially preventable readmissions within 30 days of SNF discharge (QRP 004)\nRisk-standardized. National figure is the unadjusted average.",
+   "11.1%",
+   "",
+   "Nation 10.7%\nNo Different than the National Rate\n154 eligible stays"
+  ],
+  "mFines": [
+   "Total fines",
+   "$0",
+   "",
+   "State avg $23,986 · Nation $30,972\n$23,986 better than state"
+  ],
+  "errors": []
+ }
+}

@@ -1,0 +1,225 @@
+{
+ "110230": {
+  "h1": "Emory Johns Creek Hospital",
+  "owners": "Owned by Bain Capital Fund Ix Lp, Bain Capital Ix Coinvestment Fund Lp, Bank of America Corporation, Ehca LLC, Emory Healthcare Inc and Hca Inc · PECOS, 5%-or-greater interests",
+  "system": "Part of Hca Healthcare Inc (156 hospitals): SNFs serving its GA hospitals (6) or all with service-area data (153)",
+  "systemLinks": [
+   {
+    "text": "GA hospitals (6)",
+    "href": "/explore?h=110003,110036,110125,110128,110177,110230",
+    "exploreCount": "144",
+    "exploreSub": "144 facilities · in the service area of 6 hospitals (modeled)"
+   },
+   {
+    "text": "all with service-area data (153)",
+    "href": "/explore?h=020017,050022,050380,050549,060014,060032,060034,060065,060100,060112,100023,100049,100054,100080,100107,100110,100131,100156,100161,100166,100167,100179,100180,100189,100191,100204,100206,100209,100212,100213,100223,100224,100226,100228,100231,100232,100236,100238,100242,100243,100246,100248,100252,100254,100256,100259,100260,100264,100267,100269,100320,100329,100350,100360,110003,110036,110125,110128,110177,110230,130014,130018,170123,170176,170182,180124,180127,190026,260027,260095,260190,260214,261320,340002,340087,341316,341319,341326,341329,300014,300017,300029,300034,290003,290039,290047,420030,420079,420085,440006,440046,440065,440150,440156,440161,440194,440197,440227,444029,450087,450097,450107,450165,450203,450222,450388,450403,450431,450604,450617,450634,450638,450644,450647,450651,450659,450662,450669,450670,450672,450675,450711,450713,450718,450775,450788,450804,450809,450822,454079,454094,454161,670055,670103,670106,460005,460013,460017,460042,460047,460052,460054,460060,490020,490048,490107,490110,490112,490116,490118,490126,490141,490145",
+    "exploreCount": "3,111",
+    "exploreSub": "3,111 facilities · in the service area of 153 hospitals (modeled)"
+   }
+  ],
+  "sentence": "In 2025, 3,997 Medicare inpatient cases at Emory Johns Creek Hospital came from 41 ZIP codes that each sent 11 or more patients. Those ZIP codes contain 23 nursing homes. Weighting them by where the hospital's patients live and by each facility's Medicare volume, 76% of that modeled SNF volume sits in 4–5★ facilities, 6% in 3★, and 18% in 1–2★.",
+  "cards": [
+   {
+    "label": "Hospital overall rating",
+    "value": "4",
+    "note": "CMS Care Compare, 2026"
+   },
+   {
+    "label": "Medicare inpatient discharges, 2024",
+    "value": "2,313",
+    "note": "1,710 beneficiaries · $24,447,556 Medicare paid"
+   },
+   {
+    "label": "Readmission measures vs. national",
+    "value": "2 / 6 / 0",
+    "note": "better / same / worse"
+   },
+   {
+    "label": "SNF spending in the 30 days after discharge",
+    "value": "$2,320\nper episode",
+    "note": "National $4,194 · 9.8% of the episode (national 15.3%)"
+   },
+   {
+    "label": "Modeled SNF volume in 4–5★ facilities",
+    "value": "76%",
+    "note": "7 facilities"
+   },
+   {
+    "label": "In 3★ facilities",
+    "value": "6%",
+    "note": "4 facilities"
+   },
+   {
+    "label": "In 1–2★ facilities",
+    "value": "18%",
+    "note": "12 facilities"
+   },
+   {
+    "label": "Volume-weighted facility measures",
+    "value": "4.02★",
+    "note": "Rehospitalized 24.4% · readmitted after SNF 10.9% · to community 67.4%"
+   }
+  ],
+  "snfHdr": "Nursing homes in the service area · 23",
+  "errors": []
+ },
+ "210009": {
+  "h1": "The Johns Hopkins Hospital",
+  "owners": "Owned by The Johns Hopkins Health System Corporation · PECOS, 5%-or-greater interests",
+  "system": "Part of The Johns Hopkins Health System Corporation (7 hospitals): SNFs serving its MD hospitals (4) or all with service-area data (5)",
+  "systemLinks": [
+   {
+    "text": "MD hospitals (4)",
+    "href": "/explore?h=210009,210022,210029,210048",
+    "exploreCount": "226",
+    "exploreSub": "226 facilities · in the service area of 4 hospitals (modeled)"
+   },
+   {
+    "text": "all with service-area data (5)",
+    "href": "/explore?h=090005,210009,210022,210029,210048",
+    "exploreCount": "235",
+    "exploreSub": "235 facilities · in the service area of 5 hospitals (modeled)"
+   }
+  ],
+  "sentence": "In 2025, 10,834 Medicare inpatient cases at The Johns Hopkins Hospital came from 200 ZIP codes that each sent 11 or more patients. Those ZIP codes contain 209 nursing homes. Weighting them by where the hospital's patients live and by each facility's Medicare volume, 43% of that modeled SNF volume sits in 4–5★ facilities, 19% in 3★, and 38% in 1–2★.",
+  "cards": [
+   {
+    "label": "Hospital overall rating",
+    "value": "5",
+    "note": "CMS Care Compare, 2026"
+   },
+   {
+    "label": "Medicare inpatient discharges, 2024",
+    "value": "10,157",
+    "note": "7,404 beneficiaries · $428,579,020 Medicare paid"
+   },
+   {
+    "label": "Readmission measures vs. national",
+    "value": "1 / 6 / 3",
+    "note": "better / same / worse"
+   },
+   {
+    "label": "SNF spending in the 30 days after discharge",
+    "value": "–",
+    "note": "Not reported by CMS for this hospital"
+   },
+   {
+    "label": "Modeled SNF volume in 4–5★ facilities",
+    "value": "43%",
+    "note": "94 facilities"
+   },
+   {
+    "label": "In 3★ facilities",
+    "value": "19%",
+    "note": "42 facilities"
+   },
+   {
+    "label": "In 1–2★ facilities",
+    "value": "38%",
+    "note": "71 facilities"
+   },
+   {
+    "label": "Volume-weighted facility measures",
+    "value": "3.18★",
+    "note": "Rehospitalized 21.2% · readmitted after SNF 11.7% · to community 56.0%"
+   }
+  ],
+  "snfHdr": "Nursing homes in the service area · 209",
+  "errors": []
+ },
+ "330101": {
+  "h1": "New York-Presbyterian Hospital",
+  "owners": null,
+  "system": null,
+  "systemLinks": [],
+  "sentence": "In 2025, 53,585 Medicare inpatient cases at New York-Presbyterian Hospital came from 399 ZIP codes that each sent 11 or more patients. Those ZIP codes contain 378 nursing homes. Weighting them by where the hospital's patients live and by each facility's Medicare volume, 55% of that modeled SNF volume sits in 4–5★ facilities, 23% in 3★, and 21% in 1–2★.",
+  "cards": [
+   {
+    "label": "Hospital overall rating",
+    "value": "5",
+    "note": "CMS Care Compare, 2026"
+   },
+   {
+    "label": "Medicare inpatient discharges, 2024",
+    "value": "29,042",
+    "note": "20,730 beneficiaries · $865,432,639 Medicare paid"
+   },
+   {
+    "label": "Readmission measures vs. national",
+    "value": "3 / 6 / 2",
+    "note": "better / same / worse"
+   },
+   {
+    "label": "SNF spending in the 30 days after discharge",
+    "value": "$4,964\nper episode",
+    "note": "National $4,194 · 16.5% of the episode (national 15.3%)"
+   },
+   {
+    "label": "Modeled SNF volume in 4–5★ facilities",
+    "value": "55%",
+    "note": "179 facilities"
+   },
+   {
+    "label": "In 3★ facilities",
+    "value": "23%",
+    "note": "88 facilities"
+   },
+   {
+    "label": "In 1–2★ facilities",
+    "value": "21%",
+    "note": "110 facilities"
+   },
+   {
+    "label": "Volume-weighted facility measures",
+    "value": "3.68★",
+    "note": "Rehospitalized 20.5% · readmitted after SNF 9.9% · to community 46.7%"
+   }
+  ],
+  "snfHdr": "Nursing homes in the service area · 378",
+  "errors": []
+ },
+ "014000": {
+  "h1": "Hill Crest Behavioral Health Services",
+  "owners": "Owned by Premier Behavioral Solutions, Inc. (indirect), Psychiatric Solutions, Inc. (indirect) and Universal Health Services (indirect) · PECOS, 5%-or-greater interests",
+  "system": "Part of Universal Health Services Inc (141 hospitals): SNFs serving its AL hospitals (0) or all with service-area data (77)",
+  "systemLinks": [
+   {
+    "text": "AL hospitals (0)",
+    "href": "/explore?h=",
+    "exploreCount": "14,690",
+    "exploreSub": "14,690 facilities"
+   },
+   {
+    "text": "all with service-area data (77)",
+    "href": "/explore?h=024001,034026,034030,050204,050329,050701,050775,054053,054087,054104,054110,054111,054160,090001,094004,084002,084004,100035,100275,100299,104017,104026,104069,104071,104072,104076,104080,104082,110209,134002,144009,154041,154051,184007,184009,184012,194020,224013,224021,224023,264034,344007,344014,354004,324010,290021,290032,290041,290046,290054,290057,290062,291311,364029,370026,384012,394008,394034,394055,404004,420082,424002,424010,444004,450092,450119,450209,450324,450643,454012,454104,454109,454152,494025,504002,504014,534004",
+    "exploreCount": "633",
+    "exploreSub": "633 facilities · in the service area of 77 hospitals (modeled)"
+   }
+  ],
+  "sentence": "CMS publishes no service-area rows with 11 or more cases for this hospital, so the service-area view is not available.",
+  "cards": [
+   {
+    "label": "Hospital overall rating",
+    "value": "–",
+    "note": "fn 19"
+   },
+   {
+    "label": "Medicare inpatient discharges, 2024",
+    "value": "–",
+    "note": "Not in the 2024 inpatient file"
+   },
+   {
+    "label": "Readmission measures vs. national",
+    "value": "–",
+    "note": "better / same / worse"
+   },
+   {
+    "label": "SNF spending in the 30 days after discharge",
+    "value": "–",
+    "note": "Not reported by CMS for this hospital"
+   }
+  ],
+  "snfHdr": "Nursing homes in the service area · 0",
+  "errors": []
+ }
+}

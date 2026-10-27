@@ -1,0 +1,18 @@
+const { chromium } = require('@playwright/test')
+const BASE = process.env.BASE || 'http://localhost:4180'
+;(async () => {
+  const b = await chromium.launch(); const page = await b.newPage({ viewport: { width: 1440, height: 900 } })
+  await page.goto(`${BASE}/explore`); await page.waitForSelector('[data-testid=result-count]', { timeout: 120000 })
+  const aside = page.locator('aside[aria-label=Filters]')
+  await aside.getByRole('radio', { name: 'System' }).click()
+  await aside.getByRole('combobox', { name: 'Find a hospital system' }).fill('johns hopkins'); await page.waitForSelector('#hosp-results'); await page.waitForTimeout(400)
+  await page.locator('#hosp-results li button').first().click(); await page.waitForTimeout(300)
+  await page.locator('[data-testid=system-states] [role=group] button', { hasText: /^FL / }).click()
+  await page.mouse.move(1000, 800); await page.waitForTimeout(1500)
+  const s = await page.locator('[data-testid=system-states] [role=group] button').evaluateAll(bs => bs.map(x => { const c = getComputedStyle(x); return { t: x.innerText, pressed: x.getAttribute('aria-pressed'), color: c.color, bg: c.backgroundColor, transition: c.transitionProperty + ' ' + c.transitionDuration } }))
+  console.log(JSON.stringify(s, null, 1))
+  const css = await page.evaluate(() => { const out = []; for (const sh of document.styleSheets) { try { for (const r of sh.cssRules) { if (/\.press\b/.test(r.cssText) || /--color-accent|--color-ink-2|--color-surface|--color-well/.test(r.cssText.slice(0, 2000))) out.push(r.cssText.slice(0, 600)) } } catch {} } return out.slice(0, 8) })
+  console.log(css.join('\n---\n'))
+  await page.locator('[data-testid=system-states]').screenshot({ path: '../screenshots/redteam5-explore-system-chips-zoom.png' })
+  await b.close()
+})()

@@ -186,14 +186,14 @@ export default function Facility() {
       </div>
 
       <div className="mt-3 grid grid-cols-2 md:grid-cols-4 gap-3">
-        {(['qm_521_adj', 'qrp_004_ppr_pd_rsrr', 'hc_n_severity_G_or_worse', 'pen_total_fines_usd'] as const).map(k => {
+        {([['qm_521_adj', 'Short-stay residents rehospitalized'], ['qrp_004_ppr_pd_rsrr', 'Readmitted within 30 days of SNF discharge'], ['hc_n_severity_G_or_worse', 'Harm or jeopardy deficiencies, 3 cycles'], ['pen_total_fines_usd', 'Fines, 3 years']] as const).map(([k, cardLabel]) => {
           const m = measure(k); const v = num(row[k]); const fn = m.fn ? row[m.fn] : null
           const sa = m.state ? ref?.stateAvg[state]?.[m.state] ?? null : null
           const na = m.national ? ref?.national[m.national] ?? null : m.state ? ref?.stateAvg['NATION']?.[m.state] ?? null : null
           const cmp = sa ?? na
-          return <Stat key={k} label={m.label} value={v == null ? <span className="text-ink-3">{fn ? <Fn code={fn} ref={ref} /> : '–'}</span> : fmt(v, m.unit, m.decimals)} source="CMS" tone={tone(v, cmp, m)}
+          return <Stat key={k} label={cardLabel} value={v == null ? <span className="text-ink-3">{fn ? <Fn code={fn} ref={ref} /> : '–'}</span> : fmt(v, m.unit, m.decimals)} source="CMS" tone={tone(v, cmp, m)}
             note={cmp != null ? <>{sa != null ? `${state} average ${avg(sa, m)}` : ''}{sa != null && na != null ? ' · ' : ''}{na != null ? `nation ${avg(na, m)}` : ''}{v != null && sa != null ? <> · <Delta value={v} cmp={sa} m={m} /></> : null}</> : m.note}
-            how={howText(k, ref, m)} />
+            how={<>{m.label}. {howText(k, ref, m)}</>} />
         })}
       </div>
 
