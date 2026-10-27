@@ -1,0 +1,3 @@
+hospital_ccn,hospital_name,snf_ccn,period_start,period_end,n_discharges
+210009,JHH,215024,2025-01-01,2025-12-31,1e2
+210009,JHH,215031,2025-01-01,2025-12-31,0x10

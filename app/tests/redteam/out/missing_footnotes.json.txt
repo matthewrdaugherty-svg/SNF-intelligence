@@ -1,0 +1,278 @@
+SNF Intelligence
+Explore
+Map
+Compare
+Discharge flows
+Methodology & trust
+Explore / MD
+Carroll Park Healthcare
+3330 Wilkens Avenue, Baltimore, MD 21229 · Baltimore City County · CCN 215085
+For profit - Limited Liability company · 140 certified beds · 95.8 residents per day · Engage Healthcare (5 facilities) · Medicare and Medicaid · certified since 1972
+Abuse icon
+Add to compare
+Open on Medicare Care Compare
+Overall rating
+2
+Health inspection
+2
+Quality measures
+4
+Staffing
+2
+Star ratings
+
+CMS Five-Star ratings. Health inspection stars are relative within each state.
+
+Measure
+This facility
+Dot = facility · tall mark = state · short mark = nation
+Comparison
+Long-stay quality measures
+3
+Short-stay quality measures
+5
+Staffing
+2
+Hospital and ED use
+
+Claims-based. These are the measures closest to what a discharging hospital cares about.
+
+Measure
+This facility
+Dot = facility · tall mark = state · short mark = nation
+Comparison
+Short-stay residents rehospitalized (QM 521)
+Risk-adjusted. Calendar 2025.
+20.2%
+Short-stay residents with an outpatient ED visit (QM 522)
+4.8%
+Long-stay hospitalizations per 1,000 resident-days (QM 551)
+0.78
+Long-stay ED visits per 1,000 resident-days (QM 552)
+1.84
+SNF Quality Reporting Program
+
+Medicare Part A stays. Readmission, discharge-to-community and spending cover Oct 2022–Sep 2024; the rest Oct 2024–Sep 2025.
+
+Measure
+This facility
+Dot = facility · tall mark = state · short mark = nation
+Comparison
+Potentially preventable readmissions within 30 days of SNF discharge (QRP 004)
+Risk-standardized. National figure is the unadjusted average.
+11.6%
+No Different than the National Rate
+72 eligible stays
+Successful discharge to community (QRP 005)
+Risk-standardized. National figure is the observed rate.
+38.0%
+Worse than the National Rate
+70 eligible stays
+Medicare spending per beneficiary, ratio to national (QRP 006)
+1.13
+62 eligible stays
+Infections acquired in the SNF that led to hospitalization (QRP 039)
+fn 9
+22 eligible stays
+Falls with major injury (QRP 013)
+0.0%
+New or worsened pressure ulcers (QRP 038)
+Facility value is adjusted; national is observed.
+2.7%
+At or above expected self-care and mobility at discharge (QRP 042)
+fn 9
+Self-care goal met at discharge (QRP 024)
+fn 9
+Mobility goal met at discharge (QRP 025)
+fn 9
+Medication list given to next provider (QRP 043)
+fn 9
+Medication list given to patient or family (QRP 044)
+fn 9
+Drug regimen reviewed with follow-up (QRP 007)
+48.5%
+Staff up to date on COVID vaccine (QRP 040)
+4.3%
+Staff flu vaccination (QRP 041)
+fn 10
+Residents up to date on COVID vaccine (QRP 045)
+3.0%
+SNF Value-Based Purchasing, FY2026
+
+CMS withholds 2% of Medicare Part A payments and pays back 60% of the pool by performance. A multiplier below 1.0 is a net cut; the floor is 0.980322.
+
+Measure
+This facility
+Dot = facility · tall mark = state · short mark = nation
+Comparison
+Program ranking (1 = best of 13,900)
+#9,584
+Performance score (0–100)
+23.2
+Incentive payment multiplier
+0.9831
+Net Part A payment change (derived: multiplier − 1)
+Our arithmetic, not a CMS value.
+-1.69%
+FY2024 risk-standardized readmission rate (SNFRM)
+Case minimum not met - not reported
+FY2024 risk-standardized infection rate
+Case minimum not met - not reported
+FY2024 total nursing staff turnover
+0.5804
+FY2024 adjusted nurse hours per resident-day
+3.90
+Inspections, penalties and complaints
+
+Everything CMS publishes for the last three inspection cycles (about three years). Zero means none in the window.
+
+Measure
+This facility
+Dot = facility · tall mark = state · short mark = nation
+Comparison
+Health deficiencies, most recent standard inspection cycle
+17
+Health deficiencies, all three cycles
+81
+Actual-harm deficiencies (severity G–I)
+0
+Immediate-jeopardy deficiencies (severity J–L)
+4
+Abuse, neglect or exploitation deficiencies
+9
+Deficiencies found on complaint inspections
+44
+Complaint-inspection deficiencies, last 12 months
+12
+Complaint inspections with citations, last 12 months
+4
+Infection-control inspection deficiencies
+0
+Fire safety deficiencies, three cycles
+29
+Fines
+1
+Total fines
+$306,550
+Fines, last 12 months
+$0
+Medicare payment denials
+1
+Payment denial days
+83
+Weighted health survey score (feeds the health-inspection stars)
+151.8
+Penalties · 2
+2023-11-20	Fine	$306,550
+2023-11-20	Payment Denial	83 days from 2024-02-20
+Deficiencies at severity G or worse · 4
+2023-11-20
+Severity K
+Tag 0689
+complaint
+Deficient, Provider has date of correction
+Ensure that a nursing home area is free from accident hazards and provides adequate supervision to prevent accidents.
+2023-11-20
+Severity K
+Tag 0867
+Deficient, Provider has date of correction
+Set up an ongoing quality assessment and assurance group to review quality deficiencies and develop corrective plans of action.
+2023-11-20
+Severity J
+Tag 0678
+Deficient, Provider has date of correction
+Provide basic life support, including CPR, prior to the arrival of emergency medical personnel , subject to physician orders and the resident’s advance directives.
+2023-11-20
+Severity J
+Tag 0740
+complaint
+Deficient, Provider has date of correction
+Ensure each resident must receive and the facility must provide necessary behavioral health care and services.
+Staffing
+
+From Payroll-Based Journal submissions, Jan–Mar 2026; turnover covers calendar 2025.
+
+Measure
+This facility
+Dot = facility · tall mark = state · short mark = nation
+Comparison
+Total nurse hours per resident-day
+3.32
+RN hours per resident-day
+0.57
+Total nurse hours per resident-day, case-mix adjusted
+3.31
+Weekend total nurse hours per resident-day
+3.05
+Physical therapist hours per resident-day
+0.05
+Total nursing staff turnover
+49.4%
+RN turnover
+53.8%
+Administrators who left
+0
+Nursing case-mix index (resident acuity)
+1.40
+Short-stay residents (MDS)
+
+Facility-reported assessments, Apr 2025–Mar 2026 (flu vaccine: Jul 2024–Jun 2025).
+
+Measure
+This facility
+Dot = facility · tall mark = state · short mark = nation
+Comparison
+Newly received an antipsychotic (QM 434)
+0.0%
+Pneumococcal vaccine given (QM 430)
+34.3%
+Flu vaccine given (QM 472)
+43.8%
+Long-stay residents (MDS)
+
+Facility-reported assessments, Apr 2025–Mar 2026 (flu vaccine: Jul 2024–Jun 2025).
+
+Measure
+This facility
+Dot = facility · tall mark = state · short mark = nation
+Comparison
+Need for help with daily activities increased (QM 401)
+37.5%
+Falls with major injury (QM 410)
+2.6%
+Pressure ulcers (QM 479)
+8.8%
+Received an antipsychotic (QM 481)
+7.6%
+Received an antianxiety or hypnotic (QM 452)
+17.9%
+Urinary tract infection (QM 407)
+0.0%
+Catheter left in bladder (QM 406)
+0.3%
+Ability to walk worsened (QM 451)
+38.0%
+New or worsened incontinence (QM 480)
+27.9%
+Lost too much weight (QM 404)
+0.3%
+Depressive symptoms (QM 408)
+44.6%
+Physically restrained (QM 409)
+0.0%
+Pneumococcal vaccine given (QM 415)
+84.9%
+Flu vaccine given (QM 454)
+87.0%
+Ownership and control
+
+As reported to CMS. Legal business name: Gwynnfalls Md Opco.
+
+5% Or Greater Direct Ownership Interest
+Gwynnfalls Md Holdco LLC · 100% · since 2023-08-01
+5% Or Greater Indirect Ownership Interest
+Lighten, Jake · 50% · since 2023-08-01
+Paneth, Jack · 50% · since 2023-08-01
+Operational/Managerial Control
+Lighten, Jake · since 2023-08-01
+Data as of . Blank values carry CMS's footnote. State and national figures are the simple averages CMS publishes. “Better/worse” follows our reading of each measure's direction; see Methodology.

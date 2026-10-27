@@ -8,10 +8,10 @@ export default function About() {
   if (!ref) return <div className="p-8 text-sm text-ink-2">Loading…</div>
   const tabs = [['overview', 'Overview'], ['measures', 'Measures and direction'], ['lineage', 'Column lineage'], ['footnotes', 'Footnote codes'], ['limits', 'Limitations'], ['checks', 'Verification']] as const
   return (
-    <div className="max-w-5xl mx-auto px-6 py-6">
+    <div className="max-w-5xl mx-auto px-4 md:px-6 py-6">
       <h1 className="text-xl font-semibold tracking-tight">Methodology & trust</h1>
       <p className="text-sm text-ink-2 mt-1 max-w-3xl">Every number in this app comes from a CMS file, unchanged, or from a count or sum of CMS rows whose rule is written down here. Nothing is estimated or filled in. Where CMS suppressed a value, it is blank and carries CMS's footnote.</p>
-      <div className="flex gap-1 mt-5 border-b border-hairline">
+      <div className="flex gap-1 mt-5 border-b border-hairline overflow-x-auto whitespace-nowrap">
         {tabs.map(([k, l]) => <button key={k} onClick={() => setTab(k)} className={`press px-3 py-2 text-sm -mb-px border-b-2 ${tab === k ? 'border-ink text-ink font-medium' : 'border-transparent text-ink-2 hover:text-ink'}`}>{l}</button>)}
       </div>
 
@@ -24,7 +24,7 @@ export default function About() {
           <div className="text-ink-2">Severity letters</div><div>CMS scope-and-severity grid A–L. We label G–I “actual harm” and J–L “immediate jeopardy”. The CMS data dictionary confirms “G or greater” means harm; the full grid is defined in the CMS Five-Star Technical Users' Guide, which this project has not yet independently fetched.</div>
           <div className="text-ink-2">Derived columns</div><div>Only one: the VBP net Part A payment change, which is (incentive multiplier − 1) × 100. It is labelled “derived” wherever it appears.</div>
           <div className="text-ink-2">What is not here</div><div>Hospital-to-SNF discharge flows (CMS does not publish them), dollar costs, payer mix, complaints filed or substantiated. See Limitations.</div>
-          <div className="text-ink-2">Built</div><div>{ref.meta.built}. The database runs inside your browser; filters and searches never leave your machine.</div>
+          <div className="text-ink-2">Built</div><div>{ref.meta.built}. The database runs inside your browser, so filters, searches and anything you upload on Discharge flows stay on your machine (uploads are kept in this browser's storage until you remove them). Two optional features contact outside services: the place lookup sends the address you type to OpenStreetMap's Nominatim service, and the Map loads its street basemap from OpenFreeMap.</div>
         </div>
       )}
 

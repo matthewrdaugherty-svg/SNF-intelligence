@@ -1,0 +1,42 @@
+checked 1673 values across 8 facilities; 40 findings
+Counter({'UX': 16, 'DISPLAY': 15, 'SCOPE': 8, 'MISMATCH': 1})
+DISPLAY | 215085 | pen_n_fines delta rounds to zero but says worse | diff +0.4000 → should read "about the same" | 0 worse than state
+DISPLAY | 215085 | qm_409_4q delta rounds to zero but says better | diff -0.0442 → should read "about the same" | 0.0% better than state
+MISMATCH | 215085 | G-L citation rows | [('2023-11-20', 'Severity J', 'Tag 0678', 'Provide basic life support, including CPR, prior to the arrival of emergency medical personnel , subject to physician orders and the resident’s advance directives.'), ('2023-11-20', 'Severity J', 'Tag 0740', 'Ensure each resident must receive and the facility must provide necessary behavioral health care and services.'), ('2023-11-20', 'Severity K', 'Tag 0689', 'Ensure that a nursing home area is free from accident hazards and provides adequate supervision to prevent accidents.')] | [('2023-11-20', 'Severity J', 'Tag 0678', 'Provide basic life support, including CPR, prior to the arrival of emergency medical personnel , subject to physician orders and the resident’s advance directives.'), ('2023-11-20', 'Severity J', 'Tag 0740', 'Ensure each resident must receive and the facility must provide necessary behavioral health care and services.'), ('2023-11-20', 'Severity K', 'Tag 0689', 'Ensure that a nursing home area is free from accident hazards and provides adequate supervision to prevent accidents.')]
+SCOPE | 215085 | ownership roles in CMS file not shown on the page | [('W-2 MANAGING EMPLOYEE', 1)] | (omitted)
+DISPLAY | 215353 | qm_409_4q delta rounds to zero but says better | diff -0.0442 → should read "about the same" | 0.0% better than state
+SCOPE | 215353 | ownership roles in CMS file not shown on the page | [('CORPORATE DIRECTOR', 15), ('CORPORATE OFFICER', 4), ('ADP OF THE SNF', 17)] | (omitted)
+UX | 15A011 | vbp_ranking blank with NO footnote/explanation | a reason for the blank | ''
+UX | 15A011 | vbp_performance_score blank with NO footnote/explanation | a reason for the blank | ''
+UX | 15A011 | vbp_incentive_multiplier blank with NO footnote/explanation | a reason for the blank | ''
+UX | 15A011 | x_vbp_net_part_a_payment_change_pct blank with NO footnote/explanation | a reason for the blank | ''
+UX | 15A011 | vbp_fy24_rsrr blank with NO footnote/explanation | a reason for the blank | ''
+UX | 15A011 | vbp_fy24_hai_rate blank with NO footnote/explanation | a reason for the blank | ''
+UX | 15A011 | vbp_fy24_turnover blank with NO footnote/explanation | a reason for the blank | ''
+UX | 15A011 | vbp_fy24_adj_nurse_hprd blank with NO footnote/explanation | a reason for the blank | ''
+DISPLAY | 15A011 | pen_n_fines delta rounds to zero but says better | diff -0.3000 → should read "about the same" | 0 better than state
+DISPLAY | 15A011 | qm_407_4q delta rounds to zero but says worse | diff +0.0227 → should read "about the same" | 0.0% worse than state
+DISPLAY | 15A011 | qm_406_4q delta rounds to zero but says worse | diff +0.0181 → should read "about the same" | 0.0% worse than state
+DISPLAY | 15A011 | qm_409_4q delta rounds to zero but says better | diff -0.0422 → should read "about the same" | 0.0% better than state
+SCOPE | 15A011 | ownership roles in CMS file not shown on the page | [('Ownership Data Not Available', 1)] | (omitted)
+DISPLAY | 675879 | reported_physical_therapist_staffing_hours_per_resident_per_day delta rounds to zero but says worse | diff -0.0024 → should read "about the same" | 0.00 worse than state
+SCOPE | 675879 | ownership roles in CMS file not shown on the page | [('W-2 MANAGING EMPLOYEE', 1), ('CORPORATE OFFICER', 1)] | (omitted)
+DISPLAY | 155383 | pen_n_fines delta rounds to zero but says better | diff -0.3000 → should read "about the same" | 0 better than state
+DISPLAY | 155383 | qm_409_4q delta rounds to zero but says better | diff -0.0422 → should read "about the same" | 0.0% better than state
+SCOPE | 155383 | ownership roles in CMS file not shown on the page | [('CORPORATE OFFICER', 1), ('ADP OF THE SNF', 5)] | (omitted)
+UX | 435092 | vbp_ranking blank with NO footnote/explanation | a reason for the blank | ''
+UX | 435092 | vbp_performance_score blank with NO footnote/explanation | a reason for the blank | ''
+UX | 435092 | vbp_incentive_multiplier blank with NO footnote/explanation | a reason for the blank | ''
+UX | 435092 | x_vbp_net_part_a_payment_change_pct blank with NO footnote/explanation | a reason for the blank | ''
+UX | 435092 | vbp_fy24_rsrr blank with NO footnote/explanation | a reason for the blank | ''
+UX | 435092 | vbp_fy24_hai_rate blank with NO footnote/explanation | a reason for the blank | ''
+UX | 435092 | vbp_fy24_turnover blank with NO footnote/explanation | a reason for the blank | ''
+UX | 435092 | vbp_fy24_adj_nurse_hprd blank with NO footnote/explanation | a reason for the blank | ''
+DISPLAY | 435092 | number_of_administrators_who_have_left_the_nursing_home delta rounds to zero but says better | diff -0.3000 → should read "about the same" | 0 better than state
+DISPLAY | 435092 | qm_409_4q delta rounds to zero but says better | diff -0.0245 → should read "about the same" | 0.0% better than state
+SCOPE | 435092 | ownership roles in CMS file not shown on the page | [('CORPORATE DIRECTOR', 1), ('CONTRACTED MANAGING EMPLOYEE', 1)] | (omitted)
+DISPLAY | 245600 | pen_n_fines delta rounds to zero but says worse | diff +0.2000 → should read "about the same" | 0 worse than state
+DISPLAY | 245600 | qm_410_4q delta rounds to zero but says worse | diff +0.0263 → should read "about the same" | 0.0% worse than state
+SCOPE | 245600 | ownership roles in CMS file not shown on the page | [('CORPORATE DIRECTOR', 15), ('CORPORATE OFFICER', 5), ('INDIVIDUAL IS AN OWNER, PARTNER OR TRUSTEE OF ANY ADP OF THE SNF', 1), ('ADP OF THE SNF', 28)] | (omitted)
+DISPLAY | 335216 | number_of_administrators_who_have_left_the_nursing_home delta rounds to zero but says better | diff -0.4000 → should read "about the same" | 0 better than state
+SCOPE | 335216 | ownership roles in CMS file not shown on the page | [('W-2 MANAGING EMPLOYEE', 1), ('CORPORATE OFFICER', 1)] | (omitted)

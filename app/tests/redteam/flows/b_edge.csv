@@ -1,0 +1,10 @@
+﻿ Hospital_CCN , HOSPITAL_NAME,Snf_Ccn ,Period_Start,period_end, N_Discharges ,notes,hospital_lat,hospital_lng
+210009,"Johns Hopkins Hospital, East Baltimore",215024,2025-01-01,2025-12-31,10,first,39.2963,-76.5929
+210009,"Johns Hopkins Hospital, East Baltimore",215024,2025-01-01,2025-12-31,15,dup row should sum,39.2963,-76.5929
+210009,"Johns Hopkins Hospital, East Baltimore",215005,2025-01-01,2025-12-31,0,zero count,39.2963,-76.5929
+210009,"Johns Hopkins Hospital, East Baltimore",15a011,2025-01-01,2025-12-31,6,letters lower-case,39.2963,-76.5929
+210009,"Johns Hopkins Hospital, East Baltimore",999999,2025-01-01,2025-12-31,8,unmatched,39.2963,-76.5929
+210009,"Johns Hopkins Hospital, East Baltimore",21Z999,2025-01-01,2025-12-31,2,unmatched letters,39.2963,-76.5929
+210009,"Johns Hopkins Hospital, East Baltimore",215013,2025-01-01,2025-12-31,,BLANK count,39.2963,-76.5929
+210009,"Johns Hopkins Hospital, East Baltimore", 215044 ,2025-01-01,2025-12-31, 7 ,padded,39.2963,-76.5929
+

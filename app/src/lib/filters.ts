@@ -19,17 +19,22 @@ export interface Filters {
 }
 export const EMPTY: Filters = { q: '', states: [], county: '', stars: [], ownership: [], sff: false, abuse: false, hospital: false, vbp: false, bedsMin: null, bedsMax: null, lat: null, lng: null, miles: null, place: '' }
 
+const OWN = ['for_profit', 'non_profit', 'government'] as const
+const clean = (s: string | null, max = 80) => (s ?? '').replace(/[;\u0000-\u001f]/g, '').slice(0, max)
+/** Every URL parameter is validated here; nothing from the address bar reaches SQL unchecked. */
 export function fromParams(p: URLSearchParams): Filters {
-  const num = (k: string) => { const v = p.get(k); return v == null || v === '' || Number.isNaN(Number(v)) ? null : Number(v) }
+  const num = (k: string, lo: number, hi: number) => { const v = p.get(k); if (v == null || v === '') return null; const n = Number(v); return Number.isFinite(n) && n >= lo && n <= hi ? n : null }
+  const lat = num('lat', -90, 90), lng = num('lng', -180, 180), miles = num('mi', 1, 300)
+  const hasRadius = lat != null && lng != null && miles != null
   return {
-    q: p.get('q') ?? '',
-    states: (p.get('st') ?? '').split(',').filter(Boolean),
-    county: p.get('county') ?? '',
-    stars: (p.get('stars') ?? '').split(',').filter(Boolean).map(Number).filter(n => n >= 1 && n <= 5),
-    ownership: (p.get('own') ?? '').split(',').filter(Boolean) as Filters['ownership'],
+    q: clean(p.get('q')),
+    states: [...new Set((p.get('st') ?? '').split(',').filter(s => STATES.includes(s)))],
+    county: clean(p.get('county')),
+    stars: [...new Set((p.get('stars') ?? '').split(',').map(Number).filter(n => Number.isInteger(n) && n >= 1 && n <= 5))],
+    ownership: [...new Set((p.get('own') ?? '').split(',').filter((o): o is Filters['ownership'][number] => (OWN as readonly string[]).includes(o)))],
     sff: p.get('sff') === '1', abuse: p.get('abuse') === '1', hospital: p.get('hosp') === '1', vbp: p.get('vbp') === '1',
-    bedsMin: num('bmin'), bedsMax: num('bmax'),
-    lat: num('lat'), lng: num('lng'), miles: num('mi'), place: p.get('place') ?? '',
+    bedsMin: num('bmin', 0, 5000), bedsMax: num('bmax', 0, 5000),
+    lat: hasRadius ? lat : null, lng: hasRadius ? lng : null, miles: hasRadius ? miles : null, place: hasRadius ? clean(p.get('place'), 120) : '',
   }
 }
 export function toParams(f: Filters, base?: URLSearchParams): URLSearchParams {
@@ -50,14 +55,16 @@ export function countActive(f: Filters) {
 export const distExpr = (lat: number, lng: number) =>
   `2 * 3958.8 * asin(sqrt(pow(sin(radians(latitude - (${lat})) / 2), 2) + cos(radians(${lat})) * cos(radians(latitude)) * pow(sin(radians(longitude - (${lng})) / 2), 2)))`
 
+const likeEsc = (s: string) => s.replace(/[\\%_]/g, m => '\\' + m)
+const like = (col: string, pattern: string) => `${col} LIKE ${sqlStr(pattern)} ESCAPE '\\'`
 export function whereClause(f: Filters): string {
   const w: string[] = []
-  if (f.q.trim()) { const s = sqlStr('%' + f.q.trim().toUpperCase() + '%'); w.push(`(upper(provider_name) LIKE ${s} OR upper(city_town) LIKE ${s} OR upper(coalesce(chain_name,'')) LIKE ${s} OR ccn LIKE ${sqlStr(f.q.trim().toUpperCase() + '%')})`) }
+  if (f.q.trim()) { const t = likeEsc(f.q.trim().toUpperCase()); w.push(`(${like('upper(provider_name)', '%' + t + '%')} OR ${like('upper(city_town)', '%' + t + '%')} OR ${like("upper(coalesce(chain_name,''))", '%' + t + '%')} OR ${like('ccn', t + '%')})`) }
   if (f.states.length) w.push(`state IN (${f.states.map(sqlStr).join(',')})`)
-  if (f.county.trim()) w.push(`upper(county_parish) LIKE ${sqlStr('%' + f.county.trim().toUpperCase() + '%')}`)
+  if (f.county.trim()) w.push(like('upper(county_parish)', '%' + likeEsc(f.county.trim().toUpperCase()) + '%'))
   if (f.stars.length) w.push(`overall_rating IN (${f.stars.join(',')})`)
   if (f.ownership.length) {
-    const parts: string[] = []
+    const parts: string[] = ["FALSE"]
     if (f.ownership.includes('for_profit')) parts.push(`ownership_type LIKE 'For profit%'`)
     if (f.ownership.includes('non_profit')) parts.push(`ownership_type LIKE 'Non profit%'`)
     if (f.ownership.includes('government')) parts.push(`ownership_type LIKE 'Government%'`)

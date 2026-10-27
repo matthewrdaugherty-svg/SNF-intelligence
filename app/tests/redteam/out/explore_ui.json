@@ -1,0 +1,60 @@
+{
+ "sort_asc": {
+  "n": 221,
+  "firstNull": 8,
+  "lastNonNull": 210,
+  "nullsLast": false,
+  "ordered": true,
+  "head": [
+   "0",
+   "3.691232",
+   "10.596579"
+  ],
+  "tail": [
+   "",
+   "",
+   ""
+  ]
+ },
+ "sort_desc": {
+  "n": 221,
+  "firstNull": 9,
+  "lastNonNull": 210,
+  "nullsLast": false,
+  "ordered": true,
+  "head": [
+   "40.139865",
+   "38.232529",
+   "31.266407"
+  ],
+  "tail": [
+   "",
+   "",
+   ""
+  ]
+ },
+ "pickerClosesOnEscape": false,
+ "persistedHeaders": "Facility\n↑\nStars\nCity\nState\nBeds\nOwnership\nSpecial focus\nRehospitalized % (QM 521)\nReadmission % (QRP 004)\nTo community % (QRP 005)\nFines $ (3 yr)\nNurse hrs / resident-day\nG–L deficiencies (3 cycles)\nZIP\nCounty",
+ "prCsvHead": [
+  "﻿CCN,Facility,Overall stars,Health inspection stars,Quality measure stars,Staffing stars,City,State,Beds,Ownership,Special focus,Short-stay residents rehospitalized (QM 521),Potentially preventable readmissions within 30 days of SNF discharge (QRP 004),Successful discharge to community (QRP 005),Total fines,Total nurse hours per resident-day,\"Harm or jeopardy deficiencies (G–L), three cycles\",ZIP,County",
+  "405000,ALTERNATIVE HEALTHCARE SOLUTIONS LLC,4,3,,5,SAN JUAN,PR,22,For profit - Limited Liability company,,,,,0,4.53942,0,00910,San Juan",
+  "405033,CENTRO DE CUIDADO PROLONGADO SAN LUCAS,1,1,,1,RIO PIEDRAS,PR,25,Non profit - Church related,,,,,0,,4,00928,San Juan",
+  "405025,CENTRO MEDICO WILMA N VAZQUEZ SNF,3,2,,5,VEGA BAJA,PR,45,For profit - Corporation,,,10.9,57.43,29997,5.03744,2,00693,Vega Baja"
+ ],
+ "suppressedCsv": [
+  "﻿CCN,Facility,Overall stars,Health inspection stars,Quality measure stars,Staffing stars,City,State,Beds,Ownership,Special focus,Short-stay residents rehospitalized (QM 521),Potentially preventable readmissions within 30 days of SNF discharge (QRP 004),Successful discharge to community (QRP 005),Total fines,Total nurse hours per resident-day,\"Harm or jeopardy deficiencies (G–L), three cycles\",ZIP,County",
+  "235324,Riverside Healthcare Center,2,2,2,3,St. Louis,MI,39,For profit - Corporation,,,,,0,2.9726,0,48880,Gratiot"
+ ],
+ "localStorage": "[\"city_town\",\"state\",\"number_of_certified_beds\",\"ownership_type\",\"special_focus_status\",\"qm_521_adj\",\"qrp_004_ppr_pd_rsrr\",\"qrp_005_dtc_rs_rate\",\"pen_total_fines_usd\",\"reported_total_nurse_staffing_hours_per_resident_per_day\",\"hc_n_severity_G_or_worse\",\"zip_code\",\"county_parish\"]",
+ "radiusCsv": [
+  "﻿CCN,Facility,Overall stars,Health inspection stars,Quality measure stars,Staffing stars,Miles,City,State,Beds,Ownership,Special focus,Short-stay residents rehospitalized (QM 521),Potentially preventable readmissions within 30 days of SNF discharge (QRP 004),Successful discharge to community (QRP 005),Total fines,Total nurse hours per resident-day,\"Harm or jeopardy deficiencies (G–L), three cycles\"",
+  "215085,CARROLL PARK HEALTHCARE,2,2,4,2,3.5,BALTIMORE,MD,140,For profit - Limited Liability company,,20.192831,11.56,37.96,306550,3.31759,4",
+  "215088,HAMMONDS LANE CENTER,3,3,4,3,5.4,BROOKLYN PARK,MD,113,For profit - Individual,,21.266387,15.04,64.35,0,3.27697,1",
+  "215081,AUTUMN LAKE HEALTHCARE AT PERRING PARKWAY,3,2,5,3,6.5,BALTIMORE,MD,125,For profit - Limited Liability company,,17.828533,12.22,58.48,32383,3.38932,2",
+  "215082,AUTUMN LAKE HEALTHCARE AT PIKESVILLE,2,1,5,3,8.3,PIKESVILLE,MD,140,For profit - Limited Liability company,,26.253561,10.14,57.96,0,3.71812,1",
+  "215084,PATAPSCO HEALTHCARE,1,1,3,1,11.7,RANDALLSTOWN,MD,172,For profit - Corporation,,17.61547,10.71,32.99,17114,3.2782,1"
+ ],
+ "injectionScreen": "Filters\nClear 1\nName, city, chain or CCN\nNear a place\nSet\nOr drop a pin on the Map.\nOverall star rating\n1\n2\n3\n4\n5\nOwnership\nFor profit\nNon profit\nGovernment\nFlags\nSpecial focus facility or candidate\nAbuse icon\nLocated in a hospital\nIn SNF VBP\nCertified beds\n–\nCounty\nState\nAK\nAL\nAR\nAZ\nCA\nCO\nCT\nDC\nDE\nFL\nGA\nGU\nHI\nIA\nID\nIL\nIN\nKS\nKY\nLA\nMA\nMD\nME\nMI\nMN\nMO\nMS\nMT\nNC\nND\nNE\nNH\nNJ\nNM\nNV\nNY\nOH\nOK\nOR\nPA\nPR\nRI\nSC\nSD\nTN\nTX\nUT\nVA\nVT\nWA\nWI\nWV\nWY\n1 facilities match\n1 facilities\nColumns · 11\nExport CSV\nFacility\nStars\nCity\nState\nBeds\nOwnership\nSpecial focus\nRehospitalized % (QM 521)\nReadmission % (QRP 004)\nTo community % (QRP 005)\nFines $ (3 yr)\nNurse hrs / resident-day\nG–L deficiencies (3 cycles)\nCarroll Park Healthcare\nAbuse icon · CCN 215085\n2\n2\n4\n2\nBaltimore\nMD\n140\nFor profit · LLC\n20.2%\n11.6%\n38.0%\n$306,550\n3.32\n4\nAverages of this set:\noverall stars 2.00\nBeds 140\nShort-stay residents rehospitalized 20.2%\nPotentially preventable readmissions within 30 days of SNF discharge 11.6%\nSuccessful discharge to community 38.0%\nTotal fines $306,550\nTotal nurse hours per resident-day 3.3",
+ "afterReload": "Carroll Park Healthcare\nAbuse icon · CCN 215085\n2\n2\n4\n2\nBaltimore\nMD\n140\nFor profit · LLC\n20.2%\n11.6%\n38.0%\n$306,550\n3.32\n4",
+ "inAppAfterInjection": "Filters\nClear 1\nName, city, chain or CCN\nNear a place\nSet\nOr drop a pin on the Map.\nOverall star rating\n1\n2\n3\n4\n5\nOwnership\nFor profit\nNon profit\nGovernment\nFlags\nSpecial focus facility or candidate\nAbuse icon\nLocated in a hospital\nIn SNF VBP\nCertified beds\n–\nCounty\nState\nAK\nAL\nAR\nAZ\nCA\nCO\nCT\nDC\nDE\nFL\nGA\nGU\nHI\nIA\nID\nIL\nIN\nKS\nKY\nLA\nMA\nMD\nME\nMI\nMN\nMO\nMS\nMT\nNC\nND\nNE\nNH\nNJ\nNM\nNV\nNY\nOH\nOK\nOR\nPA\nPR\nRI\nSC\nSD\nTN\nTX\nUT\nVA\nVT\nWA\nWI\nWV\nWY\n1 facilities match\n1 facilities\nColumns · 11\nExport CSV\nFacility\n↑\nStars\nCity\nState\nBeds\nOwnership\nSpecial focus\nRehospitalized % (QM 521)\nReadmission % (QRP 004)\nTo community % (QRP 005)\nFines $ (3 yr)\nNurse hrs / resident-day\nG–L deficiencies (3 cycles)\nTampered Via Link\nAbuse icon · CCN 215085\n5\n2\n4\n2\nBaltimore\nMD\n140\nFor profit · LLC\n20.2%\n11.6%\n38.0%\n$306,550\n3.32\n4\nAverages of this set:\noverall stars 5.00\nBeds 140\nShort-stay residents rehospitalized 20.2%\nPotentially preventable readmissions within 30 days of SNF discharge 11.6%\nSuccessful discharge to community 38.0%\nTotal fines $306,550\nTotal nurse hours per resident-day 3.3"
+}

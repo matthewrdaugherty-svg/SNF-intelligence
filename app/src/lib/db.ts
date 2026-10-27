@@ -45,6 +45,7 @@ export function getDb() { if (!dbPromise) dbPromise = init(); return dbPromise }
 
 /** Run a query and return plain JS rows. BigInt -> number, Arrow dates -> ISO strings. */
 export async function q<T extends Row = Row>(sql: string): Promise<T[]> {
+  if (sql.includes(';')) throw new Error('Refusing to run a multi-statement query')   // every input is whitelisted or sqlStr-escaped; this is the backstop
   const conn = await getDb()
   const table = await conn.query(sql)
   const names = table.schema.fields.map(f => f.name)

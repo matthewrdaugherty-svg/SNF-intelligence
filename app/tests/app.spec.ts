@@ -52,7 +52,7 @@ test('radius around a pin filters and sorts by distance', async ({ page }) => {
   await page.goto('/explore?lat=39.2904&lng=-76.6122&mi=15&place=Baltimore')
   await ready(page)
   await expect(count(page)).toHaveText('77')
-  await expect(page.getByRole('button', { name: 'Miles', exact: true })).toHaveAttribute('aria-sort', 'ascending')
+  await expect(page.getByRole('columnheader', { name: 'Miles', exact: true })).toHaveAttribute('aria-sort', 'ascending')
   await shot(page, '03-explore-radius')
 })
 
@@ -119,13 +119,13 @@ test('discharge flows: rejects a bad file, accepts a good one, computes the qual
   await expect(page.getByText(/must be 6 characters/)).toBeVisible()
   await expect(page.getByText('Discharges to SNFs')).toBeVisible()
   // total 100: low 50 (50%), mid 15, high 30, unmatched 5
-  const cards = page.locator('.grid-cols-5 > div')
+  const cards = page.locator('[class*="grid-cols-5"] > div')
   await expect(cards.nth(0)).toContainText('100')
   await expect(cards.nth(1)).toContainText('30%')
   await expect(cards.nth(2)).toContainText('15%')
   await expect(cards.nth(3)).toContainText('50%')
   await expect(cards.nth(4)).toContainText('5%')
-  await expect(page.getByText('not in CMS file')).toBeVisible()
+  await expect(page.getByText('not in the CMS file', { exact: true })).toBeVisible()
   await expect(page.getByText(/32 facilities rated 4–5★/)).toBeVisible()
   await expect(page.getByText(/3,381 certified beds/)).toBeVisible()
   await shot(page, '06-flows')
@@ -146,4 +146,62 @@ test('methodology page lists lineage, footnotes and limitations', async ({ page 
   await page.getByRole('button', { name: 'Limitations' }).click()
   await expect(page.getByText(/No hospital→SNF discharge flow/)).toBeVisible()
   await shot(page, '07-about')
+})
+
+// ---- regression tests from VALIDATION_REPORT_03_APP ----
+test('a crafted sort parameter cannot change the data (SQL injection)', async ({ page }) => {
+  const payload = encodeURIComponent("provider_name; UPDATE facility_master SET overall_rating = 5, provider_name = 'TAMPERED VIA LINK' WHERE ccn = '215085'; SELECT 1 AS provider_name, 1 AS x ORDER BY x")
+  await page.goto(`/explore?q=215085&sort=${payload}&dir=desc`)
+  await ready(page)
+  await expect(count(page)).toHaveText('1')
+  const first = page.getByRole('row').nth(1)
+  await expect(first).toContainText('Carroll Park Healthcare')
+  await expect(first).not.toContainText('Tampered')
+  await page.goto('/facility/215085')
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Carroll Park Healthcare')
+})
+
+test('fast typing in the search box loses no keystrokes', async ({ page }) => {
+  await page.goto('/explore?st=MD')
+  await ready(page)
+  await page.getByLabel('Name, city, chain or CCN').pressSequentially('baltimore', { delay: 20 })
+  await expect(count(page)).toHaveText('40', { timeout: 15_000 })   // 40 per db/snf.duckdb (name/city/chain/CCN contains BALTIMORE, state MD)
+  await expect(page).toHaveURL(/q=baltimore/)
+})
+
+test('invalid URL parameters are ignored, not shown as SQL errors', async ({ page }) => {
+  await page.goto('/explore?own=foo&stars=0,6,9&mi=Infinity&lat=39&lng=-76')
+  await ready(page)
+  await expect(count(page)).toHaveText('14,690')
+  await expect(page.getByText(/Parser Error|Binder Error/)).toHaveCount(0)
+})
+
+test('flows upload rejects blank counts, exponent numbers, impossible dates and reversed periods', async ({ page }) => {
+  await page.goto('/flows')
+  await expect(page.getByText('No discharge data loaded.')).toBeVisible({ timeout: 90_000 })
+  const csv = ['hospital_ccn,hospital_name,snf_ccn,period_start,period_end,n_discharges',
+    '210009,H,215031,2025-01-01,2025-12-31,',          // blank count
+    '210009,H,215074,2025-01-01,2025-12-31,1e2',       // exponent
+    '210009,H,215037,2025-13-45,2025-12-31,3',         // impossible date
+    '210009,H,215044,2025-12-31,2025-01-01,3',         // reversed
+    '210009,H,215022,2025-01-01,2025-12-31,7'].join('\r\n')
+  await page.setInputFiles('input[type=file]', { name: 'edge.csv', mimeType: 'text/csv', buffer: Buffer.from(csv) })
+  await expect(page.getByText(/1 valid row/)).toBeVisible()
+  await expect(page.getByText(/4 rows skipped/)).toBeVisible()
+  await expect(page.getByText(/digits only/).first()).toBeVisible()
+  await expect(page.getByText(/real dates/)).toBeVisible()
+  await expect(page.getByText(/is before period_start/)).toBeVisible()
+  // a bad file after a good one must not bring the good one back on reload
+  await page.setInputFiles('input[type=file]', { name: 'bad.csv', mimeType: 'text/csv', buffer: Buffer.from('hospital_ccn,snf_ccn\n1,2\n') })
+  await expect(page.getByText(/Missing required column/)).toBeVisible()
+  await page.reload()
+  await expect(page.getByText('No discharge data loaded.')).toBeVisible({ timeout: 90_000 })
+})
+
+test('facility not in VBP says so instead of showing blanks; comparisons never say "0 worse"', async ({ page }) => {
+  await page.goto('/facility/435092')
+  await expect(page.getByRole('heading', { level: 1 })).toBeVisible({ timeout: 90_000 })
+  await expect(page.getByText(/Not in the SNF Value-Based Purchasing program/)).toBeVisible()
+  await expect(page.getByText(/\b0 (better|worse) than state/)).toHaveCount(0)
+  await expect(page.getByText(/0\.0% (better|worse) than state/)).toHaveCount(0)
 })

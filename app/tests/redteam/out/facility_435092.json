@@ -1,0 +1,735 @@
+{
+ "h1": "Highmore Health",
+ "subs": [
+  "410 8Th Street Se, Highmore, SD 57345 · Hyde County · CCN 435092",
+  "Non profit - Corporation · 39 certified beds · 36.5 residents per day · Medicare and Medicaid · certified since 1995"
+ ],
+ "flags": [],
+ "cards": [
+  {
+   "label": "Overall rating",
+   "body": "3\nstate avg 2.9",
+   "fnTitle": null
+  },
+  {
+   "label": "Health inspection",
+   "body": "3\nstate avg 2.9",
+   "fnTitle": null
+  },
+  {
+   "label": "Quality measures",
+   "body": "2\nstate avg 2.7",
+   "fnTitle": null
+  },
+  {
+   "label": "Staffing",
+   "body": "3\nstate avg 3.5",
+   "fnTitle": null
+  }
+ ],
+ "measures": {
+  "long_stay_qm_rating": {
+   "cells": [
+    "Long-stay quality measures",
+    "2",
+    ""
+   ],
+   "fnTitle": null
+  },
+  "short_stay_qm_rating": {
+   "cells": [
+    "Short-stay quality measures",
+    "–fn 2",
+    ""
+   ],
+   "fnTitle": "Not enough data available to calculate a star rating."
+  },
+  "staffing_rating": {
+   "cells": [
+    "Staffing",
+    "3",
+    "State 4★ · Nation 3★"
+   ],
+   "fnTitle": null
+  },
+  "qm_521_adj": {
+   "cells": [
+    "Short-stay residents rehospitalized (QM 521)\nRisk-adjusted. Calendar 2025.",
+    "fn 9",
+    "",
+    "State 19.9% · Nation 23.8%"
+   ],
+   "fnTitle": "The number of residents or resident stays is too small to report. Call the facility to discuss this quality measure."
+  },
+  "qm_522_adj": {
+   "cells": [
+    "Short-stay residents with an outpatient ED visit (QM 522)",
+    "fn 9",
+    "",
+    "State 12.0% · Nation 12.0%"
+   ],
+   "fnTitle": "The number of residents or resident stays is too small to report. Call the facility to discuss this quality measure."
+  },
+  "qm_551_adj": {
+   "cells": [
+    "Long-stay hospitalizations per 1,000 resident-days (QM 551)",
+    "1.24",
+    "",
+    "State 1.52 · Nation 1.90\n0.28 better than state"
+   ],
+   "fnTitle": null
+  },
+  "qm_552_adj": {
+   "cells": [
+    "Long-stay ED visits per 1,000 resident-days (QM 552)",
+    "1.39",
+    "",
+    "State 1.75 · Nation 1.78\n0.36 better than state"
+   ],
+   "fnTitle": null
+  },
+  "qrp_004_ppr_pd_rsrr": {
+   "cells": [
+    "Potentially preventable readmissions within 30 days of SNF discharge (QRP 004)\nRisk-standardized. National figure is the unadjusted average.",
+    "fn 9",
+    "",
+    "Nation 10.7%\n22 eligible stays"
+   ],
+   "fnTitle": "The number of residents or resident stays is too small to report. Call the facility to discuss this quality measure."
+  },
+  "qrp_005_dtc_rs_rate": {
+   "cells": [
+    "Successful discharge to community (QRP 005)\nRisk-standardized. National figure is the observed rate.",
+    "fn 9",
+    "",
+    "Nation 50.6%\n17 eligible stays"
+   ],
+   "fnTitle": "The number of residents or resident stays is too small to report. Call the facility to discuss this quality measure."
+  },
+  "qrp_006_mspb_score": {
+   "cells": [
+    "Medicare spending per beneficiary, ratio to national (QRP 006)",
+    "1.28",
+    "",
+    "Nation 1.02\n21 eligible stays"
+   ],
+   "fnTitle": null
+  },
+  "qrp_039_hai_rs_rate": {
+   "cells": [
+    "Infections acquired in the SNF that led to hospitalization (QRP 039)",
+    "fn 9",
+    "",
+    "Nation 7.1%\n18 eligible stays"
+   ],
+   "fnTitle": "The number of residents or resident stays is too small to report. Call the facility to discuss this quality measure."
+  },
+  "qrp_013_obs_rate": {
+   "cells": [
+    "Falls with major injury (QRP 013)",
+    "0.0%",
+    "",
+    "Nation 0.8%"
+   ],
+   "fnTitle": null
+  },
+  "qrp_038_adj_rate": {
+   "cells": [
+    "New or worsened pressure ulcers (QRP 038)\nFacility value is adjusted; national is observed.",
+    "0.0%",
+    "",
+    "Nation 2.2%"
+   ],
+   "fnTitle": null
+  },
+  "qrp_042_obs_rate": {
+   "cells": [
+    "At or above expected self-care and mobility at discharge (QRP 042)",
+    "54.6%",
+    "",
+    "Nation 58.2%"
+   ],
+   "fnTitle": null
+  },
+  "qrp_024_obs_rate": {
+   "cells": [
+    "Self-care goal met at discharge (QRP 024)",
+    "50.0%",
+    "",
+    "Nation 55.0%"
+   ],
+   "fnTitle": null
+  },
+  "qrp_025_obs_rate": {
+   "cells": [
+    "Mobility goal met at discharge (QRP 025)",
+    "50.0%",
+    "",
+    "Nation 52.1%"
+   ],
+   "fnTitle": null
+  },
+  "qrp_043_obs_rate": {
+   "cells": [
+    "Medication list given to next provider (QRP 043)",
+    "fn 9",
+    "",
+    "Nation 96.5%"
+   ],
+   "fnTitle": "The number of residents or resident stays is too small to report. Call the facility to discuss this quality measure."
+  },
+  "qrp_044_obs_rate": {
+   "cells": [
+    "Medication list given to patient or family (QRP 044)",
+    "fn 9",
+    "",
+    "Nation 96.4%"
+   ],
+   "fnTitle": "The number of residents or resident stays is too small to report. Call the facility to discuss this quality measure."
+  },
+  "qrp_007_obs_rate": {
+   "cells": [
+    "Drug regimen reviewed with follow-up (QRP 007)",
+    "100.0%",
+    "",
+    "Nation 95.3%"
+   ],
+   "fnTitle": null
+  },
+  "qrp_040_obs_rate": {
+   "cells": [
+    "Staff up to date on COVID vaccine (QRP 040)",
+    "21.9%",
+    "",
+    "Nation 8.0%"
+   ],
+   "fnTitle": null
+  },
+  "qrp_041_obs_rate": {
+   "cells": [
+    "Staff flu vaccination (QRP 041)",
+    "35.8%",
+    "",
+    "Nation 42.0%"
+   ],
+   "fnTitle": null
+  },
+  "qrp_045_obs_rate": {
+   "cells": [
+    "Residents up to date on COVID vaccine (QRP 045)",
+    "25.8%",
+    "",
+    "Nation 23.4%"
+   ],
+   "fnTitle": null
+  },
+  "vbp_ranking": {
+   "cells": [
+    "Program ranking (1 = best of 13,900)",
+    "",
+    ""
+   ],
+   "fnTitle": null
+  },
+  "vbp_performance_score": {
+   "cells": [
+    "Performance score (0–100)",
+    "",
+    ""
+   ],
+   "fnTitle": null
+  },
+  "vbp_incentive_multiplier": {
+   "cells": [
+    "Incentive payment multiplier",
+    "",
+    ""
+   ],
+   "fnTitle": null
+  },
+  "x_vbp_net_part_a_payment_change_pct": {
+   "cells": [
+    "Net Part A payment change (derived: multiplier − 1)\nOur arithmetic, not a CMS value.",
+    "",
+    ""
+   ],
+   "fnTitle": null
+  },
+  "vbp_fy24_rsrr": {
+   "cells": [
+    "FY2024 risk-standardized readmission rate (SNFRM)",
+    "",
+    "",
+    "Nation 0.2053"
+   ],
+   "fnTitle": null
+  },
+  "vbp_fy24_hai_rate": {
+   "cells": [
+    "FY2024 risk-standardized infection rate",
+    "",
+    "",
+    "Nation 0.0727"
+   ],
+   "fnTitle": null
+  },
+  "vbp_fy24_turnover": {
+   "cells": [
+    "FY2024 total nursing staff turnover",
+    "",
+    "",
+    "Nation 0.4766"
+   ],
+   "fnTitle": null
+  },
+  "vbp_fy24_adj_nurse_hprd": {
+   "cells": [
+    "FY2024 adjusted nurse hours per resident-day",
+    "",
+    "",
+    "Nation 3.80"
+   ],
+   "fnTitle": null
+  },
+  "ss_c1_health_deficiencies": {
+   "cells": [
+    "Health deficiencies, most recent standard inspection cycle",
+    "5",
+    "",
+    "State 7 · Nation 9\n2 better than state"
+   ],
+   "fnTitle": null
+  },
+  "hc_n_total": {
+   "cells": [
+    "Health deficiencies, all three cycles",
+    "24",
+    "",
+    ""
+   ],
+   "fnTitle": null
+  },
+  "hc_n_actual_harm_GHI": {
+   "cells": [
+    "Actual-harm deficiencies (severity G–I)",
+    "3",
+    "",
+    ""
+   ],
+   "fnTitle": null
+  },
+  "hc_n_immediate_jeopardy_JKL": {
+   "cells": [
+    "Immediate-jeopardy deficiencies (severity J–L)",
+    "1",
+    "",
+    ""
+   ],
+   "fnTitle": null
+  },
+  "hc_n_abuse_neglect": {
+   "cells": [
+    "Abuse, neglect or exploitation deficiencies",
+    "4",
+    "",
+    ""
+   ],
+   "fnTitle": null
+  },
+  "hc_n_complaint": {
+   "cells": [
+    "Deficiencies found on complaint inspections",
+    "1",
+    "",
+    ""
+   ],
+   "fnTitle": null
+  },
+  "hc_n_complaint_last_12m": {
+   "cells": [
+    "Complaint-inspection deficiencies, last 12 months",
+    "1",
+    "",
+    ""
+   ],
+   "fnTitle": null
+  },
+  "sd_n_health_complaint_surveys_last_12m": {
+   "cells": [
+    "Complaint inspections with citations, last 12 months",
+    "1",
+    "",
+    ""
+   ],
+   "fnTitle": null
+  },
+  "hc_n_infection_control": {
+   "cells": [
+    "Infection-control inspection deficiencies",
+    "0",
+    "",
+    ""
+   ],
+   "fnTitle": null
+  },
+  "fc_n_total": {
+   "cells": [
+    "Fire safety deficiencies, three cycles",
+    "3",
+    "",
+    ""
+   ],
+   "fnTitle": null
+  },
+  "pen_n_fines": {
+   "cells": [
+    "Fines",
+    "0",
+    "",
+    "State 2 · Nation 1\n2 better than state"
+   ],
+   "fnTitle": null
+  },
+  "pen_total_fines_usd": {
+   "cells": [
+    "Total fines",
+    "$0",
+    "",
+    "State $40,815 · Nation $30,972\n$40,815 better than state"
+   ],
+   "fnTitle": null
+  },
+  "pen_fines_usd_last_12m": {
+   "cells": [
+    "Fines, last 12 months",
+    "$0",
+    "",
+    ""
+   ],
+   "fnTitle": null
+  },
+  "pen_n_payment_denials": {
+   "cells": [
+    "Medicare payment denials",
+    "0",
+    "",
+    ""
+   ],
+   "fnTitle": null
+  },
+  "pen_total_denial_days": {
+   "cells": [
+    "Payment denial days",
+    "0",
+    "",
+    ""
+   ],
+   "fnTitle": null
+  },
+  "total_weighted_health_survey_score": {
+   "cells": [
+    "Weighted health survey score (feeds the health-inspection stars)",
+    "47.0",
+    "",
+    ""
+   ],
+   "fnTitle": null
+  },
+  "reported_total_nurse_staffing_hours_per_resident_per_day": {
+   "cells": [
+    "Total nurse hours per resident-day",
+    "3.09",
+    "",
+    "State 3.79 · Nation 3.86\n0.70 worse than state"
+   ],
+   "fnTitle": null
+  },
+  "reported_rn_staffing_hours_per_resident_per_day": {
+   "cells": [
+    "RN hours per resident-day",
+    "0.69",
+    "",
+    "State 0.80 · Nation 0.69\n0.11 worse than state"
+   ],
+   "fnTitle": null
+  },
+  "adjusted_total_nurse_staffing_hours_per_resident_per_day": {
+   "cells": [
+    "Total nurse hours per resident-day, case-mix adjusted",
+    "3.65",
+    "",
+    ""
+   ],
+   "fnTitle": null
+  },
+  "total_number_of_nurse_staff_hours_per_resident_per_day_on_the_weekend": {
+   "cells": [
+    "Weekend total nurse hours per resident-day",
+    "2.78",
+    "",
+    "State 3.26 · Nation 3.42\n0.48 worse than state"
+   ],
+   "fnTitle": null
+  },
+  "reported_physical_therapist_staffing_hours_per_resident_per_day": {
+   "cells": [
+    "Physical therapist hours per resident-day",
+    "0.09",
+    "",
+    "State 0.05 · Nation 0.07\n0.04 better than state"
+   ],
+   "fnTitle": null
+  },
+  "total_nursing_staff_turnover": {
+   "cells": [
+    "Total nursing staff turnover",
+    "51.6%",
+    "",
+    "State 48.2% · Nation 45.8%\n3.4% worse than state"
+   ],
+   "fnTitle": null
+  },
+  "registered_nurse_turnover": {
+   "cells": [
+    "RN turnover",
+    "50.0%",
+    "",
+    "State 34.7% · Nation 42.9%\n15.3% worse than state"
+   ],
+   "fnTitle": null
+  },
+  "number_of_administrators_who_have_left_the_nursing_home": {
+   "cells": [
+    "Administrators who left",
+    "0",
+    "",
+    "State 0 · Nation 1\n0 better than state"
+   ],
+   "fnTitle": null
+  },
+  "nursing_case_mix_index": {
+   "cells": [
+    "Nursing case-mix index (resident acuity)",
+    "1.19",
+    "",
+    "State 1.25 · Nation 1.41"
+   ],
+   "fnTitle": null
+  },
+  "qm_434_4q": {
+   "cells": [
+    "Newly received an antipsychotic (QM 434)",
+    "0.0%",
+    "",
+    "State 2.0% · Nation 1.6%\n2.0% better than state"
+   ],
+   "fnTitle": null
+  },
+  "qm_430_4q": {
+   "cells": [
+    "Pneumococcal vaccine given (QM 430)",
+    "100.0%",
+    "",
+    "State 83.5% · Nation 82.0%\n16.5% better than state"
+   ],
+   "fnTitle": null
+  },
+  "qm_472_4q": {
+   "cells": [
+    "Flu vaccine given (QM 472)",
+    "fn 9",
+    "",
+    "State 78.2% · Nation 79.8%"
+   ],
+   "fnTitle": "The number of residents or resident stays is too small to report. Call the facility to discuss this quality measure."
+  },
+  "qm_401_4q": {
+   "cells": [
+    "Need for help with daily activities increased (QM 401)",
+    "12.1%",
+    "",
+    "State 21.3% · Nation 13.9%\n9.2% better than state"
+   ],
+   "fnTitle": null
+  },
+  "qm_410_4q": {
+   "cells": [
+    "Falls with major injury (QM 410)",
+    "9.3%",
+    "",
+    "State 5.5% · Nation 3.2%\n3.8% worse than state"
+   ],
+   "fnTitle": null
+  },
+  "qm_479_4q": {
+   "cells": [
+    "Pressure ulcers (QM 479)",
+    "1.6%",
+    "",
+    "State 4.6% · Nation 4.6%\n2.9% better than state"
+   ],
+   "fnTitle": null
+  },
+  "qm_481_4q": {
+   "cells": [
+    "Received an antipsychotic (QM 481)",
+    "26.1%",
+    "",
+    "State 24.6% · Nation 15.4%\n1.5% worse than state"
+   ],
+   "fnTitle": null
+  },
+  "qm_452_4q": {
+   "cells": [
+    "Received an antianxiety or hypnotic (QM 452)",
+    "7.5%",
+    "",
+    "State 17.4% · Nation 19.5%\n9.9% better than state"
+   ],
+   "fnTitle": null
+  },
+  "qm_407_4q": {
+   "cells": [
+    "Urinary tract infection (QM 407)",
+    "6.3%",
+    "",
+    "State 2.9% · Nation 1.6%\n3.4% worse than state"
+   ],
+   "fnTitle": null
+  },
+  "qm_406_4q": {
+   "cells": [
+    "Catheter left in bladder (QM 406)",
+    "2.4%",
+    "",
+    "State 2.1% · Nation 0.8%\n0.3% worse than state"
+   ],
+   "fnTitle": null
+  },
+  "qm_451_4q": {
+   "cells": [
+    "Ability to walk worsened (QM 451)",
+    "19.8%",
+    "",
+    "State 19.4% · Nation 14.1%\n0.5% worse than state"
+   ],
+   "fnTitle": null
+  },
+  "qm_480_4q": {
+   "cells": [
+    "New or worsened incontinence (QM 480)",
+    "17.5%",
+    "",
+    "State 25.4% · Nation 19.0%\n7.9% better than state"
+   ],
+   "fnTitle": null
+  },
+  "qm_404_4q": {
+   "cells": [
+    "Lost too much weight (QM 404)",
+    "11.4%",
+    "",
+    "State 5.6% · Nation 5.2%\n5.8% worse than state"
+   ],
+   "fnTitle": null
+  },
+  "qm_408_4q": {
+   "cells": [
+    "Depressive symptoms (QM 408)",
+    "0.0%",
+    "",
+    "State 5.7% · Nation 12.8%\n5.7% better than state"
+   ],
+   "fnTitle": null
+  },
+  "qm_409_4q": {
+   "cells": [
+    "Physically restrained (QM 409)",
+    "0.0%",
+    "",
+    "State 0.0% · Nation 0.1%\n0.0% better than state"
+   ],
+   "fnTitle": null
+  },
+  "qm_415_4q": {
+   "cells": [
+    "Pneumococcal vaccine given (QM 415)",
+    "100.0%",
+    "",
+    "State 94.9% · Nation 93.6%\n5.1% better than state"
+   ],
+   "fnTitle": null
+  },
+  "qm_454_4q": {
+   "cells": [
+    "Flu vaccine given (QM 454)",
+    "100.0%",
+    "",
+    "State 96.9% · Nation 95.5%\n3.1% better than state"
+   ],
+   "fnTitle": null
+  }
+ },
+ "penHeader": "Penalties · 0",
+ "penRows": [],
+ "citHeader": "Deficiencies at severity G or worse · 4",
+ "citRows": [
+  {
+   "meta": [
+    "2023-03-02",
+    "Severity J",
+    "Tag 0610",
+    "Deficient, Provider has date of correction"
+   ],
+   "desc": "Respond appropriately to all alleged violations."
+  },
+  {
+   "meta": [
+    "2023-03-02",
+    "Severity G",
+    "Tag 0600",
+    "Deficient, Provider has date of correction"
+   ],
+   "desc": "Protect each resident from all types of abuse such as physical, mental, sexual abuse, physical punishment, and neglect by anybody."
+  },
+  {
+   "meta": [
+    "2023-03-02",
+    "Severity G",
+    "Tag 0609",
+    "Deficient, Provider has date of correction"
+   ],
+   "desc": "Timely report suspected abuse, neglect, or theft and report the results of the investigation to proper authorities."
+  },
+  {
+   "meta": [
+    "2023-03-02",
+    "Severity G",
+    "Tag 0686",
+    "Deficient, Provider has date of correction"
+   ],
+   "desc": "Provide appropriate pressure ulcer care and prevent new ulcers from developing."
+  }
+ ],
+ "ownIntro": "As reported to CMS. Legal business name: Hh Holdings, Inc..",
+ "ownGroups": [
+  {
+   "role": "Operational/Managerial Control",
+   "people": [
+    "Caring Professionals · since 2010-07-01"
+   ]
+  }
+ ],
+ "sectionTitles": [
+  "Star ratings",
+  "Hospital and ED use",
+  "SNF Quality Reporting Program",
+  "SNF Value-Based Purchasing, FY2026",
+  "Inspections, penalties and complaints",
+  "Staffing",
+  "Short-stay residents (MDS)",
+  "Long-stay residents (MDS)",
+  "Ownership and control"
+ ],
+ "errors": []
+}

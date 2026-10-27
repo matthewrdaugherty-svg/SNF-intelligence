@@ -4,7 +4,7 @@ import * as maplibregl from 'maplibre-gl'
 import maplibreWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?url'
 import type { Feature, Point as GPoint } from 'geojson'
 import { q } from '../lib/db'
-import { fromParams, toParams, whereClause, distExpr, type Filters } from '../lib/filters'
+import { EMPTY, fromParams, toParams, whereClause, distExpr, type Filters } from '../lib/filters'
 import FilterPanel from '../components/FilterPanel'
 import { QualityStrip, Empty } from '../components/ui'
 import { titleCase } from '../lib/format'
@@ -47,7 +47,9 @@ export default function MapPage() {
   const fRef = useRef(f); fRef.current = f
   const hasDist = f.lat != null && f.lng != null
 
-  const onFilters = (nf: Filters) => setParams(toParams(nf, params), { replace: true })
+  const [filtersOpen, setFiltersOpen] = useState(false)
+  const onPatch = (patch: Partial<Filters>) => setParams(prev => toParams({ ...fromParams(prev), ...patch }, prev), { replace: true })
+  const onClear = () => setParams(prev => toParams(EMPTY, prev), { replace: true })
 
   useEffect(() => {
     let live = true
@@ -96,7 +98,7 @@ export default function MapPage() {
         const feats = m.queryRenderedFeatures(e.point, { layers: ['fac'] })
         if (feats.length) return
         const cur = fRef.current
-        setParams(toParams({ ...cur, lat: e.lngLat.lat, lng: e.lngLat.lng, miles: cur.miles ?? 15, place: 'Dropped pin' }, new URLSearchParams(window.location.search)), { replace: true })
+        setParams(prev => toParams({ ...fromParams(prev), lat: e.lngLat.lat, lng: e.lngLat.lng, miles: cur.miles ?? 15, place: 'Dropped pin' }, prev), { replace: true })
         setPinMode(false)
       })
       setMapReady(true)
@@ -130,11 +132,12 @@ export default function MapPage() {
 
   const list = rows ?? []
   return (
-    <div className="flex h-[calc(100dvh-52px)]">
-      <FilterPanel f={f} onChange={onFilters} resultCount={rows?.length ?? null} />
+    <div className="flex h-[calc(100dvh-52px)] relative">
+      <FilterPanel f={f} onPatch={onPatch} onClear={onClear} resultCount={rows?.length ?? null} open={filtersOpen} onClose={() => setFiltersOpen(false)} />
       <section className="flex-1 min-w-0 relative">
         <div ref={mapEl} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }} />  {/* inline: maplibre's unlayered CSS overrides Tailwind utilities */}
-        <div className="absolute top-3 left-3 flex items-center gap-2 z-10">
+        <div className="absolute top-3 left-3 right-14 flex flex-wrap items-center gap-2 z-10">
+          <button className="press btn btn-surface text-sm md:hidden here" onClick={() => setFiltersOpen(o => !o)} aria-expanded={filtersOpen}>Filters</button>
           <button className={`press btn text-sm ${pinMode ? 'btn-primary' : 'btn-surface here'}`} aria-pressed={pinMode} onClick={() => setPinMode(p => !p)}>{pinMode ? 'Click the map to set the center' : hasDist ? 'Move pin' : 'Drop a pin for a radius'}</button>
           {hasDist && <div className="bg-surface here rounded-[6px] px-3 py-1.5 text-sm text-ink-2">{f.miles} mi around {f.place || 'pin'}</div>}
           {noBasemap && <div className="bg-surface here rounded-[6px] px-3 py-1.5 text-xs text-ink-2">The street basemap could not be reached; facilities are still shown.</div>}
@@ -145,7 +148,7 @@ export default function MapPage() {
           <span className="inline-flex items-center gap-1 ml-2"><span className="inline-block w-3 h-3 rounded-full bg-white" style={{ border: '1.8px solid #b4532a' }} />special focus or abuse icon</span>
         </div>
       </section>
-      <aside className="w-80 shrink-0 border-l border-hairline bg-surface overflow-y-auto" aria-label="Facilities on the map">
+      <aside className="hidden lg:block w-80 shrink-0 border-l border-hairline bg-surface overflow-y-auto" aria-label="Facilities on the map">
         <div className="px-4 py-3 text-sm text-ink-2 border-b border-hairline">{rows ? <><span className="text-ink font-medium tabular-nums" data-testid="result-count">{rows.length.toLocaleString()}</span> facilities{hasDist ? ', nearest first' : ''}</> : 'Loading…'}</div>
         {rows && rows.length === 0 && <Empty title="Nothing here.">Widen the radius or clear a filter.</Empty>}
         {list.slice(0, 400).map(r => {

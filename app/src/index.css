@@ -7,17 +7,17 @@
   --color-surface: #ffffff;
   --color-ink: #15221e;
   --color-ink-2: #4a5753;
-  --color-ink-3: #7b8784;
+  --color-ink-3: #66716d;   /* 4.6:1 on white */
   --color-hairline: #e1e6e4;
   --color-well: #e9edec;
   /* quality ramp: one hue, lighter = worse. Used ONLY for star ratings / quality tiers. */
   --color-q1: #d6e3df;
   --color-q2: #a9cbc3;
   --color-q3: #6faea2;
-  --color-q4: #3c8c7e;
-  --color-q5: #1f6659;
+  --color-q4: #2f7a6c;   /* white text 4.6:1 */
+  --color-q5: #1a5a4e;
   /* enforcement / harm. Used ONLY for fines, payment denials, actual-harm & immediate-jeopardy, abuse icon, SFF. */
-  --color-rust: #b4532a;
+  --color-rust: #9a4421;   /* 4.6:1 on rust-soft */
   --color-rust-soft: #f3e3da;
   --radius-control: 6px;
   --radius-panel: 10px;
@@ -25,13 +25,14 @@
   --shadow-float: 0 2px 6px rgba(21, 34, 30, 0.08), 0 16px 40px rgba(21, 34, 30, 0.16);
 }
 
-html { font-family: var(--font-sans); font-feature-settings: "tnum" 1, "ss01" 1; }
-body { background: var(--color-paper); color: var(--color-ink); margin: 0; -webkit-font-smoothing: antialiased; }
-* { box-sizing: border-box; }
-::selection { background: #cfe3de; }
-
-:focus-visible { outline: 2px solid var(--color-ink); outline-offset: 2px; border-radius: 4px; }
-button, input, select { font: inherit; color: inherit; }
+@layer base {
+  html { font-family: var(--font-sans); font-feature-settings: "tnum" 1, "ss01" 1; }
+  body { background: var(--color-paper); color: var(--color-ink); margin: 0; -webkit-font-smoothing: antialiased; }
+  * { box-sizing: border-box; }
+  ::selection { background: #cfe3de; }
+  :focus-visible { outline: 2px solid var(--color-ink); outline-offset: 2px; border-radius: 4px; }
+  button, input, select { font: inherit; color: inherit; }   /* base layer, so utilities win */
+}
 
 /* Tactile controls: a slight press and a quick release. */
 .press { transition: transform 120ms cubic-bezier(.2,.8,.2,1), background-color 120ms, box-shadow 160ms; }

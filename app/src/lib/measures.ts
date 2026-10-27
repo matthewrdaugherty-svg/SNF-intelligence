@@ -3,7 +3,7 @@
 // values come from the Parquet files. Direction is OUR reading (flagged in the UI as such).
 
 export type Direction = 'lower' | 'higher' | 'none'
-export type Unit = 'pct' | 'per1000' | 'hours' | 'count' | 'usd' | 'ratio' | 'stars' | 'rank' | 'fraction' | 'text' | 'date' | 'score'
+export type Unit = 'pct' | 'per1000' | 'hours' | 'count' | 'usd' | 'ratio' | 'stars' | 'rank' | 'fraction' | 'fraction_pct' | 'text' | 'date' | 'score'
 
 export interface Measure {
   key: string            // db column on facility_master
@@ -62,9 +62,9 @@ export const GROUPS: Group[] = [
       { key: 'vbp_performance_score', label: 'Performance score (0–100)', unit: 'score', direction: 'higher', decimals: 1 },
       { key: 'vbp_incentive_multiplier', label: 'Incentive payment multiplier', short: 'VBP multiplier', unit: 'ratio', direction: 'higher', decimals: 4 },
       { key: 'x_vbp_net_part_a_payment_change_pct', label: 'Net Part A payment change (derived: multiplier − 1)', short: 'VBP net pay change %', unit: 'pct', direction: 'higher', decimals: 2, note: 'Our arithmetic, not a CMS value.' },
-      { key: 'vbp_fy24_rsrr', label: 'FY2024 risk-standardized readmission rate (SNFRM)', unit: 'fraction', direction: 'lower', fn: 'vbp_fy24_rsrr_fn', national: 'performance_period_fy_2024_national_average_risk_standardized_readmission_rate', decimals: 4 },
-      { key: 'vbp_fy24_hai_rate', label: 'FY2024 risk-standardized infection rate', unit: 'fraction', direction: 'lower', fn: 'vbp_fy24_hai_rate_fn', national: 'performance_period_fy_2024_national_average_risk_standardized_healthcare_associated_infection_rate', decimals: 4 },
-      { key: 'vbp_fy24_turnover', label: 'FY2024 total nursing staff turnover', unit: 'fraction', direction: 'lower', fn: 'vbp_fy24_turnover_fn', national: 'performance_period_fy_2024_national_average_total_nursing_staff_turnover_rate', decimals: 4 },
+      { key: 'vbp_fy24_rsrr', label: 'FY2024 risk-standardized readmission rate (SNFRM)', unit: 'fraction_pct', direction: 'lower', fn: 'vbp_fy24_rsrr_fn', national: 'performance_period_fy_2024_national_average_risk_standardized_readmission_rate', decimals: 2, note: 'CMS publishes this as a fraction (e.g. 0.20); shown here as a percentage.' },
+      { key: 'vbp_fy24_hai_rate', label: 'FY2024 risk-standardized infection rate', unit: 'fraction_pct', direction: 'lower', fn: 'vbp_fy24_hai_rate_fn', national: 'performance_period_fy_2024_national_average_risk_standardized_healthcare_associated_infection_rate', decimals: 2, note: 'CMS publishes this as a fraction; shown here as a percentage.' },
+      { key: 'vbp_fy24_turnover', label: 'FY2024 total nursing staff turnover', unit: 'fraction_pct', direction: 'lower', fn: 'vbp_fy24_turnover_fn', national: 'performance_period_fy_2024_national_average_total_nursing_staff_turnover_rate', decimals: 1, note: 'CMS publishes this as a fraction (e.g. 0.58); shown here as a percentage.' },
       { key: 'vbp_fy24_adj_nurse_hprd', label: 'FY2024 adjusted nurse hours per resident-day', unit: 'hours', direction: 'higher', fn: 'vbp_fy24_adj_nurse_hprd_fn', national: 'performance_period_fy_2024_national_average_adjusted_total_nursing_staff_hours_per_resident_day', decimals: 2 },
     ] },
   { id: 'enforcement', title: 'Inspections, penalties and complaints', blurb: 'Everything CMS publishes for the last three inspection cycles (about three years). Zero means none in the window.',
@@ -95,7 +95,7 @@ export const GROUPS: Group[] = [
       { key: 'reported_physical_therapist_staffing_hours_per_resident_per_day', label: 'Physical therapist hours per resident-day', unit: 'hours', direction: 'higher', fn: 'physical_therapist_staffing_footnote', state: 'reported_physical_therapist_staffing_hours_per_resident_per_day', decimals: 2 },
       { key: 'total_nursing_staff_turnover', label: 'Total nursing staff turnover', unit: 'pct', direction: 'lower', fn: 'total_nursing_staff_turnover_footnote', state: 'total_nursing_staff_turnover', decimals: 1 },
       { key: 'registered_nurse_turnover', label: 'RN turnover', unit: 'pct', direction: 'lower', fn: 'registered_nurse_turnover_footnote', state: 'registered_nurse_turnover', decimals: 1 },
-      { key: 'number_of_administrators_who_have_left_the_nursing_home', label: 'Administrators who left', unit: 'count', direction: 'lower', fn: 'administrator_turnover_footnote', state: 'number_of_administrators_who_have_left_the_nursing_home' },
+      { key: 'number_of_administrators_who_have_left_the_nursing_home', label: 'Administrators who left', unit: 'count', direction: 'lower', decimals: 1, fn: 'administrator_turnover_footnote', state: 'number_of_administrators_who_have_left_the_nursing_home' },
       { key: 'nursing_case_mix_index', label: 'Nursing case-mix index (resident acuity)', unit: 'ratio', direction: 'none', state: 'nursing_case_mix_index', decimals: 2 },
     ] },
   { id: 'short_stay', title: 'Short-stay residents (MDS)', blurb: 'Facility-reported assessments, Apr 2025–Mar 2026 (flu vaccine: Jul 2024–Jun 2025).',
@@ -146,7 +146,7 @@ export const IDENTITY_COLS: TableCol[] = [
 ]
 const DEFAULT_MEASURE_COLS = new Set(['qm_521_adj', 'qrp_004_ppr_pd_rsrr', 'qrp_005_dtc_rs_rate', 'pen_total_fines_usd', 'hc_n_severity_G_or_worse', 'reported_total_nurse_staffing_hours_per_resident_per_day'])
 export const MEASURE_COLS: TableCol[] = [
-  ...GROUPS.filter(g => g.id !== 'ratings').flatMap(g => g.measures.map(m => ({ key: m.key, label: m.label, short: m.short, unit: m.unit, direction: m.direction, fn: m.fn, group: g.title, width: m.unit === 'usd' ? 110 : 96, default: DEFAULT_MEASURE_COLS.has(m.key) } as TableCol))),
+  ...GROUPS.filter(g => g.id !== 'ratings').flatMap(g => g.measures.map(m => ({ key: m.key, label: m.label, short: m.short, unit: m.unit, direction: m.direction, fn: m.fn, group: g.title, width: m.unit === 'usd' ? 110 : 104, default: DEFAULT_MEASURE_COLS.has(m.key) } as TableCol))),
   { key: 'hc_n_severity_G_or_worse', label: 'Harm or jeopardy deficiencies (G–L), three cycles', short: 'G–L deficiencies (3 cycles)', unit: 'count', direction: 'lower', group: 'Inspections, penalties and complaints', width: 96, default: true },
 ]
 export const TABLE_COLS: TableCol[] = [...IDENTITY_COLS, ...MEASURE_COLS]

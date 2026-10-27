@@ -16,6 +16,7 @@ export function fmt(v: unknown, unit: Unit, decimals?: number): string {
     case 'usd': return usd.format(n)
     case 'ratio': return nf(decimals ?? 2).format(n)
     case 'fraction': return nf(decimals ?? 4).format(n)
+    case 'fraction_pct': return nf(decimals ?? 1).format(n * 100) + '%'
     case 'stars': return nf(0).format(n) + '★'
     case 'rank': return '#' + nf(0).format(n)
     case 'score': return nf(decimals ?? 1).format(n)
@@ -25,7 +26,14 @@ export const fmtInt = (n: number) => nf(0).format(n)
 export const fmtPct = (n: number, d = 1) => nf(d).format(n) + '%'
 export const fmtUsd = (n: number) => usd.format(n)
 export function titleCase(s: string) {
-  return s.toLowerCase().replace(/(^|[^a-z'’])([a-z])/g, (_, pre, c) => pre + c.toUpperCase()).replace(/\bLlc\b/g, 'LLC').replace(/\bInc\b/g, 'Inc').replace(/\bOf\b/g, 'of').replace(/\bAnd\b/g, 'and').replace(/\bThe\b/g, 'the').replace(/^the\b/, 'The')
+  return s.toLowerCase().replace(/(^|[^a-z0-9'’])([a-z])/g, (_, pre, c) => pre + c.toUpperCase()).replace(/\bLlc\b/g, 'LLC').replace(/\bInc\b/g, 'Inc').replace(/\bOf\b/g, 'of').replace(/\bAnd\b/g, 'and').replace(/\bThe\b/g, 'the').replace(/^the\b/, 'The')
+}
+/** 'Baltimore City' and Louisiana parishes are not 'X County'. */
+export function countyLabel(county: string, state: string) {
+  const c = titleCase(county)
+  if (state === 'LA') return `${c} Parish`
+  if (/\bCity$/i.test(c) || state === 'DC') return c
+  return `${c} County`
 }
 export function distanceMiles(lat1: number, lon1: number, lat2: number, lon2: number) {
   const R = 3958.8, toR = (d: number) => d * Math.PI / 180

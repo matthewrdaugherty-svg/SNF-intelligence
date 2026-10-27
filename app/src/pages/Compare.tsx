@@ -21,7 +21,7 @@ export default function Compare() {
   if (!ccns.length) return <Empty title="Nothing to compare yet."><p>Tick facilities in Explore or on a facility page. Up to {MAX_COMPARE} at a time.</p><Link to="/explore" className="underline">Go to Explore</Link></Empty>
   const colW = `minmax(150px, 1fr)`
   return (
-    <div className="px-6 py-6 overflow-x-auto">
+    <div className="px-4 md:px-6 py-6 overflow-x-auto">
       <div className="flex items-center gap-3 mb-4">
         <h1 className="text-xl font-semibold tracking-tight">Compare</h1>
         <div className="text-sm text-ink-2">{rows.length} of {MAX_COMPARE}</div>

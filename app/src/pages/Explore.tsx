@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router'
 import { q } from '../lib/db'
-import { fromParams, toParams, whereClause, distExpr, type Filters } from '../lib/filters'
+import { EMPTY, fromParams, toParams, whereClause, distExpr, type Filters } from '../lib/filters'
 import { TABLE_COLS, colByKey, type TableCol } from '../lib/measures'
 import FilterPanel from '../components/FilterPanel'
 import DataTable, { type Sort } from '../components/DataTable'
@@ -9,10 +9,14 @@ import { useReference, Empty } from '../components/ui'
 import { fmt } from '../lib/format'
 
 const BASE_COLS = ['ccn', 'provider_name', 'overall_rating', 'health_inspection_rating', 'qm_rating', 'staffing_rating', 'special_focus_status', 'abuse_icon']
+/** Only these keys may appear in ORDER BY; anything else from the URL is ignored. */
+const SORT_KEYS = new Set<string>(['provider_name', 'overall_rating', 'distance_mi', ...TABLE_COLS.map(c => c.key)])
+const safeSort = (key: string | null, dir: string | null): Sort => ({ key: key && SORT_KEYS.has(key) ? key : 'provider_name', dir: dir === 'desc' ? 'desc' : 'asc' })
 const COLS_KEY = 'snf.explore.cols'
 function loadCols(): string[] { try { const v = localStorage.getItem(COLS_KEY); if (v) return (JSON.parse(v) as string[]).filter(colByKey) } catch { /* ignore */ } return TABLE_COLS.filter(c => c.default).map(c => c.key) }
 
-export function buildSql(f: Filters, cols: TableCol[], sort: Sort): string {
+export function buildSql(f: Filters, cols: TableCol[], sortIn: Sort): string {
+  const sort = safeSort(sortIn.key, sortIn.dir)
   const sel = [...BASE_COLS, ...cols.map(c => c.key), ...cols.map(c => c.fn).filter(Boolean) as string[]]
   const hasDist = f.lat != null && f.lng != null
   if (hasDist) sel.push(`${distExpr(f.lat!, f.lng!)} AS distance_mi`)
@@ -24,7 +28,8 @@ export function buildSql(f: Filters, cols: TableCol[], sort: Sort): string {
 export default function Explore() {
   const [params, setParams] = useSearchParams()
   const f = useMemo(() => fromParams(params), [params])
-  const [sort, setSort] = useState<Sort>(() => ({ key: params.get('sort') || 'provider_name', dir: (params.get('dir') as 'asc' | 'desc') || 'asc' }))
+  const [sort, setSort] = useState<Sort>(() => safeSort(params.get('sort'), params.get('dir')))
+  const [filtersOpen, setFiltersOpen] = useState(false)
   const [colKeys, setColKeys] = useState<string[]>(loadCols)
   const cols = useMemo(() => colKeys.map(colByKey).filter(Boolean) as TableCol[], [colKeys])
   const [rows, setRows] = useState<Record<string, unknown>[] | null>(null)
@@ -42,13 +47,16 @@ export default function Explore() {
   useEffect(() => { try { localStorage.setItem(COLS_KEY, JSON.stringify(colKeys)) } catch { /* ignore */ } }, [colKeys])
   useEffect(() => { if (hasDist && sort.key === 'provider_name' && !params.get('sort')) setSort({ key: 'distance_mi', dir: 'asc' }) }, [hasDist]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const onFilters = (nf: Filters) => setParams(toParams(nf, params), { replace: true })
-  const onSort = (s: Sort) => { setSort(s); const p = new URLSearchParams(params); p.set('sort', s.key); p.set('dir', s.dir); setParams(p, { replace: true }) }
+  // functional updates: always build from the latest URL, never from a stale closure
+  const onPatch = (patch: Partial<Filters>) => setParams(prev => toParams({ ...fromParams(prev), ...patch }, prev), { replace: true })
+  const onClear = () => setParams(prev => toParams(EMPTY, prev), { replace: true })
+  const onSort = (s: Sort) => { const ss = safeSort(s.key, s.dir); setSort(ss); setParams(prev => { const p = new URLSearchParams(prev); p.set('sort', ss.key); p.set('dir', ss.dir); return p }, { replace: true }) }
 
   function exportCsv() {
     if (!rows) return
-    const keys = ['ccn', 'provider_name', 'overall_rating', 'health_inspection_rating', 'qm_rating', 'staffing_rating', ...(hasDist ? ['distance_mi'] : []), ...cols.map(c => c.key)]
-    const labels = ['CCN', 'Facility', 'Overall stars', 'Health inspection stars', 'Quality measure stars', 'Staffing stars', ...(hasDist ? ['Miles'] : []), ...cols.map(c => c.label)]
+    // every value with a CMS footnote exports its footnote in the next column (Operating Rule 1.3)
+    const keys = ['ccn', 'provider_name', 'overall_rating', 'health_inspection_rating', 'qm_rating', 'staffing_rating', ...(hasDist ? ['distance_mi'] : []), ...cols.flatMap(c => c.fn ? [c.key, c.fn] : [c.key])]
+    const labels = ['CCN', 'Facility', 'Overall stars', 'Health inspection stars', 'Quality measure stars', 'Staffing stars', ...(hasDist ? ['Miles'] : []), ...cols.flatMap(c => c.fn ? [c.label, `${c.label} — CMS footnote`] : [c.label])]
     const esc = (v: unknown) => { const s = v == null ? '' : String(v); return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s }
     const lines = [labels.map(esc).join(','), ...rows.map(r => keys.map(k => esc(k === 'distance_mi' && r[k] != null ? Number(r[k]).toFixed(1) : r[k])).join(','))]
     const blob = new Blob(['﻿' + lines.join('\n')], { type: 'text/csv;charset=utf-8' })
@@ -58,16 +66,17 @@ export default function Explore() {
   const groups = useMemo(() => { const g = new Map<string, TableCol[]>(); for (const c of TABLE_COLS) g.set(c.group, [...(g.get(c.group) ?? []), c]); return [...g.entries()] }, [])
 
   return (
-    <div className="flex h-[calc(100dvh-52px)]">
-      <FilterPanel f={f} onChange={onFilters} resultCount={rows?.length ?? null} />
-      <section className="flex-1 min-w-0 flex flex-col">
+    <div className="flex h-[calc(100dvh-52px)] relative">
+      <FilterPanel f={f} onPatch={onPatch} onClear={onClear} resultCount={rows?.length ?? null} open={filtersOpen} onClose={() => setFiltersOpen(false)} />
+      <section className="flex-1 min-w-0 flex flex-col relative">
         <div className="flex items-center gap-3 px-4 h-12 shrink-0">
+          <button className="press btn btn-surface text-sm md:hidden" onClick={() => setFiltersOpen(o => !o)} aria-expanded={filtersOpen}>Filters</button>
           <div className="text-sm text-ink-2">{rows ? <><span className="text-ink font-medium tabular-nums" data-testid="result-count">{rows.length.toLocaleString()}</span> facilities</> : 'Loading…'}{hasDist && f.place ? <span className="text-ink-3"> · within {f.miles} mi of {f.place}</span> : null}</div>
           <div className="ml-auto flex items-center gap-2 relative">
             <button className="press btn btn-surface text-sm" onClick={() => setPicker(p => !p)} aria-expanded={picker}>Columns · {cols.length}</button>
             <button className="press btn btn-primary text-sm" onClick={exportCsv} disabled={!rows?.length}>Export CSV</button>
             {picker && (
-              <div className="absolute right-0 top-10 w-[520px] max-h-[70vh] overflow-auto bg-surface rounded-[10px] p-4 z-20" style={{ boxShadow: 'var(--shadow-float)' }} role="dialog" aria-label="Choose columns">
+              <div className="absolute right-0 top-10 w-[min(520px,calc(100vw-2rem))] max-h-[70vh] overflow-auto bg-surface rounded-[10px] p-4 z-20" style={{ boxShadow: 'var(--shadow-float)' }} role="dialog" aria-label="Choose columns" onKeyDown={e => { if (e.key === 'Escape') setPicker(false) }}>
                 <div className="flex items-center justify-between mb-2"><div className="font-medium">Columns</div><button className="press btn btn-quiet text-xs" onClick={() => setColKeys(TABLE_COLS.filter(c => c.default).map(c => c.key))}>Reset to default</button></div>
                 {groups.map(([g, cs]) => (
                   <div key={g} className="mb-3">
@@ -83,7 +92,7 @@ export default function Explore() {
           </div>
         </div>
         <div className="flex-1 min-h-0 border-t border-hairline">
-          {error ? <Empty title="The query failed.">{error}</Empty>
+          {error ? <Empty title="These filters could not be applied."><button className="underline" onClick={onClear}>Clear all filters</button> and try again. <span className="text-ink-3 block mt-1 text-xs">{error}</span></Empty>
             : rows && rows.length === 0 ? <Empty title="No facilities match these filters.">Clear a filter or widen the radius.</Empty>
             : rows ? <DataTable rows={rows} cols={cols} sort={sort} onSort={onSort} ref={ref} showDistance={hasDist} /> : null}
         </div>
