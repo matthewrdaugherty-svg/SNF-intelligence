@@ -1,0 +1,162 @@
+{
+ "none": {
+  "count": "14,690",
+  "error": null,
+  "pageErrors": []
+ },
+ "state_MD": {
+  "count": "221",
+  "error": null,
+  "pageErrors": []
+ },
+ "states_MD_VA": {
+  "count": "510",
+  "error": null,
+  "pageErrors": []
+ },
+ "stars_1_2": {
+  "count": "5,912",
+  "error": null,
+  "pageErrors": []
+ },
+ "own_nonprofit": {
+  "count": "2,859",
+  "error": null,
+  "pageErrors": []
+ },
+ "own_fp_gov": {
+  "count": "11,831",
+  "error": null,
+  "pageErrors": []
+ },
+ "sff": {
+  "count": "527",
+  "error": null,
+  "pageErrors": []
+ },
+ "abuse": {
+  "count": "1,429",
+  "error": null,
+  "pageErrors": []
+ },
+ "hospital": {
+  "count": "602",
+  "error": null,
+  "pageErrors": []
+ },
+ "vbp": {
+  "count": "13,775",
+  "error": null,
+  "pageErrors": []
+ },
+ "beds_100_150": {
+  "count": "5,160",
+  "error": null,
+  "pageErrors": []
+ },
+ "beds_min_200": {
+  "count": "835",
+  "error": null,
+  "pageErrors": []
+ },
+ "beds_max_0": {
+  "count": "0",
+  "error": null,
+  "pageErrors": []
+ },
+ "q_genesis": {
+  "count": "184",
+  "error": null,
+  "pageErrors": []
+ },
+ "q_baltimore": {
+  "count": "41",
+  "error": null,
+  "pageErrors": []
+ },
+ "q_ccn_prefix_21": {
+  "count": "221",
+  "error": null,
+  "pageErrors": []
+ },
+ "q_apostrophe": {
+  "count": "1",
+  "error": null,
+  "pageErrors": []
+ },
+ "q_injection": {
+  "count": "0",
+  "error": null,
+  "pageErrors": []
+ },
+ "q_percent_wildcard": {
+  "count": "14,690",
+  "error": null,
+  "pageErrors": []
+ },
+ "q_underscore_wildcard": {
+  "count": "14,690",
+  "error": null,
+  "pageErrors": []
+ },
+ "county_baltimore": {
+  "count": "70",
+  "error": null,
+  "pageErrors": []
+ },
+ "radius_baltimore_15": {
+  "count": "77",
+  "error": null,
+  "pageErrors": []
+ },
+ "radius_la_10": {
+  "count": "138",
+  "error": null,
+  "pageErrors": []
+ },
+ "radius_rural_sd_40": {
+  "count": "3",
+  "error": null,
+  "pageErrors": []
+ },
+ "combo_ca": {
+  "count": "45",
+  "error": null,
+  "pageErrors": []
+ },
+ "combo_tx_flags": {
+  "count": "19",
+  "error": null,
+  "pageErrors": []
+ },
+ "combo_radius": {
+  "count": "10",
+  "error": null,
+  "pageErrors": []
+ },
+ "combo_all_flags_vbp_hosp": {
+  "count": "250",
+  "error": null,
+  "pageErrors": []
+ },
+ "combo_county_state": {
+  "count": "19",
+  "error": null,
+  "pageErrors": []
+ },
+ "invalid_own": {
+  "count": null,
+  "error": "The query failed.\nError: Parser Error: syntax error at or near \")\" LINE 1: ..., reported_staffing_footnote FROM facility_master WHERE () ORDER BY provider_name ASC NULLS LAST, provider_name ASC ^ LINE 1: ..., reported_staffing_footnote FROM facility_master WHERE () ORDER BY provider_name ASC NULLS LAST, provider_name ASC ^",
+  "pageErrors": []
+ },
+ "invalid_mi_inf": {
+  "count": null,
+  "error": "The query failed.\nError: Binder Error: Referenced column \"Infinity\" not found in FROM clause! Candidate bindings: \"own_indirect_owners\", \"number_of_administrators_who_have_left_the_nursing_home\", \"staffing_rating_footnote\", \"number_of_facilities_in_chain\", \"ownership_type\" LINE 1: ...)) * pow(sin(radians(longitude - (-76.61)) / 2), 2))) <= Infinity ORDER BY distance_mi ASC NULLS LAST, provider_name... ^",
+  "pageErrors": []
+ },
+ "stars_out_of_range": {
+  "count": "14,690",
+  "error": null,
+  "pageErrors": []
+ }
+}

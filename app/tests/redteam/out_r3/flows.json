@@ -1,0 +1,3049 @@
+{
+ "a_jhh_15": {
+  "status": "a_wellformed.csv: 12 valid rows, 2 hospitals",
+  "cards": [
+   [
+    "Discharges to SNFs",
+    "161",
+    "10 facilities"
+   ],
+   [
+    "To 4–5★ facilities",
+    "10%",
+    "16 discharges",
+    ""
+   ],
+   [
+    "To 3★ facilities",
+    "19%",
+    "30 discharges",
+    ""
+   ],
+   [
+    "To 1–2★ facilities",
+    "66%",
+    "106 discharges",
+    ""
+   ],
+   [
+    "Unrated or unmatched CCN",
+    "6%",
+    "0 to CCNs not in the CMS file",
+    ""
+   ]
+  ],
+  "weighted": "Volume-weighted averages of the destinations' CMS measures:\noverall stars 2.09\nshort-stay rehospitalization 20.2%\n30-day preventable readmission after SNF discharge 11.3%\ndischarge to community 49.3%\nWeighted by discharges; facilities with a suppressed value are left out of that average. These are facility-level CMS rates, not this hospital's own patients' outcomes.",
+  "tables": [
+   [
+    [
+     "Facility",
+     "Discharges",
+     "Share",
+     "Stars",
+     "Miles",
+     "Rehosp. %",
+     "Readmit %",
+     "To community %",
+     "Fines 3-yr",
+     "G–L deficiencies"
+    ],
+    [
+     "White Oak Rehabilitation and Nursing Center\nHyattsville, MD · abuse icon",
+     "40",
+     "25%",
+     "1\n1\n4\n3",
+     "30.9",
+     "21.9%",
+     "11.9%",
+     "43.4%",
+     "$76,515",
+     "2"
+    ],
+    [
+     "Fairland Center\nSilver Spring, MD",
+     "30",
+     "19%",
+     "2\n2\n3\n2",
+     "25.2",
+     "18.3%",
+     "11.6%",
+     "53.1%",
+     "$0",
+     "0"
+    ],
+    [
+     "Autumn Lake Healthcare At Long Green\nBaltimore, MD",
+     "25",
+     "16%",
+     "1\n1\n3\n2",
+     "5.0",
+     "22.7%",
+     "10.7%",
+     "39.7%",
+     "$0",
+     "0"
+    ],
+    [
+     "St. Elizabeth Rehabilitation & Nursing Center\nBaltimore, MD",
+     "18",
+     "11%",
+     "3\n3\n4\n3",
+     "4.6",
+     "13.8%",
+     "10.2%",
+     "64.7%",
+     "$66,996",
+     "3"
+    ],
+    [
+     "Autumn Lake Healthcare At Ballenger Creek\nFrederick, MD",
+     "12",
+     "7%",
+     "3\n2\n5\n3",
+     "40.6",
+     "14.6%",
+     "10.8%",
+     "57.1%",
+     "$0",
+     "2"
+    ],
+    [
+     "Carroll Park Healthcare\nBaltimore, MD · abuse icon",
+     "11",
+     "7%",
+     "2\n2\n4\n2",
+     "4.6",
+     "20.2%",
+     "11.6%",
+     "38.0%",
+     "$306,550",
+     "4"
+    ],
+    [
+     "Complete Care At Annapolis\nAnnapolis, MD",
+     "9",
+     "6%",
+     "5\n4\n5\n3",
+     "23.8",
+     "27.1%",
+     "12.9%",
+     "53.6%",
+     "$0",
+     "0"
+    ],
+    [
+     "St. Mary's Nursing Center Inc\nLeonardtown, MD",
+     "7",
+     "4%",
+     "5\n5\n5\n3",
+     "68.9",
+     "17.8%",
+     "10.2%",
+     "68.1%",
+     "$0",
+     "0"
+    ],
+    [
+     "Pines Nursing and Rehab\nEaston, MD · SFF",
+     "5",
+     "3%",
+     "–\n–\n–\n–",
+     "46.7",
+     "18.8%",
+     "11.7%",
+     "38.4%",
+     "$24,088",
+     "5"
+    ],
+    [
+     "Future Care Annapolis\nAnnapolis, MD",
+     "4",
+     "2%",
+     "–\n–\n–\n–",
+     "22.4",
+     "38.2%",
+     "",
+     "",
+     "$0",
+     "0"
+    ]
+   ],
+   [
+    [
+     "Facility",
+     "Miles",
+     "Stars",
+     "Beds",
+     "Residents/day",
+     "Rehosp. %",
+     "Readmit %",
+     "To community %",
+     "Fines 3-yr",
+     "Already a destination"
+    ],
+    [
+     "Transitional Care Services At Mercy Medical Center\nBaltimore, MD",
+     "1.2",
+     "5\n5\n5\n5",
+     "35",
+     "26",
+     "27.0%",
+     "9.5%",
+     "66.2%",
+     "$0",
+     ""
+    ],
+    [
+     "Future Care Canton Harbor\nBaltimore, MD",
+     "1.7",
+     "5\n5\n5\n4",
+     "160",
+     "153",
+     "20.0%",
+     "12.4%",
+     "58.5%",
+     "$13,627",
+     ""
+    ],
+    [
+     "Future Care Charles Village\nBaltimore, MD",
+     "1.9",
+     "4\n3\n5\n3",
+     "109",
+     "102",
+     "20.1%",
+     "12.3%",
+     "65.4%",
+     "$0",
+     ""
+    ],
+    [
+     "Roland Park Place\nBaltimore, MD",
+     "2.2",
+     "5\n5\n5\n5",
+     "16",
+     "12",
+     "3.7%",
+     "10.0%",
+     "73.6%",
+     "$0",
+     ""
+    ],
+    [
+     "Future Care Sandtown-Winchester\nBaltimore, MD",
+     "2.4",
+     "5\n4\n5\n4",
+     "148",
+     "142",
+     "16.7%",
+     "10.6%",
+     "56.6%",
+     "$0",
+     ""
+    ],
+    [
+     "Future Care Northpoint\nBaltimore, MD",
+     "3.1",
+     "5\n4\n5\n3",
+     "180",
+     "144",
+     "15.4%",
+     "10.3%",
+     "57.5%",
+     "$0",
+     ""
+    ],
+    [
+     "Keswick Multi-Care Center\nBaltimore, MD",
+     "3.4",
+     "4\n3\n4\n5",
+     "170",
+     "156",
+     "18.8%",
+     "11.7%",
+     "63.5%",
+     "$0",
+     ""
+    ],
+    [
+     "Good Samaritan Nursing Home Operator, LLC\nBaltimore, MD",
+     "4.3",
+     "4\n4\n4\n3",
+     "146",
+     "141",
+     "21.1%",
+     "11.8%",
+     "66.7%",
+     "$0",
+     ""
+    ],
+    [
+     "Northwest Healthcare Center\nBaltimore, MD",
+     "5.0",
+     "4\n4\n4\n4",
+     "91",
+     "83",
+     "15.8%",
+     "11.2%",
+     "45.8%",
+     "$0",
+     ""
+    ],
+    [
+     "Future Care Irvington\nBaltimore, MD",
+     "5.2",
+     "4\n4\n4\n3",
+     "200",
+     "182",
+     "23.9%",
+     "11.3%",
+     "61.7%",
+     "$8,417",
+     ""
+    ],
+    [
+     "Charlestown Community Inc\nCatonsville, MD",
+     "6.3",
+     "5\n4\n4\n5",
+     "103",
+     "83",
+     "20.2%",
+     "8.8%",
+     "62.5%",
+     "$0",
+     ""
+    ],
+    [
+     "Complete Care At Multi Medical Center LLC\nTowson, MD",
+     "6.3",
+     "5\n4\n5\n3",
+     "118",
+     "106",
+     "23.3%",
+     "14.3%",
+     "60.8%",
+     "$0",
+     ""
+    ],
+    [
+     "Little Sisters of the Poor\nBaltimore, MD",
+     "6.3",
+     "4\n4\n1\n5",
+     "20",
+     "17",
+     "",
+     "",
+     "",
+     "$0",
+     ""
+    ],
+    [
+     "Lochearn Nursing Home, LLC\nBaltimore, MD",
+     "7.0",
+     "5\n4\n5\n3",
+     "200",
+     "192",
+     "13.1%",
+     "10.5%",
+     "55.5%",
+     "$0",
+     ""
+    ],
+    [
+     "Autumn Lake Healthcare At Parkville\nBaltimore, MD",
+     "7.4",
+     "4\n4\n4\n2",
+     "135",
+     "124",
+     "23.1%",
+     "13.6%",
+     "44.5%",
+     "$0",
+     ""
+    ],
+    [
+     "Franklin Woods Center\nBaltimore, MD",
+     "7.5",
+     "4\n4\n4\n3",
+     "117",
+     "105",
+     "18.2%",
+     "16.1%",
+     "62.0%",
+     "$0",
+     ""
+    ],
+    [
+     "Edenwald\nTowson, MD",
+     "7.6",
+     "5\n5\n5\n5",
+     "70",
+     "34",
+     "11.1%",
+     "9.7%",
+     "16.9%",
+     "$0",
+     ""
+    ],
+    [
+     "Pickersgill Retirement Community\nTowson, MD",
+     "7.7",
+     "4\n4\n3\n4",
+     "43",
+     "31",
+     "15.4%",
+     "10.3%",
+     "49.7%",
+     "$0",
+     ""
+    ],
+    [
+     "Chestnut Grn Hlth Ctr Blakehur\nTowson, MD",
+     "8.0",
+     "5\n4\n3\n5",
+     "49",
+     "38",
+     "19.2%",
+     "11.4%",
+     "55.6%",
+     "$0",
+     ""
+    ],
+    [
+     "Oak Crest Village\nParkville, MD",
+     "8.1",
+     "4\n4\n4\n4",
+     "80",
+     "77",
+     "13.1%",
+     "11.1%",
+     "66.6%",
+     "$49,725",
+     ""
+    ],
+    [
+     "St. Joseph's Nursing Home\nCatonsville, MD",
+     "8.2",
+     "5\n5\n4\n5",
+     "44",
+     "40",
+     "",
+     "",
+     "",
+     "$0",
+     ""
+    ],
+    [
+     "Advanced Rehab At Autumn Lake Healthcare\nLutherville, MD",
+     "8.6",
+     "4\n4\n4\n2",
+     "110",
+     "82",
+     "18.4%",
+     "12.9%",
+     "65.8%",
+     "$8,021",
+     ""
+    ],
+    [
+     "Meadow Park Rehabilitation and Healthcare Center\nCatonsville, MD",
+     "8.6",
+     "4\n3\n5\n2",
+     "120",
+     "115",
+     "11.3%",
+     "12.9%",
+     "53.7%",
+     "$11,452",
+     ""
+    ],
+    [
+     "Marley Neck Rehabilitation and Wellness Center\nGlen Burnie, MD",
+     "9.9",
+     "4\n3\n5\n3",
+     "95",
+     "90",
+     "24.1%",
+     "13.2%",
+     "59.4%",
+     "$0",
+     ""
+    ],
+    [
+     "Stella Maris, Inc.\nTimonium, MD",
+     "10.8",
+     "4\n4\n2\n4",
+     "390",
+     "340",
+     "23.6%",
+     "14.3%",
+     "61.6%",
+     "$0",
+     ""
+    ],
+    [
+     "Future Care Old Court\nRandallstown, MD",
+     "11.0",
+     "5\n5\n4\n4",
+     "141",
+     "137",
+     "24.0%",
+     "9.6%",
+     "56.7%",
+     "$0",
+     ""
+    ],
+    [
+     "North Oaks Communities\nBaltimore, MD",
+     "11.1",
+     "4\n5\n1\n5",
+     "37",
+     "24",
+     "30.9%",
+     "12.4%",
+     "22.7%",
+     "$0",
+     ""
+    ],
+    [
+     "Glen Meadows Retirement Com.\nGlen Arm, MD",
+     "11.1",
+     "4\n2\n5\n5",
+     "31",
+     "30",
+     "40.1%",
+     "10.5%",
+     "62.1%",
+     "$31,233",
+     ""
+    ],
+    [
+     "Lorien Mays Chapel\nTimonium, MD",
+     "11.9",
+     "4\n4\n3\n2",
+     "93",
+     "83",
+     "20.0%",
+     "16.0%",
+     "64.9%",
+     "$0",
+     ""
+    ],
+    [
+     "The Lutheran Village At Miller's Grant\nEllicott City, MD",
+     "13.4",
+     "5\n5\n3\n5",
+     "16",
+     "13",
+     "",
+     "",
+     "",
+     "$0",
+     ""
+    ],
+    [
+     "Broadmead\nCockeysville, MD",
+     "14.6",
+     "5\n5\n5\n5",
+     "70",
+     "38",
+     "17.9%",
+     "10.6%",
+     "70.3%",
+     "$0",
+     ""
+    ],
+    [
+     "Residences At Vantage Point\nColumbia, MD",
+     "14.9",
+     "5\n4\n5\n5",
+     "44",
+     "19",
+     "0.0%",
+     "11.5%",
+     "57.9%",
+     "$0",
+     ""
+    ]
+   ]
+  ],
+  "altText": "32 facilities rated 4–5★ overall (excluding special-focus and abuse-icon facilities) with 3,381 certified beds in total; their simple average short-stay rehospitalization is 18.9% versus 20.2% weighted across current destinations. This hospital sent 106 discharges (66%) to 1–2★ facilities in the period.",
+  "hospital": "210009",
+  "options": [
+   "Johns Hopkins Hospital (210009) · 161 discharges",
+   "LAC+USC Medical Center (050600) · 35 discharges"
+  ],
+  "ls": 1044,
+  "body": "Discharge flows\n\nWhere a hospital's patients go after discharge, and how much of that volume lands in high- versus low-rated facilities. CMS publishes no hospital-to-SNF flows, so this page runs on counts a hospital provides. The schema is fixed so real data drops in without any rework; a modeled catchment option (built from public Medicare utilization and hospital service-area files) is planned and will carry a “modeled” label everywhere it appears.\n\nUpload CSV\nDownload the template\nRemove uploaded data\nUse aggregated counts (hospital → SNF → number of discharges in a period), not patient records. Data stays in this browser; nothing is uploaded to a server.\nColumns: hospital_ccn, hospital_name, snf_ccn, period_start, period_end, n_discharges · optional hospital_lat, hospital_lng (needed for distances and nearby alternatives). Dates as YYYY-MM-DD. Keep leading zeros in CCNs.\na_wellformed.csv: 12 valid rows, 2 hospitals\nHospital\nJohns Hopkins Hospital (210009) · 161 discharges\nLAC+USC Medical Center (050600) · 35 discharges\n2025-01-01 to 2025-12-31 · hospital-reported\nDischarges to SNFs\n161\n10 facilities\nTo 4–5★ facilities\n10%\n16 discharges\nTo 3★ facilities\n19%\n30 discharges\nTo 1–2★ facilities\n66%\n106 discharges\nUnrated or unmatched CCN\n6%\n0 to CCNs not in the CMS file\nVolume-weighted averages of the destinations' CMS measures:\noverall stars 2.09\nshort-stay rehospitalization 20.2%\n30-day preventable readmission after SNF discharge 11.3%\ndischarge to community 49.3%\nWeighted by discharges; facilities with a suppressed value are left out of that average. These are facility-level CMS rates, not this hospital's own patients' outcomes.\nDestinations · 10\nFacility\tDischarges\tShare\tStars\tMiles\tRehosp. %\tReadmit %\tTo community %\tFines 3-yr\tG–L deficiencies\nWhite Oak Rehabilitation and Nursing Center\nHyattsville, MD · abuse icon\n\t40\t25%\t\n1\n1\n4\n3\n\t30.9\t21.9%\t11.9%\t43.4%\t$76,515\t2\nFairland Center\nSilver Spring, MD\n\t30\t19%\t\n2\n2\n3\n2\n\t25.2\t18.3%\t11.6%\t53.1%\t$0\t0\nAutumn Lake Healthcare At Long Green\nBaltimore, MD\n\t25\t16%\t\n1\n1\n3\n2\n\t5.0\t22.7%\t10.7%\t39.7%\t$0\t0\nSt. Elizabeth Rehabilitation & Nursing Center\nBaltimore, MD\n\t18\t11%\t\n3\n3\n4\n3\n\t4.6\t13.8%\t10.2%\t64.7%\t$66,996\t3\nAutumn Lake Healthcare At Ballenger Creek\nFrederick, MD\n\t12\t7%\t\n3\n2\n5\n3\n\t40.6\t14.6%\t10.8%\t57.1%\t$0\t2\nCarroll Park Healthcare\nBaltimore, MD · abuse icon\n\t11\t7%\t\n2\n2\n4\n2\n\t4.6\t20.2%\t11.6%\t38.0%\t$306,550\t4\nComplete Care At Annapolis\nAnnapolis, MD\n\t9\t6%\t\n5\n4\n5\n3\n\t23.8\t27.1%\t12.9%\t53.6%\t$0\t0\nSt. Mary's Nursing Center Inc\nLeonardtown, MD\n\t7\t4%\t\n5\n5\n5\n3\n\t68.9\t17.8%\t10.2%\t68.1%\t$0\t0\nPines Nursing and Rehab\nEaston, MD · SFF\n\t5\t3%\t\n–\n–\n–\n–\n\t46.7\t18.8%\t11.7%\t38.4%\t$24,088\t5\nFuture Care Annapolis\nAnnapolis, MD\n\t4\t2%\t\n–\n–\n–\n–\n\t22.4\t38.2%\t\t\t$0\t0\n4–5★ facilities near this hospital\nwithin\n15 mi\n32 facilities rated 4–5★ overall (excluding special-focus and abuse-icon facilities) with 3,381 certified beds in total; their simple average short-stay rehospitalization is 18.9% versus 20.2% weighted across current destinations. This hospital sent 106 discharges (66%) to 1–2★ facilities in the period.\nArithmetic on CMS facility averages, for sizing the conversation. It does not say these facilities have capacity or are clinically right for the patients, and it is not an estimate of readmissions avoided.\nFacility\tMiles\tStars\tBeds\tResidents/day\tRehosp. %\tReadmit %\tTo community %\tFines 3-yr\tAlready a destination\nTransitional Care Services At Mercy Medical Center\nBaltimore, MD\n\t1.2\t\n5\n5\n5\n5\n\t35\t26\t27.0%\t9.5%\t66.2%\t$0\t\nFuture Care Canton Harbor\nBaltimore, MD\n\t1.7\t\n5\n5\n5\n4\n\t160\t153\t20.0%\t12.4%\t58.5%\t$13,627\t\nFuture Care Charles Village\nBaltimore, MD\n\t1.9\t\n4\n3\n5\n3\n\t109\t102\t20.1%\t12.3%\t65.4%\t$0\t\nRoland Park Place\nBaltimore, MD\n\t2.2\t\n5\n5\n5\n5\n\t16\t12\t3.7%\t10.0%\t73.6%\t$0\t\nFuture Care Sandtown-Winchester\nBaltimore, MD\n\t2.4\t\n5\n4\n5\n4\n\t148\t142\t16.7%\t10.6%\t56.6%\t$0\t\nFuture Care Northpoint\nBaltimore, MD\n\t3.1\t\n5\n4\n5\n3\n\t180\t144\t15.4%\t10.3%\t57.5%\t$0\t\nKeswick Multi-Care Center\nBaltimore, MD\n\t3.4\t\n4\n3\n4\n5\n\t170\t156\t18.8%\t11.7%\t63.5%\t$0\t\nGood Samaritan Nursing Home Operator, LLC\nBaltimore, MD\n\t4.3\t\n4\n4\n4\n3\n\t146\t141\t21.1%\t11.8%\t66.7%\t$0\t\nNorthwest Healthcare Center\nBaltimore, MD\n\t5.0\t\n4\n4\n4\n4\n\t91\t83\t15.8%\t11.2%\t45.8%\t$0\t\nFuture Care Irvington\nBaltimore, MD\n\t5.2\t\n4\n4\n4\n3\n\t200\t182\t23.9%\t11.3%\t61.7%\t$8,417\t\nCharlestown Community Inc\nCatonsville, MD\n\t6.3\t\n5\n4\n4\n5\n\t103\t83\t20.2%\t8.8%\t62.5%\t$0\t\nComplete Care At Multi Medical Center LLC\nTowson, MD\n\t6.3\t\n5\n4\n5\n3\n\t118\t106\t23.3%\t14.3%\t60.8%\t$0\t\nLittle Sisters of the Poor\nBaltimore, MD\n\t6.3\t\n4\n4\n1\n5\n\t20\t17\t\t\t\t$0\t\nLochearn Nursing Home, LLC\nBaltimore, MD\n\t7.0\t\n5\n4\n5\n3\n\t200\t192\t13.1%\t10.5%\t55.5%\t$0\t\nAutumn Lake Healthcare At Parkville\nBaltimore, MD\n\t7.4\t\n4\n4\n4\n2\n\t135\t124\t23.1%\t13.6%\t44.5%\t$0\t\nFranklin Woods Center\nBaltimore, MD\n\t7.5\t\n4\n4\n4\n3\n\t117\t105\t18.2%\t16.1%\t62.0%\t$0\t\nEdenwald\nTowson, MD\n\t7.6\t\n5\n5\n5\n5\n\t70\t34\t11.1%\t9.7%\t16.9%\t$0\t\nPickersgill Retirement Community\nTowson, MD\n\t7.7\t\n4\n4\n3\n4\n\t43\t31\t15.4%\t10.3%\t49.7%\t$0\t\nChestnut Grn Hlth Ctr Blakehur\nTowson, MD\n\t8.0\t\n5\n4\n3\n5\n\t49\t38\t19.2%\t11.4%\t55.6%\t$0\t\nOak Crest Village\nParkville, MD\n\t8.1\t\n4\n4\n4\n4\n\t80\t77\t13.1%\t11.1%\t66.6%\t$49,725\t\nSt. Joseph's Nursing Home\nCatonsville, MD\n\t8.2\t\n5\n5\n4\n5\n\t44\t40\t\t\t\t$0\t\nAdvanced Rehab At Autumn Lake Healthcare\nLutherville, MD\n\t8.6\t\n4\n4\n4\n2\n\t110\t82\t18.4%\t12.9%\t65.8%\t$8,021\t\nMeadow Park Rehabilitation and Healthcare Center\nCatonsville, MD\n\t8.6\t\n4\n3\n5\n2\n\t120\t115\t11.3%\t12.9%\t53.7%\t$11,452\t\nMarley Neck Rehabilitation and Wellness Center\nGlen Burnie, MD\n\t9.9\t\n4\n3\n5\n3\n\t95\t90\t24.1%\t13.2%\t59.4%\t$0\t\nStella Maris, Inc.\nTimonium, MD\n\t10.8\t\n4\n4\n2\n4\n\t390\t340\t23.6%\t14.3%\t61.6%\t$0\t\nFuture Care Old Court\nRandallstown, MD\n\t11.0\t\n5\n5\n4\n4\n\t141\t137\t24.0%\t9.6%\t56.7%\t$0\t\nNorth Oaks Communities\nBaltimore, MD\n\t11.1\t\n4\n5\n1\n5\n\t37\t24\t30.9%\t12.4%\t22.7%\t$0\t\nGlen Meadows Retirement Com.\nGlen Arm, MD\n\t11.1\t\n4\n2\n5\n5\n\t31\t30\t40.1%\t10.5%\t62.1%\t$31,233\t\nLorien Mays Chapel\nTimonium, MD\n\t11.9\t\n4\n4\n3\n2\n\t93\t83\t20.0%\t16.0%\t64.9%\t$0\t\nThe Lutheran Village At Miller's Grant\nEllicott City, MD\n\t13.4\t\n5\n5\n3\n5\n\t16\t13\t\t\t\t$0\t\nBroadmead\nCockeysville, MD\n\t14.6\t\n5\n5\n5\n5\n\t70\t38\t17.9%\t10.6%\t70.3%\t$0\t\nResidences At Vantage Point\nColumbia, MD\n\t14.9\t\n5\n4\n5\n5\n\t44\t19\t0.0%\t11.5%\t57.9%\t$0\t\nSource labels: every row above is “hospital-reported” (your upload). CMS facility data as of 2026-09-01."
+ },
+ "a_jhh_5": {
+  "status": "a_wellformed.csv: 12 valid rows, 2 hospitals",
+  "cards": [
+   [
+    "Discharges to SNFs",
+    "161",
+    "10 facilities"
+   ],
+   [
+    "To 4–5★ facilities",
+    "10%",
+    "16 discharges",
+    ""
+   ],
+   [
+    "To 3★ facilities",
+    "19%",
+    "30 discharges",
+    ""
+   ],
+   [
+    "To 1–2★ facilities",
+    "66%",
+    "106 discharges",
+    ""
+   ],
+   [
+    "Unrated or unmatched CCN",
+    "6%",
+    "0 to CCNs not in the CMS file",
+    ""
+   ]
+  ],
+  "weighted": "Volume-weighted averages of the destinations' CMS measures:\noverall stars 2.09\nshort-stay rehospitalization 20.2%\n30-day preventable readmission after SNF discharge 11.3%\ndischarge to community 49.3%\nWeighted by discharges; facilities with a suppressed value are left out of that average. These are facility-level CMS rates, not this hospital's own patients' outcomes.",
+  "tables": [
+   [
+    [
+     "Facility",
+     "Discharges",
+     "Share",
+     "Stars",
+     "Miles",
+     "Rehosp. %",
+     "Readmit %",
+     "To community %",
+     "Fines 3-yr",
+     "G–L deficiencies"
+    ],
+    [
+     "White Oak Rehabilitation and Nursing Center\nHyattsville, MD · abuse icon",
+     "40",
+     "25%",
+     "1\n1\n4\n3",
+     "30.9",
+     "21.9%",
+     "11.9%",
+     "43.4%",
+     "$76,515",
+     "2"
+    ],
+    [
+     "Fairland Center\nSilver Spring, MD",
+     "30",
+     "19%",
+     "2\n2\n3\n2",
+     "25.2",
+     "18.3%",
+     "11.6%",
+     "53.1%",
+     "$0",
+     "0"
+    ],
+    [
+     "Autumn Lake Healthcare At Long Green\nBaltimore, MD",
+     "25",
+     "16%",
+     "1\n1\n3\n2",
+     "5.0",
+     "22.7%",
+     "10.7%",
+     "39.7%",
+     "$0",
+     "0"
+    ],
+    [
+     "St. Elizabeth Rehabilitation & Nursing Center\nBaltimore, MD",
+     "18",
+     "11%",
+     "3\n3\n4\n3",
+     "4.6",
+     "13.8%",
+     "10.2%",
+     "64.7%",
+     "$66,996",
+     "3"
+    ],
+    [
+     "Autumn Lake Healthcare At Ballenger Creek\nFrederick, MD",
+     "12",
+     "7%",
+     "3\n2\n5\n3",
+     "40.6",
+     "14.6%",
+     "10.8%",
+     "57.1%",
+     "$0",
+     "2"
+    ],
+    [
+     "Carroll Park Healthcare\nBaltimore, MD · abuse icon",
+     "11",
+     "7%",
+     "2\n2\n4\n2",
+     "4.6",
+     "20.2%",
+     "11.6%",
+     "38.0%",
+     "$306,550",
+     "4"
+    ],
+    [
+     "Complete Care At Annapolis\nAnnapolis, MD",
+     "9",
+     "6%",
+     "5\n4\n5\n3",
+     "23.8",
+     "27.1%",
+     "12.9%",
+     "53.6%",
+     "$0",
+     "0"
+    ],
+    [
+     "St. Mary's Nursing Center Inc\nLeonardtown, MD",
+     "7",
+     "4%",
+     "5\n5\n5\n3",
+     "68.9",
+     "17.8%",
+     "10.2%",
+     "68.1%",
+     "$0",
+     "0"
+    ],
+    [
+     "Pines Nursing and Rehab\nEaston, MD · SFF",
+     "5",
+     "3%",
+     "–\n–\n–\n–",
+     "46.7",
+     "18.8%",
+     "11.7%",
+     "38.4%",
+     "$24,088",
+     "5"
+    ],
+    [
+     "Future Care Annapolis\nAnnapolis, MD",
+     "4",
+     "2%",
+     "–\n–\n–\n–",
+     "22.4",
+     "38.2%",
+     "",
+     "",
+     "$0",
+     "0"
+    ]
+   ],
+   [
+    [
+     "Facility",
+     "Miles",
+     "Stars",
+     "Beds",
+     "Residents/day",
+     "Rehosp. %",
+     "Readmit %",
+     "To community %",
+     "Fines 3-yr",
+     "Already a destination"
+    ],
+    [
+     "Transitional Care Services At Mercy Medical Center\nBaltimore, MD",
+     "1.2",
+     "5\n5\n5\n5",
+     "35",
+     "26",
+     "27.0%",
+     "9.5%",
+     "66.2%",
+     "$0",
+     ""
+    ],
+    [
+     "Future Care Canton Harbor\nBaltimore, MD",
+     "1.7",
+     "5\n5\n5\n4",
+     "160",
+     "153",
+     "20.0%",
+     "12.4%",
+     "58.5%",
+     "$13,627",
+     ""
+    ],
+    [
+     "Future Care Charles Village\nBaltimore, MD",
+     "1.9",
+     "4\n3\n5\n3",
+     "109",
+     "102",
+     "20.1%",
+     "12.3%",
+     "65.4%",
+     "$0",
+     ""
+    ],
+    [
+     "Roland Park Place\nBaltimore, MD",
+     "2.2",
+     "5\n5\n5\n5",
+     "16",
+     "12",
+     "3.7%",
+     "10.0%",
+     "73.6%",
+     "$0",
+     ""
+    ],
+    [
+     "Future Care Sandtown-Winchester\nBaltimore, MD",
+     "2.4",
+     "5\n4\n5\n4",
+     "148",
+     "142",
+     "16.7%",
+     "10.6%",
+     "56.6%",
+     "$0",
+     ""
+    ],
+    [
+     "Future Care Northpoint\nBaltimore, MD",
+     "3.1",
+     "5\n4\n5\n3",
+     "180",
+     "144",
+     "15.4%",
+     "10.3%",
+     "57.5%",
+     "$0",
+     ""
+    ],
+    [
+     "Keswick Multi-Care Center\nBaltimore, MD",
+     "3.4",
+     "4\n3\n4\n5",
+     "170",
+     "156",
+     "18.8%",
+     "11.7%",
+     "63.5%",
+     "$0",
+     ""
+    ],
+    [
+     "Good Samaritan Nursing Home Operator, LLC\nBaltimore, MD",
+     "4.3",
+     "4\n4\n4\n3",
+     "146",
+     "141",
+     "21.1%",
+     "11.8%",
+     "66.7%",
+     "$0",
+     ""
+    ],
+    [
+     "Northwest Healthcare Center\nBaltimore, MD",
+     "5.0",
+     "4\n4\n4\n4",
+     "91",
+     "83",
+     "15.8%",
+     "11.2%",
+     "45.8%",
+     "$0",
+     ""
+    ]
+   ]
+  ],
+  "altText": "9 facilities rated 4–5★ overall (excluding special-focus and abuse-icon facilities) with 1,055 certified beds in total; their simple average short-stay rehospitalization is 17.6% versus 20.2% weighted across current destinations. This hospital sent 106 discharges (66%) to 1–2★ facilities in the period.",
+  "hospital": "210009",
+  "options": [
+   "Johns Hopkins Hospital (210009) · 161 discharges",
+   "LAC+USC Medical Center (050600) · 35 discharges"
+  ],
+  "ls": 1044,
+  "body": "Discharge flows\n\nWhere a hospital's patients go after discharge, and how much of that volume lands in high- versus low-rated facilities. CMS publishes no hospital-to-SNF flows, so this page runs on counts a hospital provides. The schema is fixed so real data drops in without any rework; a modeled catchment option (built from public Medicare utilization and hospital service-area files) is planned and will carry a “modeled” label everywhere it appears.\n\nUpload CSV\nDownload the template\nRemove uploaded data\nUse aggregated counts (hospital → SNF → number of discharges in a period), not patient records. Data stays in this browser; nothing is uploaded to a server.\nColumns: hospital_ccn, hospital_name, snf_ccn, period_start, period_end, n_discharges · optional hospital_lat, hospital_lng (needed for distances and nearby alternatives). Dates as YYYY-MM-DD. Keep leading zeros in CCNs.\na_wellformed.csv: 12 valid rows, 2 hospitals\nHospital\nJohns Hopkins Hospital (210009) · 161 discharges\nLAC+USC Medical Center (050600) · 35 discharges\n2025-01-01 to 2025-12-31 · hospital-reported\nDischarges to SNFs\n161\n10 facilities\nTo 4–5★ facilities\n10%\n16 discharges\nTo 3★ facilities\n19%\n30 discharges\nTo 1–2★ facilities\n66%\n106 discharges\nUnrated or unmatched CCN\n6%\n0 to CCNs not in the CMS file\nVolume-weighted averages of the destinations' CMS measures:\noverall stars 2.09\nshort-stay rehospitalization 20.2%\n30-day preventable readmission after SNF discharge 11.3%\ndischarge to community 49.3%\nWeighted by discharges; facilities with a suppressed value are left out of that average. These are facility-level CMS rates, not this hospital's own patients' outcomes.\nDestinations · 10\nFacility\tDischarges\tShare\tStars\tMiles\tRehosp. %\tReadmit %\tTo community %\tFines 3-yr\tG–L deficiencies\nWhite Oak Rehabilitation and Nursing Center\nHyattsville, MD · abuse icon\n\t40\t25%\t\n1\n1\n4\n3\n\t30.9\t21.9%\t11.9%\t43.4%\t$76,515\t2\nFairland Center\nSilver Spring, MD\n\t30\t19%\t\n2\n2\n3\n2\n\t25.2\t18.3%\t11.6%\t53.1%\t$0\t0\nAutumn Lake Healthcare At Long Green\nBaltimore, MD\n\t25\t16%\t\n1\n1\n3\n2\n\t5.0\t22.7%\t10.7%\t39.7%\t$0\t0\nSt. Elizabeth Rehabilitation & Nursing Center\nBaltimore, MD\n\t18\t11%\t\n3\n3\n4\n3\n\t4.6\t13.8%\t10.2%\t64.7%\t$66,996\t3\nAutumn Lake Healthcare At Ballenger Creek\nFrederick, MD\n\t12\t7%\t\n3\n2\n5\n3\n\t40.6\t14.6%\t10.8%\t57.1%\t$0\t2\nCarroll Park Healthcare\nBaltimore, MD · abuse icon\n\t11\t7%\t\n2\n2\n4\n2\n\t4.6\t20.2%\t11.6%\t38.0%\t$306,550\t4\nComplete Care At Annapolis\nAnnapolis, MD\n\t9\t6%\t\n5\n4\n5\n3\n\t23.8\t27.1%\t12.9%\t53.6%\t$0\t0\nSt. Mary's Nursing Center Inc\nLeonardtown, MD\n\t7\t4%\t\n5\n5\n5\n3\n\t68.9\t17.8%\t10.2%\t68.1%\t$0\t0\nPines Nursing and Rehab\nEaston, MD · SFF\n\t5\t3%\t\n–\n–\n–\n–\n\t46.7\t18.8%\t11.7%\t38.4%\t$24,088\t5\nFuture Care Annapolis\nAnnapolis, MD\n\t4\t2%\t\n–\n–\n–\n–\n\t22.4\t38.2%\t\t\t$0\t0\n4–5★ facilities near this hospital\nwithin\n5 mi\n9 facilities rated 4–5★ overall (excluding special-focus and abuse-icon facilities) with 1,055 certified beds in total; their simple average short-stay rehospitalization is 17.6% versus 20.2% weighted across current destinations. This hospital sent 106 discharges (66%) to 1–2★ facilities in the period.\nArithmetic on CMS facility averages, for sizing the conversation. It does not say these facilities have capacity or are clinically right for the patients, and it is not an estimate of readmissions avoided.\nFacility\tMiles\tStars\tBeds\tResidents/day\tRehosp. %\tReadmit %\tTo community %\tFines 3-yr\tAlready a destination\nTransitional Care Services At Mercy Medical Center\nBaltimore, MD\n\t1.2\t\n5\n5\n5\n5\n\t35\t26\t27.0%\t9.5%\t66.2%\t$0\t\nFuture Care Canton Harbor\nBaltimore, MD\n\t1.7\t\n5\n5\n5\n4\n\t160\t153\t20.0%\t12.4%\t58.5%\t$13,627\t\nFuture Care Charles Village\nBaltimore, MD\n\t1.9\t\n4\n3\n5\n3\n\t109\t102\t20.1%\t12.3%\t65.4%\t$0\t\nRoland Park Place\nBaltimore, MD\n\t2.2\t\n5\n5\n5\n5\n\t16\t12\t3.7%\t10.0%\t73.6%\t$0\t\nFuture Care Sandtown-Winchester\nBaltimore, MD\n\t2.4\t\n5\n4\n5\n4\n\t148\t142\t16.7%\t10.6%\t56.6%\t$0\t\nFuture Care Northpoint\nBaltimore, MD\n\t3.1\t\n5\n4\n5\n3\n\t180\t144\t15.4%\t10.3%\t57.5%\t$0\t\nKeswick Multi-Care Center\nBaltimore, MD\n\t3.4\t\n4\n3\n4\n5\n\t170\t156\t18.8%\t11.7%\t63.5%\t$0\t\nGood Samaritan Nursing Home Operator, LLC\nBaltimore, MD\n\t4.3\t\n4\n4\n4\n3\n\t146\t141\t21.1%\t11.8%\t66.7%\t$0\t\nNorthwest Healthcare Center\nBaltimore, MD\n\t5.0\t\n4\n4\n4\n4\n\t91\t83\t15.8%\t11.2%\t45.8%\t$0\t\nSource labels: every row above is “hospital-reported” (your upload). CMS facility data as of 2026-09-01."
+ },
+ "a_lac": {
+  "status": "a_wellformed.csv: 12 valid rows, 2 hospitals",
+  "cards": [
+   [
+    "Discharges to SNFs",
+    "35",
+    "2 facilities"
+   ],
+   [
+    "To 4–5★ facilities",
+    "37%",
+    "13 discharges",
+    ""
+   ],
+   [
+    "To 3★ facilities",
+    "0%",
+    "0 discharges",
+    ""
+   ],
+   [
+    "To 1–2★ facilities",
+    "63%",
+    "22 discharges",
+    ""
+   ],
+   [
+    "Unrated or unmatched CCN",
+    "0%",
+    "0 to CCNs not in the CMS file",
+    ""
+   ]
+  ],
+  "weighted": "Volume-weighted averages of the destinations' CMS measures:\noverall stars 2.74\nshort-stay rehospitalization 20.6%\n30-day preventable readmission after SNF discharge 11.1%\ndischarge to community 35.7%\nWeighted by discharges; facilities with a suppressed value are left out of that average. These are facility-level CMS rates, not this hospital's own patients' outcomes.",
+  "tables": [
+   [
+    [
+     "Facility",
+     "Discharges",
+     "Share",
+     "Stars",
+     "Miles",
+     "Rehosp. %",
+     "Readmit %",
+     "To community %",
+     "Fines 3-yr",
+     "G–L deficiencies"
+    ],
+    [
+     "Maple Healthcare Center\nLos Angeles, CA · abuse icon",
+     "22",
+     "63%",
+     "2\n2\n4\n3",
+     "4.3",
+     "24.3%",
+     "11.3%",
+     "22.1%",
+     "$164,264",
+     "6"
+    ],
+    [
+     "Hollenbeck Palms\nLos Angeles, CA",
+     "13",
+     "37%",
+     "4\n3\n3\n5",
+     "1.5",
+     "14.5%",
+     "10.8%",
+     "58.7%",
+     "$0",
+     "2"
+    ]
+   ],
+   [
+    [
+     "Facility",
+     "Miles",
+     "Stars",
+     "Beds",
+     "Residents/day",
+     "Rehosp. %",
+     "Readmit %",
+     "To community %",
+     "Fines 3-yr",
+     "Already a destination"
+    ],
+    [
+     "Hollenbeck Palms\nLos Angeles, CA",
+     "1.5",
+     "4\n3\n3\n5",
+     "106",
+     "54",
+     "14.5%",
+     "10.8%",
+     "58.7%",
+     "$0",
+     "yes"
+    ],
+    [
+     "Huntington Healthcare Center\nLos Angeles, CA",
+     "2.0",
+     "4\n4\n5\n1",
+     "99",
+     "94",
+     "2.6%",
+     "7.9%",
+     "",
+     "$13,635",
+     ""
+    ],
+    [
+     "East Los Angeles Doctors Hosp\nLos Angeles, CA",
+     "3.0",
+     "5\n5\n4\n4",
+     "25",
+     "24",
+     "",
+     "",
+     "",
+     "$0",
+     ""
+    ],
+    [
+     "Los Angeles Comm Hospital\nLos Angeles, CA",
+     "3.0",
+     "4\n4\n–\n2",
+     "39",
+     "38",
+     "",
+     "",
+     "",
+     "$12,670",
+     ""
+    ],
+    [
+     "Angels Nursing Health Center\nLos Angeles, CA",
+     "3.5",
+     "5\n4\n5\n4",
+     "49",
+     "45",
+     "19.2%",
+     "11.5%",
+     "",
+     "$71,566",
+     ""
+    ],
+    [
+     "Bonnie Brae Skilled Nursing\nLos Angeles, CA",
+     "3.5",
+     "5\n4\n5\n3",
+     "59",
+     "43",
+     "19.6%",
+     "10.2%",
+     "",
+     "$0",
+     ""
+    ],
+    [
+     "Westlake Convalescent Hospital\nLos Angeles, CA",
+     "3.5",
+     "4\n3\n5\n4",
+     "114",
+     "70",
+     "14.8%",
+     "",
+     "",
+     "$0",
+     ""
+    ],
+    [
+     "Pih Health Good Samaritan Hospital D/P Snf\nLos Angeles, CA",
+     "3.5",
+     "5\n5\n2\n5",
+     "28",
+     "24",
+     "32.6%",
+     "9.4%",
+     "45.4%",
+     "$0",
+     ""
+    ],
+    [
+     "Burlington Convalescent Hospital\nLos Angeles, CA",
+     "3.5",
+     "4\n4\n4\n4",
+     "124",
+     "116",
+     "21.7%",
+     "10.1%",
+     "27.0%",
+     "$8,278",
+     ""
+    ],
+    [
+     "Alden Terrace Convalescent Hospital\nLos Angeles, CA",
+     "4.2",
+     "5\n4\n5\n4",
+     "210",
+     "194",
+     "7.9%",
+     "9.1%",
+     "",
+     "$0",
+     ""
+    ],
+    [
+     "Alhambra Hospital Med Ctr Dp/Snf\nAlhambra, CA",
+     "4.5",
+     "4\n4\n4\n3",
+     "26",
+     "25",
+     "",
+     "",
+     "",
+     "$0",
+     ""
+    ],
+    [
+     "Atherton Baptist Home\nAlhambra, CA",
+     "4.9",
+     "5\n4\n5\n4",
+     "113",
+     "60",
+     "",
+     "9.8%",
+     "44.0%",
+     "$0",
+     ""
+    ]
+   ]
+  ],
+  "altText": "12 facilities rated 4–5★ overall (excluding special-focus and abuse-icon facilities) with 992 certified beds in total; their simple average short-stay rehospitalization is 16.6% versus 20.6% weighted across current destinations. This hospital sent 22 discharges (63%) to 1–2★ facilities in the period.",
+  "hospital": "050600",
+  "options": [
+   "Johns Hopkins Hospital (210009) · 161 discharges",
+   "LAC+USC Medical Center (050600) · 35 discharges"
+  ],
+  "ls": 1044,
+  "body": "Discharge flows\n\nWhere a hospital's patients go after discharge, and how much of that volume lands in high- versus low-rated facilities. CMS publishes no hospital-to-SNF flows, so this page runs on counts a hospital provides. The schema is fixed so real data drops in without any rework; a modeled catchment option (built from public Medicare utilization and hospital service-area files) is planned and will carry a “modeled” label everywhere it appears.\n\nUpload CSV\nDownload the template\nRemove uploaded data\nUse aggregated counts (hospital → SNF → number of discharges in a period), not patient records. Data stays in this browser; nothing is uploaded to a server.\nColumns: hospital_ccn, hospital_name, snf_ccn, period_start, period_end, n_discharges · optional hospital_lat, hospital_lng (needed for distances and nearby alternatives). Dates as YYYY-MM-DD. Keep leading zeros in CCNs.\na_wellformed.csv: 12 valid rows, 2 hospitals\nHospital\nJohns Hopkins Hospital (210009) · 161 discharges\nLAC+USC Medical Center (050600) · 35 discharges\n2025-01-01 to 2025-06-30 · hospital-reported\nDischarges to SNFs\n35\n2 facilities\nTo 4–5★ facilities\n37%\n13 discharges\nTo 3★ facilities\n0%\n0 discharges\nTo 1–2★ facilities\n63%\n22 discharges\nUnrated or unmatched CCN\n0%\n0 to CCNs not in the CMS file\nVolume-weighted averages of the destinations' CMS measures:\noverall stars 2.74\nshort-stay rehospitalization 20.6%\n30-day preventable readmission after SNF discharge 11.1%\ndischarge to community 35.7%\nWeighted by discharges; facilities with a suppressed value are left out of that average. These are facility-level CMS rates, not this hospital's own patients' outcomes.\nDestinations · 2\nFacility\tDischarges\tShare\tStars\tMiles\tRehosp. %\tReadmit %\tTo community %\tFines 3-yr\tG–L deficiencies\nMaple Healthcare Center\nLos Angeles, CA · abuse icon\n\t22\t63%\t\n2\n2\n4\n3\n\t4.3\t24.3%\t11.3%\t22.1%\t$164,264\t6\nHollenbeck Palms\nLos Angeles, CA\n\t13\t37%\t\n4\n3\n3\n5\n\t1.5\t14.5%\t10.8%\t58.7%\t$0\t2\n4–5★ facilities near this hospital\nwithin\n5 mi\n12 facilities rated 4–5★ overall (excluding special-focus and abuse-icon facilities) with 992 certified beds in total; their simple average short-stay rehospitalization is 16.6% versus 20.6% weighted across current destinations. This hospital sent 22 discharges (63%) to 1–2★ facilities in the period.\nArithmetic on CMS facility averages, for sizing the conversation. It does not say these facilities have capacity or are clinically right for the patients, and it is not an estimate of readmissions avoided.\nFacility\tMiles\tStars\tBeds\tResidents/day\tRehosp. %\tReadmit %\tTo community %\tFines 3-yr\tAlready a destination\nHollenbeck Palms\nLos Angeles, CA\n\t1.5\t\n4\n3\n3\n5\n\t106\t54\t14.5%\t10.8%\t58.7%\t$0\tyes\nHuntington Healthcare Center\nLos Angeles, CA\n\t2.0\t\n4\n4\n5\n1\n\t99\t94\t2.6%\t7.9%\t\t$13,635\t\nEast Los Angeles Doctors Hosp\nLos Angeles, CA\n\t3.0\t\n5\n5\n4\n4\n\t25\t24\t\t\t\t$0\t\nLos Angeles Comm Hospital\nLos Angeles, CA\n\t3.0\t\n4\n4\n–\n2\n\t39\t38\t\t\t\t$12,670\t\nAngels Nursing Health Center\nLos Angeles, CA\n\t3.5\t\n5\n4\n5\n4\n\t49\t45\t19.2%\t11.5%\t\t$71,566\t\nBonnie Brae Skilled Nursing\nLos Angeles, CA\n\t3.5\t\n5\n4\n5\n3\n\t59\t43\t19.6%\t10.2%\t\t$0\t\nWestlake Convalescent Hospital\nLos Angeles, CA\n\t3.5\t\n4\n3\n5\n4\n\t114\t70\t14.8%\t\t\t$0\t\nPih Health Good Samaritan Hospital D/P Snf\nLos Angeles, CA\n\t3.5\t\n5\n5\n2\n5\n\t28\t24\t32.6%\t9.4%\t45.4%\t$0\t\nBurlington Convalescent Hospital\nLos Angeles, CA\n\t3.5\t\n4\n4\n4\n4\n\t124\t116\t21.7%\t10.1%\t27.0%\t$8,278\t\nAlden Terrace Convalescent Hospital\nLos Angeles, CA\n\t4.2\t\n5\n4\n5\n4\n\t210\t194\t7.9%\t9.1%\t\t$0\t\nAlhambra Hospital Med Ctr Dp/Snf\nAlhambra, CA\n\t4.5\t\n4\n4\n4\n3\n\t26\t25\t\t\t\t$0\t\nAtherton Baptist Home\nAlhambra, CA\n\t4.9\t\n5\n4\n5\n4\n\t113\t60\t\t9.8%\t44.0%\t$0\t\nSource labels: every row above is “hospital-reported” (your upload). CMS facility data as of 2026-09-01."
+ },
+ "a_after_reload": {
+  "status": "previous upload (this browser): 12 valid rows, 2 hospitals",
+  "cards": [
+   [
+    "Discharges to SNFs",
+    "161",
+    "10 facilities"
+   ],
+   [
+    "To 4–5★ facilities",
+    "10%",
+    "16 discharges",
+    ""
+   ],
+   [
+    "To 3★ facilities",
+    "19%",
+    "30 discharges",
+    ""
+   ],
+   [
+    "To 1–2★ facilities",
+    "66%",
+    "106 discharges",
+    ""
+   ],
+   [
+    "Unrated or unmatched CCN",
+    "6%",
+    "0 to CCNs not in the CMS file",
+    ""
+   ]
+  ],
+  "weighted": "Volume-weighted averages of the destinations' CMS measures:\noverall stars 2.09\nshort-stay rehospitalization 20.2%\n30-day preventable readmission after SNF discharge 11.3%\ndischarge to community 49.3%\nWeighted by discharges; facilities with a suppressed value are left out of that average. These are facility-level CMS rates, not this hospital's own patients' outcomes.",
+  "tables": [
+   [
+    [
+     "Facility",
+     "Discharges",
+     "Share",
+     "Stars",
+     "Miles",
+     "Rehosp. %",
+     "Readmit %",
+     "To community %",
+     "Fines 3-yr",
+     "G–L deficiencies"
+    ],
+    [
+     "White Oak Rehabilitation and Nursing Center\nHyattsville, MD · abuse icon",
+     "40",
+     "25%",
+     "1\n1\n4\n3",
+     "30.9",
+     "21.9%",
+     "11.9%",
+     "43.4%",
+     "$76,515",
+     "2"
+    ],
+    [
+     "Fairland Center\nSilver Spring, MD",
+     "30",
+     "19%",
+     "2\n2\n3\n2",
+     "25.2",
+     "18.3%",
+     "11.6%",
+     "53.1%",
+     "$0",
+     "0"
+    ],
+    [
+     "Autumn Lake Healthcare At Long Green\nBaltimore, MD",
+     "25",
+     "16%",
+     "1\n1\n3\n2",
+     "5.0",
+     "22.7%",
+     "10.7%",
+     "39.7%",
+     "$0",
+     "0"
+    ],
+    [
+     "St. Elizabeth Rehabilitation & Nursing Center\nBaltimore, MD",
+     "18",
+     "11%",
+     "3\n3\n4\n3",
+     "4.6",
+     "13.8%",
+     "10.2%",
+     "64.7%",
+     "$66,996",
+     "3"
+    ],
+    [
+     "Autumn Lake Healthcare At Ballenger Creek\nFrederick, MD",
+     "12",
+     "7%",
+     "3\n2\n5\n3",
+     "40.6",
+     "14.6%",
+     "10.8%",
+     "57.1%",
+     "$0",
+     "2"
+    ],
+    [
+     "Carroll Park Healthcare\nBaltimore, MD · abuse icon",
+     "11",
+     "7%",
+     "2\n2\n4\n2",
+     "4.6",
+     "20.2%",
+     "11.6%",
+     "38.0%",
+     "$306,550",
+     "4"
+    ],
+    [
+     "Complete Care At Annapolis\nAnnapolis, MD",
+     "9",
+     "6%",
+     "5\n4\n5\n3",
+     "23.8",
+     "27.1%",
+     "12.9%",
+     "53.6%",
+     "$0",
+     "0"
+    ],
+    [
+     "St. Mary's Nursing Center Inc\nLeonardtown, MD",
+     "7",
+     "4%",
+     "5\n5\n5\n3",
+     "68.9",
+     "17.8%",
+     "10.2%",
+     "68.1%",
+     "$0",
+     "0"
+    ],
+    [
+     "Pines Nursing and Rehab\nEaston, MD · SFF",
+     "5",
+     "3%",
+     "–\n–\n–\n–",
+     "46.7",
+     "18.8%",
+     "11.7%",
+     "38.4%",
+     "$24,088",
+     "5"
+    ],
+    [
+     "Future Care Annapolis\nAnnapolis, MD",
+     "4",
+     "2%",
+     "–\n–\n–\n–",
+     "22.4",
+     "38.2%",
+     "",
+     "",
+     "$0",
+     "0"
+    ]
+   ],
+   [
+    [
+     "Facility",
+     "Miles",
+     "Stars",
+     "Beds",
+     "Residents/day",
+     "Rehosp. %",
+     "Readmit %",
+     "To community %",
+     "Fines 3-yr",
+     "Already a destination"
+    ],
+    [
+     "Transitional Care Services At Mercy Medical Center\nBaltimore, MD",
+     "1.2",
+     "5\n5\n5\n5",
+     "35",
+     "26",
+     "27.0%",
+     "9.5%",
+     "66.2%",
+     "$0",
+     ""
+    ],
+    [
+     "Future Care Canton Harbor\nBaltimore, MD",
+     "1.7",
+     "5\n5\n5\n4",
+     "160",
+     "153",
+     "20.0%",
+     "12.4%",
+     "58.5%",
+     "$13,627",
+     ""
+    ],
+    [
+     "Future Care Charles Village\nBaltimore, MD",
+     "1.9",
+     "4\n3\n5\n3",
+     "109",
+     "102",
+     "20.1%",
+     "12.3%",
+     "65.4%",
+     "$0",
+     ""
+    ],
+    [
+     "Roland Park Place\nBaltimore, MD",
+     "2.2",
+     "5\n5\n5\n5",
+     "16",
+     "12",
+     "3.7%",
+     "10.0%",
+     "73.6%",
+     "$0",
+     ""
+    ],
+    [
+     "Future Care Sandtown-Winchester\nBaltimore, MD",
+     "2.4",
+     "5\n4\n5\n4",
+     "148",
+     "142",
+     "16.7%",
+     "10.6%",
+     "56.6%",
+     "$0",
+     ""
+    ],
+    [
+     "Future Care Northpoint\nBaltimore, MD",
+     "3.1",
+     "5\n4\n5\n3",
+     "180",
+     "144",
+     "15.4%",
+     "10.3%",
+     "57.5%",
+     "$0",
+     ""
+    ],
+    [
+     "Keswick Multi-Care Center\nBaltimore, MD",
+     "3.4",
+     "4\n3\n4\n5",
+     "170",
+     "156",
+     "18.8%",
+     "11.7%",
+     "63.5%",
+     "$0",
+     ""
+    ],
+    [
+     "Good Samaritan Nursing Home Operator, LLC\nBaltimore, MD",
+     "4.3",
+     "4\n4\n4\n3",
+     "146",
+     "141",
+     "21.1%",
+     "11.8%",
+     "66.7%",
+     "$0",
+     ""
+    ],
+    [
+     "Northwest Healthcare Center\nBaltimore, MD",
+     "5.0",
+     "4\n4\n4\n4",
+     "91",
+     "83",
+     "15.8%",
+     "11.2%",
+     "45.8%",
+     "$0",
+     ""
+    ],
+    [
+     "Future Care Irvington\nBaltimore, MD",
+     "5.2",
+     "4\n4\n4\n3",
+     "200",
+     "182",
+     "23.9%",
+     "11.3%",
+     "61.7%",
+     "$8,417",
+     ""
+    ],
+    [
+     "Charlestown Community Inc\nCatonsville, MD",
+     "6.3",
+     "5\n4\n4\n5",
+     "103",
+     "83",
+     "20.2%",
+     "8.8%",
+     "62.5%",
+     "$0",
+     ""
+    ],
+    [
+     "Complete Care At Multi Medical Center LLC\nTowson, MD",
+     "6.3",
+     "5\n4\n5\n3",
+     "118",
+     "106",
+     "23.3%",
+     "14.3%",
+     "60.8%",
+     "$0",
+     ""
+    ],
+    [
+     "Little Sisters of the Poor\nBaltimore, MD",
+     "6.3",
+     "4\n4\n1\n5",
+     "20",
+     "17",
+     "",
+     "",
+     "",
+     "$0",
+     ""
+    ],
+    [
+     "Lochearn Nursing Home, LLC\nBaltimore, MD",
+     "7.0",
+     "5\n4\n5\n3",
+     "200",
+     "192",
+     "13.1%",
+     "10.5%",
+     "55.5%",
+     "$0",
+     ""
+    ],
+    [
+     "Autumn Lake Healthcare At Parkville\nBaltimore, MD",
+     "7.4",
+     "4\n4\n4\n2",
+     "135",
+     "124",
+     "23.1%",
+     "13.6%",
+     "44.5%",
+     "$0",
+     ""
+    ],
+    [
+     "Franklin Woods Center\nBaltimore, MD",
+     "7.5",
+     "4\n4\n4\n3",
+     "117",
+     "105",
+     "18.2%",
+     "16.1%",
+     "62.0%",
+     "$0",
+     ""
+    ],
+    [
+     "Edenwald\nTowson, MD",
+     "7.6",
+     "5\n5\n5\n5",
+     "70",
+     "34",
+     "11.1%",
+     "9.7%",
+     "16.9%",
+     "$0",
+     ""
+    ],
+    [
+     "Pickersgill Retirement Community\nTowson, MD",
+     "7.7",
+     "4\n4\n3\n4",
+     "43",
+     "31",
+     "15.4%",
+     "10.3%",
+     "49.7%",
+     "$0",
+     ""
+    ],
+    [
+     "Chestnut Grn Hlth Ctr Blakehur\nTowson, MD",
+     "8.0",
+     "5\n4\n3\n5",
+     "49",
+     "38",
+     "19.2%",
+     "11.4%",
+     "55.6%",
+     "$0",
+     ""
+    ],
+    [
+     "Oak Crest Village\nParkville, MD",
+     "8.1",
+     "4\n4\n4\n4",
+     "80",
+     "77",
+     "13.1%",
+     "11.1%",
+     "66.6%",
+     "$49,725",
+     ""
+    ],
+    [
+     "St. Joseph's Nursing Home\nCatonsville, MD",
+     "8.2",
+     "5\n5\n4\n5",
+     "44",
+     "40",
+     "",
+     "",
+     "",
+     "$0",
+     ""
+    ],
+    [
+     "Advanced Rehab At Autumn Lake Healthcare\nLutherville, MD",
+     "8.6",
+     "4\n4\n4\n2",
+     "110",
+     "82",
+     "18.4%",
+     "12.9%",
+     "65.8%",
+     "$8,021",
+     ""
+    ],
+    [
+     "Meadow Park Rehabilitation and Healthcare Center\nCatonsville, MD",
+     "8.6",
+     "4\n3\n5\n2",
+     "120",
+     "115",
+     "11.3%",
+     "12.9%",
+     "53.7%",
+     "$11,452",
+     ""
+    ],
+    [
+     "Marley Neck Rehabilitation and Wellness Center\nGlen Burnie, MD",
+     "9.9",
+     "4\n3\n5\n3",
+     "95",
+     "90",
+     "24.1%",
+     "13.2%",
+     "59.4%",
+     "$0",
+     ""
+    ],
+    [
+     "Stella Maris, Inc.\nTimonium, MD",
+     "10.8",
+     "4\n4\n2\n4",
+     "390",
+     "340",
+     "23.6%",
+     "14.3%",
+     "61.6%",
+     "$0",
+     ""
+    ],
+    [
+     "Future Care Old Court\nRandallstown, MD",
+     "11.0",
+     "5\n5\n4\n4",
+     "141",
+     "137",
+     "24.0%",
+     "9.6%",
+     "56.7%",
+     "$0",
+     ""
+    ],
+    [
+     "North Oaks Communities\nBaltimore, MD",
+     "11.1",
+     "4\n5\n1\n5",
+     "37",
+     "24",
+     "30.9%",
+     "12.4%",
+     "22.7%",
+     "$0",
+     ""
+    ],
+    [
+     "Glen Meadows Retirement Com.\nGlen Arm, MD",
+     "11.1",
+     "4\n2\n5\n5",
+     "31",
+     "30",
+     "40.1%",
+     "10.5%",
+     "62.1%",
+     "$31,233",
+     ""
+    ],
+    [
+     "Lorien Mays Chapel\nTimonium, MD",
+     "11.9",
+     "4\n4\n3\n2",
+     "93",
+     "83",
+     "20.0%",
+     "16.0%",
+     "64.9%",
+     "$0",
+     ""
+    ],
+    [
+     "The Lutheran Village At Miller's Grant\nEllicott City, MD",
+     "13.4",
+     "5\n5\n3\n5",
+     "16",
+     "13",
+     "",
+     "",
+     "",
+     "$0",
+     ""
+    ],
+    [
+     "Broadmead\nCockeysville, MD",
+     "14.6",
+     "5\n5\n5\n5",
+     "70",
+     "38",
+     "17.9%",
+     "10.6%",
+     "70.3%",
+     "$0",
+     ""
+    ],
+    [
+     "Residences At Vantage Point\nColumbia, MD",
+     "14.9",
+     "5\n4\n5\n5",
+     "44",
+     "19",
+     "0.0%",
+     "11.5%",
+     "57.9%",
+     "$0",
+     ""
+    ]
+   ]
+  ],
+  "altText": "32 facilities rated 4–5★ overall (excluding special-focus and abuse-icon facilities) with 3,381 certified beds in total; their simple average short-stay rehospitalization is 18.9% versus 20.2% weighted across current destinations. This hospital sent 106 discharges (66%) to 1–2★ facilities in the period.",
+  "hospital": "210009",
+  "options": [
+   "Johns Hopkins Hospital (210009) · 161 discharges",
+   "LAC+USC Medical Center (050600) · 35 discharges"
+  ],
+  "ls": 1044,
+  "body": "Discharge flows\n\nWhere a hospital's patients go after discharge, and how much of that volume lands in high- versus low-rated facilities. CMS publishes no hospital-to-SNF flows, so this page runs on counts a hospital provides. The schema is fixed so real data drops in without any rework; a modeled catchment option (built from public Medicare utilization and hospital service-area files) is planned and will carry a “modeled” label everywhere it appears.\n\nUpload CSV\nDownload the template\nRemove uploaded data\nUse aggregated counts (hospital → SNF → number of discharges in a period), not patient records. Data stays in this browser; nothing is uploaded to a server.\nColumns: hospital_ccn, hospital_name, snf_ccn, period_start, period_end, n_discharges · optional hospital_lat, hospital_lng (needed for distances and nearby alternatives). Dates as YYYY-MM-DD. Keep leading zeros in CCNs.\nprevious upload (this browser): 12 valid rows, 2 hospitals\nHospital\nJohns Hopkins Hospital (210009) · 161 discharges\nLAC+USC Medical Center (050600) · 35 discharges\n2025-01-01 to 2025-12-31 · hospital-reported\nDischarges to SNFs\n161\n10 facilities\nTo 4–5★ facilities\n10%\n16 discharges\nTo 3★ facilities\n19%\n30 discharges\nTo 1–2★ facilities\n66%\n106 discharges\nUnrated or unmatched CCN\n6%\n0 to CCNs not in the CMS file\nVolume-weighted averages of the destinations' CMS measures:\noverall stars 2.09\nshort-stay rehospitalization 20.2%\n30-day preventable readmission after SNF discharge 11.3%\ndischarge to community 49.3%\nWeighted by discharges; facilities with a suppressed value are left out of that average. These are facility-level CMS rates, not this hospital's own patients' outcomes.\nDestinations · 10\nFacility\tDischarges\tShare\tStars\tMiles\tRehosp. %\tReadmit %\tTo community %\tFines 3-yr\tG–L deficiencies\nWhite Oak Rehabilitation and Nursing Center\nHyattsville, MD · abuse icon\n\t40\t25%\t\n1\n1\n4\n3\n\t30.9\t21.9%\t11.9%\t43.4%\t$76,515\t2\nFairland Center\nSilver Spring, MD\n\t30\t19%\t\n2\n2\n3\n2\n\t25.2\t18.3%\t11.6%\t53.1%\t$0\t0\nAutumn Lake Healthcare At Long Green\nBaltimore, MD\n\t25\t16%\t\n1\n1\n3\n2\n\t5.0\t22.7%\t10.7%\t39.7%\t$0\t0\nSt. Elizabeth Rehabilitation & Nursing Center\nBaltimore, MD\n\t18\t11%\t\n3\n3\n4\n3\n\t4.6\t13.8%\t10.2%\t64.7%\t$66,996\t3\nAutumn Lake Healthcare At Ballenger Creek\nFrederick, MD\n\t12\t7%\t\n3\n2\n5\n3\n\t40.6\t14.6%\t10.8%\t57.1%\t$0\t2\nCarroll Park Healthcare\nBaltimore, MD · abuse icon\n\t11\t7%\t\n2\n2\n4\n2\n\t4.6\t20.2%\t11.6%\t38.0%\t$306,550\t4\nComplete Care At Annapolis\nAnnapolis, MD\n\t9\t6%\t\n5\n4\n5\n3\n\t23.8\t27.1%\t12.9%\t53.6%\t$0\t0\nSt. Mary's Nursing Center Inc\nLeonardtown, MD\n\t7\t4%\t\n5\n5\n5\n3\n\t68.9\t17.8%\t10.2%\t68.1%\t$0\t0\nPines Nursing and Rehab\nEaston, MD · SFF\n\t5\t3%\t\n–\n–\n–\n–\n\t46.7\t18.8%\t11.7%\t38.4%\t$24,088\t5\nFuture Care Annapolis\nAnnapolis, MD\n\t4\t2%\t\n–\n–\n–\n–\n\t22.4\t38.2%\t\t\t$0\t0\n4–5★ facilities near this hospital\nwithin\n15 mi\n32 facilities rated 4–5★ overall (excluding special-focus and abuse-icon facilities) with 3,381 certified beds in total; their simple average short-stay rehospitalization is 18.9% versus 20.2% weighted across current destinations. This hospital sent 106 discharges (66%) to 1–2★ facilities in the period.\nArithmetic on CMS facility averages, for sizing the conversation. It does not say these facilities have capacity or are clinically right for the patients, and it is not an estimate of readmissions avoided.\nFacility\tMiles\tStars\tBeds\tResidents/day\tRehosp. %\tReadmit %\tTo community %\tFines 3-yr\tAlready a destination\nTransitional Care Services At Mercy Medical Center\nBaltimore, MD\n\t1.2\t\n5\n5\n5\n5\n\t35\t26\t27.0%\t9.5%\t66.2%\t$0\t\nFuture Care Canton Harbor\nBaltimore, MD\n\t1.7\t\n5\n5\n5\n4\n\t160\t153\t20.0%\t12.4%\t58.5%\t$13,627\t\nFuture Care Charles Village\nBaltimore, MD\n\t1.9\t\n4\n3\n5\n3\n\t109\t102\t20.1%\t12.3%\t65.4%\t$0\t\nRoland Park Place\nBaltimore, MD\n\t2.2\t\n5\n5\n5\n5\n\t16\t12\t3.7%\t10.0%\t73.6%\t$0\t\nFuture Care Sandtown-Winchester\nBaltimore, MD\n\t2.4\t\n5\n4\n5\n4\n\t148\t142\t16.7%\t10.6%\t56.6%\t$0\t\nFuture Care Northpoint\nBaltimore, MD\n\t3.1\t\n5\n4\n5\n3\n\t180\t144\t15.4%\t10.3%\t57.5%\t$0\t\nKeswick Multi-Care Center\nBaltimore, MD\n\t3.4\t\n4\n3\n4\n5\n\t170\t156\t18.8%\t11.7%\t63.5%\t$0\t\nGood Samaritan Nursing Home Operator, LLC\nBaltimore, MD\n\t4.3\t\n4\n4\n4\n3\n\t146\t141\t21.1%\t11.8%\t66.7%\t$0\t\nNorthwest Healthcare Center\nBaltimore, MD\n\t5.0\t\n4\n4\n4\n4\n\t91\t83\t15.8%\t11.2%\t45.8%\t$0\t\nFuture Care Irvington\nBaltimore, MD\n\t5.2\t\n4\n4\n4\n3\n\t200\t182\t23.9%\t11.3%\t61.7%\t$8,417\t\nCharlestown Community Inc\nCatonsville, MD\n\t6.3\t\n5\n4\n4\n5\n\t103\t83\t20.2%\t8.8%\t62.5%\t$0\t\nComplete Care At Multi Medical Center LLC\nTowson, MD\n\t6.3\t\n5\n4\n5\n3\n\t118\t106\t23.3%\t14.3%\t60.8%\t$0\t\nLittle Sisters of the Poor\nBaltimore, MD\n\t6.3\t\n4\n4\n1\n5\n\t20\t17\t\t\t\t$0\t\nLochearn Nursing Home, LLC\nBaltimore, MD\n\t7.0\t\n5\n4\n5\n3\n\t200\t192\t13.1%\t10.5%\t55.5%\t$0\t\nAutumn Lake Healthcare At Parkville\nBaltimore, MD\n\t7.4\t\n4\n4\n4\n2\n\t135\t124\t23.1%\t13.6%\t44.5%\t$0\t\nFranklin Woods Center\nBaltimore, MD\n\t7.5\t\n4\n4\n4\n3\n\t117\t105\t18.2%\t16.1%\t62.0%\t$0\t\nEdenwald\nTowson, MD\n\t7.6\t\n5\n5\n5\n5\n\t70\t34\t11.1%\t9.7%\t16.9%\t$0\t\nPickersgill Retirement Community\nTowson, MD\n\t7.7\t\n4\n4\n3\n4\n\t43\t31\t15.4%\t10.3%\t49.7%\t$0\t\nChestnut Grn Hlth Ctr Blakehur\nTowson, MD\n\t8.0\t\n5\n4\n3\n5\n\t49\t38\t19.2%\t11.4%\t55.6%\t$0\t\nOak Crest Village\nParkville, MD\n\t8.1\t\n4\n4\n4\n4\n\t80\t77\t13.1%\t11.1%\t66.6%\t$49,725\t\nSt. Joseph's Nursing Home\nCatonsville, MD\n\t8.2\t\n5\n5\n4\n5\n\t44\t40\t\t\t\t$0\t\nAdvanced Rehab At Autumn Lake Healthcare\nLutherville, MD\n\t8.6\t\n4\n4\n4\n2\n\t110\t82\t18.4%\t12.9%\t65.8%\t$8,021\t\nMeadow Park Rehabilitation and Healthcare Center\nCatonsville, MD\n\t8.6\t\n4\n3\n5\n2\n\t120\t115\t11.3%\t12.9%\t53.7%\t$11,452\t\nMarley Neck Rehabilitation and Wellness Center\nGlen Burnie, MD\n\t9.9\t\n4\n3\n5\n3\n\t95\t90\t24.1%\t13.2%\t59.4%\t$0\t\nStella Maris, Inc.\nTimonium, MD\n\t10.8\t\n4\n4\n2\n4\n\t390\t340\t23.6%\t14.3%\t61.6%\t$0\t\nFuture Care Old Court\nRandallstown, MD\n\t11.0\t\n5\n5\n4\n4\n\t141\t137\t24.0%\t9.6%\t56.7%\t$0\t\nNorth Oaks Communities\nBaltimore, MD\n\t11.1\t\n4\n5\n1\n5\n\t37\t24\t30.9%\t12.4%\t22.7%\t$0\t\nGlen Meadows Retirement Com.\nGlen Arm, MD\n\t11.1\t\n4\n2\n5\n5\n\t31\t30\t40.1%\t10.5%\t62.1%\t$31,233\t\nLorien Mays Chapel\nTimonium, MD\n\t11.9\t\n4\n4\n3\n2\n\t93\t83\t20.0%\t16.0%\t64.9%\t$0\t\nThe Lutheran Village At Miller's Grant\nEllicott City, MD\n\t13.4\t\n5\n5\n3\n5\n\t16\t13\t\t\t\t$0\t\nBroadmead\nCockeysville, MD\n\t14.6\t\n5\n5\n5\n5\n\t70\t38\t17.9%\t10.6%\t70.3%\t$0\t\nResidences At Vantage Point\nColumbia, MD\n\t14.9\t\n5\n4\n5\n5\n\t44\t19\t0.0%\t11.5%\t57.9%\t$0\t\nSource labels: every row above is “hospital-reported” (your upload). CMS facility data as of 2026-09-01."
+ },
+ "a_after_remove": {
+  "status": null,
+  "cards": [],
+  "weighted": null,
+  "tables": [],
+  "altText": null,
+  "hospital": null,
+  "options": [],
+  "ls": null,
+  "body": "Discharge flows\n\nWhere a hospital's patients go after discharge, and how much of that volume lands in high- versus low-rated facilities. CMS publishes no hospital-to-SNF flows, so this page runs on counts a hospital provides. The schema is fixed so real data drops in without any rework; a modeled catchment option (built from public Medicare utilization and hospital service-area files) is planned and will carry a “modeled” label everywhere it appears.\n\nUpload CSV\nDownload the template\nUse aggregated counts (hospital → SNF → number of discharges in a period), not patient records. Data stays in this browser; nothing is uploaded to a server.\nColumns: hospital_ccn, hospital_name, snf_ccn, period_start, period_end, n_discharges · optional hospital_lat, hospital_lng (needed for distances and nearby alternatives). Dates as YYYY-MM-DD. Keep leading zeros in CCNs.\nNo discharge data loaded.\nUpload a CSV to see the quality mix of a hospital's post-acute destinations. Meanwhile, the Map can show every SNF within a radius of any hospital address."
+ },
+ "a_after_remove_reload": {
+  "status": null,
+  "cards": [],
+  "weighted": null,
+  "tables": [],
+  "altText": null,
+  "hospital": null,
+  "options": [],
+  "ls": null,
+  "body": "Discharge flows\n\nWhere a hospital's patients go after discharge, and how much of that volume lands in high- versus low-rated facilities. CMS publishes no hospital-to-SNF flows, so this page runs on counts a hospital provides. The schema is fixed so real data drops in without any rework; a modeled catchment option (built from public Medicare utilization and hospital service-area files) is planned and will carry a “modeled” label everywhere it appears.\n\nUpload CSV\nDownload the template\nUse aggregated counts (hospital → SNF → number of discharges in a period), not patient records. Data stays in this browser; nothing is uploaded to a server.\nColumns: hospital_ccn, hospital_name, snf_ccn, period_start, period_end, n_discharges · optional hospital_lat, hospital_lng (needed for distances and nearby alternatives). Dates as YYYY-MM-DD. Keep leading zeros in CCNs.\nNo discharge data loaded.\nUpload a CSV to see the quality mix of a hospital's post-acute destinations. Meanwhile, the Map can show every SNF within a radius of any hospital address."
+ },
+ "b_edge.csv": {
+  "status": "b_edge.csv: 8 valid rows, 1 hospital",
+  "cards": [
+   [
+    "Discharges to SNFs",
+    "48",
+    "7 facilities"
+   ],
+   [
+    "To 4–5★ facilities",
+    "0%",
+    "0 discharges",
+    ""
+   ],
+   [
+    "To 3★ facilities",
+    "27%",
+    "13 discharges",
+    ""
+   ],
+   [
+    "To 1–2★ facilities",
+    "52%",
+    "25 discharges",
+    ""
+   ],
+   [
+    "Unrated or unmatched CCN",
+    "21%",
+    "10 to CCNs not in the CMS file",
+    ""
+   ]
+  ],
+  "weighted": "Volume-weighted averages of the destinations' CMS measures:\noverall stars 1.68\nshort-stay rehospitalization 20.1%\n30-day preventable readmission after SNF discharge 11.5%\ndischarge to community 48.1%\nWeighted by discharges; facilities with a suppressed value are left out of that average. These are facility-level CMS rates, not this hospital's own patients' outcomes.",
+  "tables": [
+   [
+    [
+     "Facility",
+     "Discharges",
+     "Share",
+     "Stars",
+     "Miles",
+     "Rehosp. %",
+     "Readmit %",
+     "To community %",
+     "Fines 3-yr",
+     "G–L deficiencies"
+    ],
+    [
+     "White Oak Rehabilitation and Nursing Center\nHyattsville, MD · abuse icon",
+     "25",
+     "52%",
+     "1\n1\n4\n3",
+     "30.9",
+     "21.9%",
+     "11.9%",
+     "43.4%",
+     "$76,515",
+     "2"
+    ],
+    [
+     "CCN 999999 not in CMS file",
+     "8",
+     "17%",
+     "",
+     "",
+     "",
+     "",
+     "",
+     "",
+     ""
+    ],
+    [
+     "St. Elizabeth Rehabilitation & Nursing Center\nBaltimore, MD",
+     "7",
+     "15%",
+     "3\n3\n4\n3",
+     "4.6",
+     "13.8%",
+     "10.2%",
+     "64.7%",
+     "$66,996",
+     "3"
+    ],
+    [
+     "Especially Kidz Health & Rehab\nShelbyville, IN",
+     "6",
+     "13%",
+     "3\n4\n3\n1",
+     "490.9",
+     "",
+     "",
+     "",
+     "$0",
+     "0"
+    ],
+    [
+     "CCN 21Z999 not in CMS file",
+     "2",
+     "4%",
+     "",
+     "",
+     "",
+     "",
+     "",
+     "",
+     ""
+    ],
+    [
+     "Complete Care At Annapolis\nAnnapolis, MD",
+     "0",
+     "0%",
+     "5\n4\n5\n3",
+     "23.8",
+     "27.1%",
+     "12.9%",
+     "53.6%",
+     "$0",
+     "0"
+    ],
+    [
+     "St. Mary's Nursing Center Inc\nLeonardtown, MD",
+     "0",
+     "0%",
+     "5\n5\n5\n3",
+     "68.9",
+     "17.8%",
+     "10.2%",
+     "68.1%",
+     "$0",
+     "0"
+    ]
+   ],
+   [
+    [
+     "Facility",
+     "Miles",
+     "Stars",
+     "Beds",
+     "Residents/day",
+     "Rehosp. %",
+     "Readmit %",
+     "To community %",
+     "Fines 3-yr",
+     "Already a destination"
+    ],
+    [
+     "Transitional Care Services At Mercy Medical Center\nBaltimore, MD",
+     "1.2",
+     "5\n5\n5\n5",
+     "35",
+     "26",
+     "27.0%",
+     "9.5%",
+     "66.2%",
+     "$0",
+     ""
+    ],
+    [
+     "Future Care Canton Harbor\nBaltimore, MD",
+     "1.7",
+     "5\n5\n5\n4",
+     "160",
+     "153",
+     "20.0%",
+     "12.4%",
+     "58.5%",
+     "$13,627",
+     ""
+    ],
+    [
+     "Future Care Charles Village\nBaltimore, MD",
+     "1.9",
+     "4\n3\n5\n3",
+     "109",
+     "102",
+     "20.1%",
+     "12.3%",
+     "65.4%",
+     "$0",
+     ""
+    ],
+    [
+     "Roland Park Place\nBaltimore, MD",
+     "2.2",
+     "5\n5\n5\n5",
+     "16",
+     "12",
+     "3.7%",
+     "10.0%",
+     "73.6%",
+     "$0",
+     ""
+    ],
+    [
+     "Future Care Sandtown-Winchester\nBaltimore, MD",
+     "2.4",
+     "5\n4\n5\n4",
+     "148",
+     "142",
+     "16.7%",
+     "10.6%",
+     "56.6%",
+     "$0",
+     ""
+    ],
+    [
+     "Future Care Northpoint\nBaltimore, MD",
+     "3.1",
+     "5\n4\n5\n3",
+     "180",
+     "144",
+     "15.4%",
+     "10.3%",
+     "57.5%",
+     "$0",
+     ""
+    ],
+    [
+     "Keswick Multi-Care Center\nBaltimore, MD",
+     "3.4",
+     "4\n3\n4\n5",
+     "170",
+     "156",
+     "18.8%",
+     "11.7%",
+     "63.5%",
+     "$0",
+     ""
+    ],
+    [
+     "Good Samaritan Nursing Home Operator, LLC\nBaltimore, MD",
+     "4.3",
+     "4\n4\n4\n3",
+     "146",
+     "141",
+     "21.1%",
+     "11.8%",
+     "66.7%",
+     "$0",
+     ""
+    ],
+    [
+     "Northwest Healthcare Center\nBaltimore, MD",
+     "5.0",
+     "4\n4\n4\n4",
+     "91",
+     "83",
+     "15.8%",
+     "11.2%",
+     "45.8%",
+     "$0",
+     ""
+    ],
+    [
+     "Future Care Irvington\nBaltimore, MD",
+     "5.2",
+     "4\n4\n4\n3",
+     "200",
+     "182",
+     "23.9%",
+     "11.3%",
+     "61.7%",
+     "$8,417",
+     ""
+    ],
+    [
+     "Charlestown Community Inc\nCatonsville, MD",
+     "6.3",
+     "5\n4\n4\n5",
+     "103",
+     "83",
+     "20.2%",
+     "8.8%",
+     "62.5%",
+     "$0",
+     ""
+    ],
+    [
+     "Complete Care At Multi Medical Center LLC\nTowson, MD",
+     "6.3",
+     "5\n4\n5\n3",
+     "118",
+     "106",
+     "23.3%",
+     "14.3%",
+     "60.8%",
+     "$0",
+     ""
+    ],
+    [
+     "Little Sisters of the Poor\nBaltimore, MD",
+     "6.3",
+     "4\n4\n1\n5",
+     "20",
+     "17",
+     "",
+     "",
+     "",
+     "$0",
+     ""
+    ],
+    [
+     "Lochearn Nursing Home, LLC\nBaltimore, MD",
+     "7.0",
+     "5\n4\n5\n3",
+     "200",
+     "192",
+     "13.1%",
+     "10.5%",
+     "55.5%",
+     "$0",
+     ""
+    ],
+    [
+     "Autumn Lake Healthcare At Parkville\nBaltimore, MD",
+     "7.4",
+     "4\n4\n4\n2",
+     "135",
+     "124",
+     "23.1%",
+     "13.6%",
+     "44.5%",
+     "$0",
+     ""
+    ],
+    [
+     "Franklin Woods Center\nBaltimore, MD",
+     "7.5",
+     "4\n4\n4\n3",
+     "117",
+     "105",
+     "18.2%",
+     "16.1%",
+     "62.0%",
+     "$0",
+     ""
+    ],
+    [
+     "Edenwald\nTowson, MD",
+     "7.6",
+     "5\n5\n5\n5",
+     "70",
+     "34",
+     "11.1%",
+     "9.7%",
+     "16.9%",
+     "$0",
+     ""
+    ],
+    [
+     "Pickersgill Retirement Community\nTowson, MD",
+     "7.7",
+     "4\n4\n3\n4",
+     "43",
+     "31",
+     "15.4%",
+     "10.3%",
+     "49.7%",
+     "$0",
+     ""
+    ],
+    [
+     "Chestnut Grn Hlth Ctr Blakehur\nTowson, MD",
+     "8.0",
+     "5\n4\n3\n5",
+     "49",
+     "38",
+     "19.2%",
+     "11.4%",
+     "55.6%",
+     "$0",
+     ""
+    ],
+    [
+     "Oak Crest Village\nParkville, MD",
+     "8.1",
+     "4\n4\n4\n4",
+     "80",
+     "77",
+     "13.1%",
+     "11.1%",
+     "66.6%",
+     "$49,725",
+     ""
+    ],
+    [
+     "St. Joseph's Nursing Home\nCatonsville, MD",
+     "8.2",
+     "5\n5\n4\n5",
+     "44",
+     "40",
+     "",
+     "",
+     "",
+     "$0",
+     ""
+    ],
+    [
+     "Advanced Rehab At Autumn Lake Healthcare\nLutherville, MD",
+     "8.6",
+     "4\n4\n4\n2",
+     "110",
+     "82",
+     "18.4%",
+     "12.9%",
+     "65.8%",
+     "$8,021",
+     ""
+    ],
+    [
+     "Meadow Park Rehabilitation and Healthcare Center\nCatonsville, MD",
+     "8.6",
+     "4\n3\n5\n2",
+     "120",
+     "115",
+     "11.3%",
+     "12.9%",
+     "53.7%",
+     "$11,452",
+     ""
+    ],
+    [
+     "Marley Neck Rehabilitation and Wellness Center\nGlen Burnie, MD",
+     "9.9",
+     "4\n3\n5\n3",
+     "95",
+     "90",
+     "24.1%",
+     "13.2%",
+     "59.4%",
+     "$0",
+     ""
+    ],
+    [
+     "Stella Maris, Inc.\nTimonium, MD",
+     "10.8",
+     "4\n4\n2\n4",
+     "390",
+     "340",
+     "23.6%",
+     "14.3%",
+     "61.6%",
+     "$0",
+     ""
+    ],
+    [
+     "Future Care Old Court\nRandallstown, MD",
+     "11.0",
+     "5\n5\n4\n4",
+     "141",
+     "137",
+     "24.0%",
+     "9.6%",
+     "56.7%",
+     "$0",
+     ""
+    ],
+    [
+     "North Oaks Communities\nBaltimore, MD",
+     "11.1",
+     "4\n5\n1\n5",
+     "37",
+     "24",
+     "30.9%",
+     "12.4%",
+     "22.7%",
+     "$0",
+     ""
+    ],
+    [
+     "Glen Meadows Retirement Com.\nGlen Arm, MD",
+     "11.1",
+     "4\n2\n5\n5",
+     "31",
+     "30",
+     "40.1%",
+     "10.5%",
+     "62.1%",
+     "$31,233",
+     ""
+    ],
+    [
+     "Lorien Mays Chapel\nTimonium, MD",
+     "11.9",
+     "4\n4\n3\n2",
+     "93",
+     "83",
+     "20.0%",
+     "16.0%",
+     "64.9%",
+     "$0",
+     ""
+    ],
+    [
+     "The Lutheran Village At Miller's Grant\nEllicott City, MD",
+     "13.4",
+     "5\n5\n3\n5",
+     "16",
+     "13",
+     "",
+     "",
+     "",
+     "$0",
+     ""
+    ],
+    [
+     "Broadmead\nCockeysville, MD",
+     "14.6",
+     "5\n5\n5\n5",
+     "70",
+     "38",
+     "17.9%",
+     "10.6%",
+     "70.3%",
+     "$0",
+     ""
+    ],
+    [
+     "Residences At Vantage Point\nColumbia, MD",
+     "14.9",
+     "5\n4\n5\n5",
+     "44",
+     "19",
+     "0.0%",
+     "11.5%",
+     "57.9%",
+     "$0",
+     ""
+    ]
+   ]
+  ],
+  "altText": "32 facilities rated 4–5★ overall (excluding special-focus and abuse-icon facilities) with 3,381 certified beds in total; their simple average short-stay rehospitalization is 18.9% versus 20.1% weighted across current destinations. This hospital sent 25 discharges (52%) to 1–2★ facilities in the period.",
+  "hospital": "210009",
+  "options": [
+   "Johns Hopkins Hospital, East Baltimore (210009) · 48 discharges"
+  ],
+  "ls": 996,
+  "body": "Discharge flows\n\nWhere a hospital's patients go after discharge, and how much of that volume lands in high- versus low-rated facilities. CMS publishes no hospital-to-SNF flows, so this page runs on counts a hospital provides. The schema is fixed so real data drops in without any rework; a modeled catchment option (built from public Medicare utilization and hospital service-area files) is planned and will carry a “modeled” label everywhere it appears.\n\nUpload CSV\nDownload the template\nRemove uploaded data\nUse aggregated counts (hospital → SNF → number of discharges in a period), not patient records. Data stays in this browser; nothing is uploaded to a server.\nColumns: hospital_ccn, hospital_name, snf_ccn, period_start, period_end, n_discharges · optional hospital_lat, hospital_lng (needed for distances and nearby alternatives). Dates as YYYY-MM-DD. Keep leading zeros in CCNs.\nb_edge.csv: 8 valid rows, 1 hospital\nHospital\nJohns Hopkins Hospital, East Baltimore (210009) · 48 discharges\n2025-01-01 to 2025-12-31 · hospital-reported\nDischarges to SNFs\n48\n7 facilities\nTo 4–5★ facilities\n0%\n0 discharges\nTo 3★ facilities\n27%\n13 discharges\nTo 1–2★ facilities\n52%\n25 discharges\nUnrated or unmatched CCN\n21%\n10 to CCNs not in the CMS file\nVolume-weighted averages of the destinations' CMS measures:\noverall stars 1.68\nshort-stay rehospitalization 20.1%\n30-day preventable readmission after SNF discharge 11.5%\ndischarge to community 48.1%\nWeighted by discharges; facilities with a suppressed value are left out of that average. These are facility-level CMS rates, not this hospital's own patients' outcomes.\nDestinations · 7\nFacility\tDischarges\tShare\tStars\tMiles\tRehosp. %\tReadmit %\tTo community %\tFines 3-yr\tG–L deficiencies\nWhite Oak Rehabilitation and Nursing Center\nHyattsville, MD · abuse icon\n\t25\t52%\t\n1\n1\n4\n3\n\t30.9\t21.9%\t11.9%\t43.4%\t$76,515\t2\nCCN 999999 not in CMS file\t8\t17%\t\t\t\t\t\t\t\nSt. Elizabeth Rehabilitation & Nursing Center\nBaltimore, MD\n\t7\t15%\t\n3\n3\n4\n3\n\t4.6\t13.8%\t10.2%\t64.7%\t$66,996\t3\nEspecially Kidz Health & Rehab\nShelbyville, IN\n\t6\t13%\t\n3\n4\n3\n1\n\t490.9\t\t\t\t$0\t0\nCCN 21Z999 not in CMS file\t2\t4%\t\t\t\t\t\t\t\nComplete Care At Annapolis\nAnnapolis, MD\n\t0\t0%\t\n5\n4\n5\n3\n\t23.8\t27.1%\t12.9%\t53.6%\t$0\t0\nSt. Mary's Nursing Center Inc\nLeonardtown, MD\n\t0\t0%\t\n5\n5\n5\n3\n\t68.9\t17.8%\t10.2%\t68.1%\t$0\t0\n4–5★ facilities near this hospital\nwithin\n15 mi\n32 facilities rated 4–5★ overall (excluding special-focus and abuse-icon facilities) with 3,381 certified beds in total; their simple average short-stay rehospitalization is 18.9% versus 20.1% weighted across current destinations. This hospital sent 25 discharges (52%) to 1–2★ facilities in the period.\nArithmetic on CMS facility averages, for sizing the conversation. It does not say these facilities have capacity or are clinically right for the patients, and it is not an estimate of readmissions avoided.\nFacility\tMiles\tStars\tBeds\tResidents/day\tRehosp. %\tReadmit %\tTo community %\tFines 3-yr\tAlready a destination\nTransitional Care Services At Mercy Medical Center\nBaltimore, MD\n\t1.2\t\n5\n5\n5\n5\n\t35\t26\t27.0%\t9.5%\t66.2%\t$0\t\nFuture Care Canton Harbor\nBaltimore, MD\n\t1.7\t\n5\n5\n5\n4\n\t160\t153\t20.0%\t12.4%\t58.5%\t$13,627\t\nFuture Care Charles Village\nBaltimore, MD\n\t1.9\t\n4\n3\n5\n3\n\t109\t102\t20.1%\t12.3%\t65.4%\t$0\t\nRoland Park Place\nBaltimore, MD\n\t2.2\t\n5\n5\n5\n5\n\t16\t12\t3.7%\t10.0%\t73.6%\t$0\t\nFuture Care Sandtown-Winchester\nBaltimore, MD\n\t2.4\t\n5\n4\n5\n4\n\t148\t142\t16.7%\t10.6%\t56.6%\t$0\t\nFuture Care Northpoint\nBaltimore, MD\n\t3.1\t\n5\n4\n5\n3\n\t180\t144\t15.4%\t10.3%\t57.5%\t$0\t\nKeswick Multi-Care Center\nBaltimore, MD\n\t3.4\t\n4\n3\n4\n5\n\t170\t156\t18.8%\t11.7%\t63.5%\t$0\t\nGood Samaritan Nursing Home Operator, LLC\nBaltimore, MD\n\t4.3\t\n4\n4\n4\n3\n\t146\t141\t21.1%\t11.8%\t66.7%\t$0\t\nNorthwest Healthcare Center\nBaltimore, MD\n\t5.0\t\n4\n4\n4\n4\n\t91\t83\t15.8%\t11.2%\t45.8%\t$0\t\nFuture Care Irvington\nBaltimore, MD\n\t5.2\t\n4\n4\n4\n3\n\t200\t182\t23.9%\t11.3%\t61.7%\t$8,417\t\nCharlestown Community Inc\nCatonsville, MD\n\t6.3\t\n5\n4\n4\n5\n\t103\t83\t20.2%\t8.8%\t62.5%\t$0\t\nComplete Care At Multi Medical Center LLC\nTowson, MD\n\t6.3\t\n5\n4\n5\n3\n\t118\t106\t23.3%\t14.3%\t60.8%\t$0\t\nLittle Sisters of the Poor\nBaltimore, MD\n\t6.3\t\n4\n4\n1\n5\n\t20\t17\t\t\t\t$0\t\nLochearn Nursing Home, LLC\nBaltimore, MD\n\t7.0\t\n5\n4\n5\n3\n\t200\t192\t13.1%\t10.5%\t55.5%\t$0\t\nAutumn Lake Healthcare At Parkville\nBaltimore, MD\n\t7.4\t\n4\n4\n4\n2\n\t135\t124\t23.1%\t13.6%\t44.5%\t$0\t\nFranklin Woods Center\nBaltimore, MD\n\t7.5\t\n4\n4\n4\n3\n\t117\t105\t18.2%\t16.1%\t62.0%\t$0\t\nEdenwald\nTowson, MD\n\t7.6\t\n5\n5\n5\n5\n\t70\t34\t11.1%\t9.7%\t16.9%\t$0\t\nPickersgill Retirement Community\nTowson, MD\n\t7.7\t\n4\n4\n3\n4\n\t43\t31\t15.4%\t10.3%\t49.7%\t$0\t\nChestnut Grn Hlth Ctr Blakehur\nTowson, MD\n\t8.0\t\n5\n4\n3\n5\n\t49\t38\t19.2%\t11.4%\t55.6%\t$0\t\nOak Crest Village\nParkville, MD\n\t8.1\t\n4\n4\n4\n4\n\t80\t77\t13.1%\t11.1%\t66.6%\t$49,725\t\nSt. Joseph's Nursing Home\nCatonsville, MD\n\t8.2\t\n5\n5\n4\n5\n\t44\t40\t\t\t\t$0\t\nAdvanced Rehab At Autumn Lake Healthcare\nLutherville, MD\n\t8.6\t\n4\n4\n4\n2\n\t110\t82\t18.4%\t12.9%\t65.8%\t$8,021\t\nMeadow Park Rehabilitation and Healthcare Center\nCatonsville, MD\n\t8.6\t\n4\n3\n5\n2\n\t120\t115\t11.3%\t12.9%\t53.7%\t$11,452\t\nMarley Neck Rehabilitation and Wellness Center\nGlen Burnie, MD\n\t9.9\t\n4\n3\n5\n3\n\t95\t90\t24.1%\t13.2%\t59.4%\t$0\t\nStella Maris, Inc.\nTimonium, MD\n\t10.8\t\n4\n4\n2\n4\n\t390\t340\t23.6%\t14.3%\t61.6%\t$0\t\nFuture Care Old Court\nRandallstown, MD\n\t11.0\t\n5\n5\n4\n4\n\t141\t137\t24.0%\t9.6%\t56.7%\t$0\t\nNorth Oaks Communities\nBaltimore, MD\n\t11.1\t\n4\n5\n1\n5\n\t37\t24\t30.9%\t12.4%\t22.7%\t$0\t\nGlen Meadows Retirement Com.\nGlen Arm, MD\n\t11.1\t\n4\n2\n5\n5\n\t31\t30\t40.1%\t10.5%\t62.1%\t$31,233\t\nLorien Mays Chapel\nTimonium, MD\n\t11.9\t\n4\n4\n3\n2\n\t93\t83\t20.0%\t16.0%\t64.9%\t$0\t\nThe Lutheran Village At Miller's Grant\nEllicott City, MD\n\t13.4\t\n5\n5\n3\n5\n\t16\t13\t\t\t\t$0\t\nBroadmead\nCockeysville, MD\n\t14.6\t\n5\n5\n5\n5\n\t70\t38\t17.9%\t10.6%\t70.3%\t$0\t\nResidences At Vantage Point\nColumbia, MD\n\t14.9\t\n5\n4\n5\n5\n\t44\t19\t0.0%\t11.5%\t57.9%\t$0\t\nSource labels: every row above is “hospital-reported” (your upload). CMS facility data as of 2026-09-01.",
+  "pageErrors": [
+   "console: Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+   "console: Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED"
+  ]
+ },
+ "c1_missing_column.csv": {
+  "status": "c1_missing_column.csv: 0 valid rows, 0 hospitals · 1 row skipped\nMissing required column: hospital_name. Expected columns: hospital_ccn, hospital_name, snf_ccn, period_start, period_end, n_discharges (optional: hospital_lat, hospital_lng).",
+  "cards": [],
+  "weighted": null,
+  "tables": [],
+  "altText": null,
+  "hospital": null,
+  "options": [],
+  "ls": null,
+  "body": "Discharge flows\n\nWhere a hospital's patients go after discharge, and how much of that volume lands in high- versus low-rated facilities. CMS publishes no hospital-to-SNF flows, so this page runs on counts a hospital provides. The schema is fixed so real data drops in without any rework; a modeled catchment option (built from public Medicare utilization and hospital service-area files) is planned and will carry a “modeled” label everywhere it appears.\n\nUpload CSV\nDownload the template\nRemove uploaded data\nUse aggregated counts (hospital → SNF → number of discharges in a period), not patient records. Data stays in this browser; nothing is uploaded to a server.\nColumns: hospital_ccn, hospital_name, snf_ccn, period_start, period_end, n_discharges · optional hospital_lat, hospital_lng (needed for distances and nearby alternatives). Dates as YYYY-MM-DD. Keep leading zeros in CCNs.\nc1_missing_column.csv: 0 valid rows, 0 hospitals · 1 row skipped\nMissing required column: hospital_name. Expected columns: hospital_ccn, hospital_name, snf_ccn, period_start, period_end, n_discharges (optional: hospital_lat, hospital_lng).",
+  "pageErrors": [
+   "console: Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+   "console: Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED"
+  ]
+ },
+ "c2_bad_rows.csv": {
+  "status": "c2_bad_rows.csv: 2 valid rows, 1 hospital · 5 rows skipped\nLine 3: period_start/period_end must be YYYY-MM-DD.\nLine 4: n_discharges \"-3\" must be a whole number of 0 or more.\nLine 5: n_discharges \"2.5\" must be a whole number of 0 or more.\nLine 6: n_discharges \"abc\" must be a whole number of 0 or more.\nLine 7: snf_ccn \"15009\" must be 6 characters (keep leading zeros).",
+  "cards": [
+   [
+    "Discharges to SNFs",
+    "9",
+    "2 facilities"
+   ],
+   [
+    "To 4–5★ facilities",
+    "44%",
+    "4 discharges",
+    ""
+   ],
+   [
+    "To 3★ facilities",
+    "0%",
+    "0 discharges",
+    ""
+   ],
+   [
+    "To 1–2★ facilities",
+    "56%",
+    "5 discharges",
+    ""
+   ],
+   [
+    "Unrated or unmatched CCN",
+    "0%",
+    "0 to CCNs not in the CMS file",
+    ""
+   ]
+  ],
+  "weighted": "Volume-weighted averages of the destinations' CMS measures:\noverall stars 2.78\nshort-stay rehospitalization 24.2%\n30-day preventable readmission after SNF discharge 12.4%\ndischarge to community 47.9%\nWeighted by discharges; facilities with a suppressed value are left out of that average. These are facility-level CMS rates, not this hospital's own patients' outcomes.",
+  "tables": [
+   [
+    [
+     "Facility",
+     "Discharges",
+     "Share",
+     "Stars",
+     "Rehosp. %",
+     "Readmit %",
+     "To community %",
+     "Fines 3-yr",
+     "G–L deficiencies"
+    ],
+    [
+     "White Oak Rehabilitation and Nursing Center\nHyattsville, MD · abuse icon",
+     "5",
+     "56%",
+     "1\n1\n4\n3",
+     "21.9%",
+     "11.9%",
+     "43.4%",
+     "$76,515",
+     "2"
+    ],
+    [
+     "Complete Care At Annapolis\nAnnapolis, MD",
+     "4",
+     "44%",
+     "5\n4\n5\n3",
+     "27.1%",
+     "12.9%",
+     "53.6%",
+     "$0",
+     "0"
+    ]
+   ]
+  ],
+  "altText": null,
+  "hospital": "210009",
+  "options": [
+   "JHH (210009) · 9 discharges"
+  ],
+  "ls": 370,
+  "body": "Discharge flows\n\nWhere a hospital's patients go after discharge, and how much of that volume lands in high- versus low-rated facilities. CMS publishes no hospital-to-SNF flows, so this page runs on counts a hospital provides. The schema is fixed so real data drops in without any rework; a modeled catchment option (built from public Medicare utilization and hospital service-area files) is planned and will carry a “modeled” label everywhere it appears.\n\nUpload CSV\nDownload the template\nRemove uploaded data\nUse aggregated counts (hospital → SNF → number of discharges in a period), not patient records. Data stays in this browser; nothing is uploaded to a server.\nColumns: hospital_ccn, hospital_name, snf_ccn, period_start, period_end, n_discharges · optional hospital_lat, hospital_lng (needed for distances and nearby alternatives). Dates as YYYY-MM-DD. Keep leading zeros in CCNs.\nc2_bad_rows.csv: 2 valid rows, 1 hospital · 5 rows skipped\nLine 3: period_start/period_end must be YYYY-MM-DD.\nLine 4: n_discharges \"-3\" must be a whole number of 0 or more.\nLine 5: n_discharges \"2.5\" must be a whole number of 0 or more.\nLine 6: n_discharges \"abc\" must be a whole number of 0 or more.\nLine 7: snf_ccn \"15009\" must be 6 characters (keep leading zeros).\nHospital\nJHH (210009) · 9 discharges\n2025-01-01 to 2025-12-31 · hospital-reported\nDischarges to SNFs\n9\n2 facilities\nTo 4–5★ facilities\n44%\n4 discharges\nTo 3★ facilities\n0%\n0 discharges\nTo 1–2★ facilities\n56%\n5 discharges\nUnrated or unmatched CCN\n0%\n0 to CCNs not in the CMS file\nVolume-weighted averages of the destinations' CMS measures:\noverall stars 2.78\nshort-stay rehospitalization 24.2%\n30-day preventable readmission after SNF discharge 12.4%\ndischarge to community 47.9%\nWeighted by discharges; facilities with a suppressed value are left out of that average. These are facility-level CMS rates, not this hospital's own patients' outcomes.\nDestinations · 2\nFacility\tDischarges\tShare\tStars\tRehosp. %\tReadmit %\tTo community %\tFines 3-yr\tG–L deficiencies\nWhite Oak Rehabilitation and Nursing Center\nHyattsville, MD · abuse icon\n\t5\t56%\t\n1\n1\n4\n3\n\t21.9%\t11.9%\t43.4%\t$76,515\t2\nComplete Care At Annapolis\nAnnapolis, MD\n\t4\t44%\t\n5\n4\n5\n3\n\t27.1%\t12.9%\t53.6%\t$0\t0\n4–5★ facilities near this hospital\nAdd hospital_lat and hospital_lng to the CSV to see nearby alternatives and distances.\nSource labels: every row above is “hospital-reported” (your upload). CMS facility data as of 2026-09-01.",
+  "pageErrors": [
+   "console: Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+   "console: Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED"
+  ]
+ },
+ "c3_impossible_date.csv": {
+  "status": "c3_impossible_date.csv: 2 valid rows, 1 hospital",
+  "cards": [],
+  "weighted": null,
+  "tables": [],
+  "altText": null,
+  "hospital": null,
+  "options": [],
+  "ls": null,
+  "body": "Discharge flows\n\nWhere a hospital's patients go after discharge, and how much of that volume lands in high- versus low-rated facilities. CMS publishes no hospital-to-SNF flows, so this page runs on counts a hospital provides. The schema is fixed so real data drops in without any rework; a modeled catchment option (built from public Medicare utilization and hospital service-area files) is planned and will carry a “modeled” label everywhere it appears.\n\nUpload CSV\nDownload the template\nRemove uploaded data\nUse aggregated counts (hospital → SNF → number of discharges in a period), not patient records. Data stays in this browser; nothing is uploaded to a server.\nColumns: hospital_ccn, hospital_name, snf_ccn, period_start, period_end, n_discharges · optional hospital_lat, hospital_lng (needed for distances and nearby alternatives). Dates as YYYY-MM-DD. Keep leading zeros in CCNs.\nc3_impossible_date.csv: 2 valid rows, 1 hospital",
+  "pageErrors": [
+   "console: Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+   "console: Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+   "Conversion Error: date field value out of range: \"2025-13-45\""
+  ]
+ },
+ "c4_number_forms.csv": {
+  "status": "c4_number_forms.csv: 2 valid rows, 1 hospital",
+  "cards": [
+   [
+    "Discharges to SNFs",
+    "116",
+    "2 facilities"
+   ],
+   [
+    "To 4–5★ facilities",
+    "0%",
+    "0 discharges",
+    ""
+   ],
+   [
+    "To 3★ facilities",
+    "0%",
+    "0 discharges",
+    ""
+   ],
+   [
+    "To 1–2★ facilities",
+    "100%",
+    "116 discharges",
+    ""
+   ],
+   [
+    "Unrated or unmatched CCN",
+    "0%",
+    "0 to CCNs not in the CMS file",
+    ""
+   ]
+  ],
+  "weighted": "Volume-weighted averages of the destinations' CMS measures:\noverall stars 1.00\nshort-stay rehospitalization 22.0%\n30-day preventable readmission after SNF discharge 11.8%\ndischarge to community 42.9%\nWeighted by discharges; facilities with a suppressed value are left out of that average. These are facility-level CMS rates, not this hospital's own patients' outcomes.",
+  "tables": [
+   [
+    [
+     "Facility",
+     "Discharges",
+     "Share",
+     "Stars",
+     "Rehosp. %",
+     "Readmit %",
+     "To community %",
+     "Fines 3-yr",
+     "G–L deficiencies"
+    ],
+    [
+     "White Oak Rehabilitation and Nursing Center\nHyattsville, MD · abuse icon",
+     "100",
+     "86%",
+     "1\n1\n4\n3",
+     "21.9%",
+     "11.9%",
+     "43.4%",
+     "$76,515",
+     "2"
+    ],
+    [
+     "Autumn Lake Healthcare At Long Green\nBaltimore, MD",
+     "16",
+     "14%",
+     "1\n1\n3\n2",
+     "22.7%",
+     "10.7%",
+     "39.7%",
+     "$0",
+     "0"
+    ]
+   ]
+  ],
+  "altText": null,
+  "hospital": "210009",
+  "options": [
+   "JHH (210009) · 116 discharges"
+  ],
+  "ls": 161,
+  "body": "Discharge flows\n\nWhere a hospital's patients go after discharge, and how much of that volume lands in high- versus low-rated facilities. CMS publishes no hospital-to-SNF flows, so this page runs on counts a hospital provides. The schema is fixed so real data drops in without any rework; a modeled catchment option (built from public Medicare utilization and hospital service-area files) is planned and will carry a “modeled” label everywhere it appears.\n\nUpload CSV\nDownload the template\nRemove uploaded data\nUse aggregated counts (hospital → SNF → number of discharges in a period), not patient records. Data stays in this browser; nothing is uploaded to a server.\nColumns: hospital_ccn, hospital_name, snf_ccn, period_start, period_end, n_discharges · optional hospital_lat, hospital_lng (needed for distances and nearby alternatives). Dates as YYYY-MM-DD. Keep leading zeros in CCNs.\nc4_number_forms.csv: 2 valid rows, 1 hospital\nHospital\nJHH (210009) · 116 discharges\n2025-01-01 to 2025-12-31 · hospital-reported\nDischarges to SNFs\n116\n2 facilities\nTo 4–5★ facilities\n0%\n0 discharges\nTo 3★ facilities\n0%\n0 discharges\nTo 1–2★ facilities\n100%\n116 discharges\nUnrated or unmatched CCN\n0%\n0 to CCNs not in the CMS file\nVolume-weighted averages of the destinations' CMS measures:\noverall stars 1.00\nshort-stay rehospitalization 22.0%\n30-day preventable readmission after SNF discharge 11.8%\ndischarge to community 42.9%\nWeighted by discharges; facilities with a suppressed value are left out of that average. These are facility-level CMS rates, not this hospital's own patients' outcomes.\nDestinations · 2\nFacility\tDischarges\tShare\tStars\tRehosp. %\tReadmit %\tTo community %\tFines 3-yr\tG–L deficiencies\nWhite Oak Rehabilitation and Nursing Center\nHyattsville, MD · abuse icon\n\t100\t86%\t\n1\n1\n4\n3\n\t21.9%\t11.9%\t43.4%\t$76,515\t2\nAutumn Lake Healthcare At Long Green\nBaltimore, MD\n\t16\t14%\t\n1\n1\n3\n2\n\t22.7%\t10.7%\t39.7%\t$0\t0\n4–5★ facilities near this hospital\nAdd hospital_lat and hospital_lng to the CSV to see nearby alternatives and distances.\nSource labels: every row above is “hospital-reported” (your upload). CMS facility data as of 2026-09-01.",
+  "pageErrors": [
+   "console: Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+   "console: Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED"
+  ]
+ },
+ "bad_after_good": {
+  "status": "c1_missing_column.csv: 0 valid rows, 0 hospitals · 1 row skipped\nMissing required column: hospital_name. Expected columns: hospital_ccn, hospital_name, snf_ccn, period_start, period_end, n_discharges (optional: hospital_lat, hospital_lng).",
+  "cards": [],
+  "weighted": null,
+  "tables": [],
+  "altText": null,
+  "hospital": null,
+  "options": [],
+  "ls": 1044,
+  "body": "Discharge flows\n\nWhere a hospital's patients go after discharge, and how much of that volume lands in high- versus low-rated facilities. CMS publishes no hospital-to-SNF flows, so this page runs on counts a hospital provides. The schema is fixed so real data drops in without any rework; a modeled catchment option (built from public Medicare utilization and hospital service-area files) is planned and will carry a “modeled” label everywhere it appears.\n\nUpload CSV\nDownload the template\nRemove uploaded data\nUse aggregated counts (hospital → SNF → number of discharges in a period), not patient records. Data stays in this browser; nothing is uploaded to a server.\nColumns: hospital_ccn, hospital_name, snf_ccn, period_start, period_end, n_discharges · optional hospital_lat, hospital_lng (needed for distances and nearby alternatives). Dates as YYYY-MM-DD. Keep leading zeros in CCNs.\nc1_missing_column.csv: 0 valid rows, 0 hospitals · 1 row skipped\nMissing required column: hospital_name. Expected columns: hospital_ccn, hospital_name, snf_ccn, period_start, period_end, n_discharges (optional: hospital_lat, hospital_lng)."
+ },
+ "bad_after_good_reload": {
+  "status": "previous upload (this browser): 12 valid rows, 2 hospitals",
+  "cards": [
+   [
+    "Discharges to SNFs",
+    "161",
+    "10 facilities"
+   ],
+   [
+    "To 4–5★ facilities",
+    "10%",
+    "16 discharges",
+    ""
+   ],
+   [
+    "To 3★ facilities",
+    "19%",
+    "30 discharges",
+    ""
+   ],
+   [
+    "To 1–2★ facilities",
+    "66%",
+    "106 discharges",
+    ""
+   ],
+   [
+    "Unrated or unmatched CCN",
+    "6%",
+    "0 to CCNs not in the CMS file",
+    ""
+   ]
+  ],
+  "weighted": "Volume-weighted averages of the destinations' CMS measures:\noverall stars 2.09\nshort-stay rehospitalization 20.2%\n30-day preventable readmission after SNF discharge 11.3%\ndischarge to community 49.3%\nWeighted by discharges; facilities with a suppressed value are left out of that average. These are facility-level CMS rates, not this hospital's own patients' outcomes.",
+  "tables": [
+   [
+    [
+     "Facility",
+     "Discharges",
+     "Share",
+     "Stars",
+     "Miles",
+     "Rehosp. %",
+     "Readmit %",
+     "To community %",
+     "Fines 3-yr",
+     "G–L deficiencies"
+    ],
+    [
+     "White Oak Rehabilitation and Nursing Center\nHyattsville, MD · abuse icon",
+     "40",
+     "25%",
+     "1\n1\n4\n3",
+     "30.9",
+     "21.9%",
+     "11.9%",
+     "43.4%",
+     "$76,515",
+     "2"
+    ],
+    [
+     "Fairland Center\nSilver Spring, MD",
+     "30",
+     "19%",
+     "2\n2\n3\n2",
+     "25.2",
+     "18.3%",
+     "11.6%",
+     "53.1%",
+     "$0",
+     "0"
+    ],
+    [
+     "Autumn Lake Healthcare At Long Green\nBaltimore, MD",
+     "25",
+     "16%",
+     "1\n1\n3\n2",
+     "5.0",
+     "22.7%",
+     "10.7%",
+     "39.7%",
+     "$0",
+     "0"
+    ],
+    [
+     "St. Elizabeth Rehabilitation & Nursing Center\nBaltimore, MD",
+     "18",
+     "11%",
+     "3\n3\n4\n3",
+     "4.6",
+     "13.8%",
+     "10.2%",
+     "64.7%",
+     "$66,996",
+     "3"
+    ],
+    [
+     "Autumn Lake Healthcare At Ballenger Creek\nFrederick, MD",
+     "12",
+     "7%",
+     "3\n2\n5\n3",
+     "40.6",
+     "14.6%",
+     "10.8%",
+     "57.1%",
+     "$0",
+     "2"
+    ],
+    [
+     "Carroll Park Healthcare\nBaltimore, MD · abuse icon",
+     "11",
+     "7%",
+     "2\n2\n4\n2",
+     "4.6",
+     "20.2%",
+     "11.6%",
+     "38.0%",
+     "$306,550",
+     "4"
+    ],
+    [
+     "Complete Care At Annapolis\nAnnapolis, MD",
+     "9",
+     "6%",
+     "5\n4\n5\n3",
+     "23.8",
+     "27.1%",
+     "12.9%",
+     "53.6%",
+     "$0",
+     "0"
+    ],
+    [
+     "St. Mary's Nursing Center Inc\nLeonardtown, MD",
+     "7",
+     "4%",
+     "5\n5\n5\n3",
+     "68.9",
+     "17.8%",
+     "10.2%",
+     "68.1%",
+     "$0",
+     "0"
+    ],
+    [
+     "Pines Nursing and Rehab\nEaston, MD · SFF",
+     "5",
+     "3%",
+     "–\n–\n–\n–",
+     "46.7",
+     "18.8%",
+     "11.7%",
+     "38.4%",
+     "$24,088",
+     "5"
+    ],
+    [
+     "Future Care Annapolis\nAnnapolis, MD",
+     "4",
+     "2%",
+     "–\n–\n–\n–",
+     "22.4",
+     "38.2%",
+     "",
+     "",
+     "$0",
+     "0"
+    ]
+   ],
+   [
+    [
+     "Facility",
+     "Miles",
+     "Stars",
+     "Beds",
+     "Residents/day",
+     "Rehosp. %",
+     "Readmit %",
+     "To community %",
+     "Fines 3-yr",
+     "Already a destination"
+    ],
+    [
+     "Transitional Care Services At Mercy Medical Center\nBaltimore, MD",
+     "1.2",
+     "5\n5\n5\n5",
+     "35",
+     "26",
+     "27.0%",
+     "9.5%",
+     "66.2%",
+     "$0",
+     ""
+    ],
+    [
+     "Future Care Canton Harbor\nBaltimore, MD",
+     "1.7",
+     "5\n5\n5\n4",
+     "160",
+     "153",
+     "20.0%",
+     "12.4%",
+     "58.5%",
+     "$13,627",
+     ""
+    ],
+    [
+     "Future Care Charles Village\nBaltimore, MD",
+     "1.9",
+     "4\n3\n5\n3",
+     "109",
+     "102",
+     "20.1%",
+     "12.3%",
+     "65.4%",
+     "$0",
+     ""
+    ],
+    [
+     "Roland Park Place\nBaltimore, MD",
+     "2.2",
+     "5\n5\n5\n5",
+     "16",
+     "12",
+     "3.7%",
+     "10.0%",
+     "73.6%",
+     "$0",
+     ""
+    ],
+    [
+     "Future Care Sandtown-Winchester\nBaltimore, MD",
+     "2.4",
+     "5\n4\n5\n4",
+     "148",
+     "142",
+     "16.7%",
+     "10.6%",
+     "56.6%",
+     "$0",
+     ""
+    ],
+    [
+     "Future Care Northpoint\nBaltimore, MD",
+     "3.1",
+     "5\n4\n5\n3",
+     "180",
+     "144",
+     "15.4%",
+     "10.3%",
+     "57.5%",
+     "$0",
+     ""
+    ],
+    [
+     "Keswick Multi-Care Center\nBaltimore, MD",
+     "3.4",
+     "4\n3\n4\n5",
+     "170",
+     "156",
+     "18.8%",
+     "11.7%",
+     "63.5%",
+     "$0",
+     ""
+    ],
+    [
+     "Good Samaritan Nursing Home Operator, LLC\nBaltimore, MD",
+     "4.3",
+     "4\n4\n4\n3",
+     "146",
+     "141",
+     "21.1%",
+     "11.8%",
+     "66.7%",
+     "$0",
+     ""
+    ],
+    [
+     "Northwest Healthcare Center\nBaltimore, MD",
+     "5.0",
+     "4\n4\n4\n4",
+     "91",
+     "83",
+     "15.8%",
+     "11.2%",
+     "45.8%",
+     "$0",
+     ""
+    ],
+    [
+     "Future Care Irvington\nBaltimore, MD",
+     "5.2",
+     "4\n4\n4\n3",
+     "200",
+     "182",
+     "23.9%",
+     "11.3%",
+     "61.7%",
+     "$8,417",
+     ""
+    ],
+    [
+     "Charlestown Community Inc\nCatonsville, MD",
+     "6.3",
+     "5\n4\n4\n5",
+     "103",
+     "83",
+     "20.2%",
+     "8.8%",
+     "62.5%",
+     "$0",
+     ""
+    ],
+    [
+     "Complete Care At Multi Medical Center LLC\nTowson, MD",
+     "6.3",
+     "5\n4\n5\n3",
+     "118",
+     "106",
+     "23.3%",
+     "14.3%",
+     "60.8%",
+     "$0",
+     ""
+    ],
+    [
+     "Little Sisters of the Poor\nBaltimore, MD",
+     "6.3",
+     "4\n4\n1\n5",
+     "20",
+     "17",
+     "",
+     "",
+     "",
+     "$0",
+     ""
+    ],
+    [
+     "Lochearn Nursing Home, LLC\nBaltimore, MD",
+     "7.0",
+     "5\n4\n5\n3",
+     "200",
+     "192",
+     "13.1%",
+     "10.5%",
+     "55.5%",
+     "$0",
+     ""
+    ],
+    [
+     "Autumn Lake Healthcare At Parkville\nBaltimore, MD",
+     "7.4",
+     "4\n4\n4\n2",
+     "135",
+     "124",
+     "23.1%",
+     "13.6%",
+     "44.5%",
+     "$0",
+     ""
+    ],
+    [
+     "Franklin Woods Center\nBaltimore, MD",
+     "7.5",
+     "4\n4\n4\n3",
+     "117",
+     "105",
+     "18.2%",
+     "16.1%",
+     "62.0%",
+     "$0",
+     ""
+    ],
+    [
+     "Edenwald\nTowson, MD",
+     "7.6",
+     "5\n5\n5\n5",
+     "70",
+     "34",
+     "11.1%",
+     "9.7%",
+     "16.9%",
+     "$0",
+     ""
+    ],
+    [
+     "Pickersgill Retirement Community\nTowson, MD",
+     "7.7",
+     "4\n4\n3\n4",
+     "43",
+     "31",
+     "15.4%",
+     "10.3%",
+     "49.7%",
+     "$0",
+     ""
+    ],
+    [
+     "Chestnut Grn Hlth Ctr Blakehur\nTowson, MD",
+     "8.0",
+     "5\n4\n3\n5",
+     "49",
+     "38",
+     "19.2%",
+     "11.4%",
+     "55.6%",
+     "$0",
+     ""
+    ],
+    [
+     "Oak Crest Village\nParkville, MD",
+     "8.1",
+     "4\n4\n4\n4",
+     "80",
+     "77",
+     "13.1%",
+     "11.1%",
+     "66.6%",
+     "$49,725",
+     ""
+    ],
+    [
+     "St. Joseph's Nursing Home\nCatonsville, MD",
+     "8.2",
+     "5\n5\n4\n5",
+     "44",
+     "40",
+     "",
+     "",
+     "",
+     "$0",
+     ""
+    ],
+    [
+     "Advanced Rehab At Autumn Lake Healthcare\nLutherville, MD",
+     "8.6",
+     "4\n4\n4\n2",
+     "110",
+     "82",
+     "18.4%",
+     "12.9%",
+     "65.8%",
+     "$8,021",
+     ""
+    ],
+    [
+     "Meadow Park Rehabilitation and Healthcare Center\nCatonsville, MD",
+     "8.6",
+     "4\n3\n5\n2",
+     "120",
+     "115",
+     "11.3%",
+     "12.9%",
+     "53.7%",
+     "$11,452",
+     ""
+    ],
+    [
+     "Marley Neck Rehabilitation and Wellness Center\nGlen Burnie, MD",
+     "9.9",
+     "4\n3\n5\n3",
+     "95",
+     "90",
+     "24.1%",
+     "13.2%",
+     "59.4%",
+     "$0",
+     ""
+    ],
+    [
+     "Stella Maris, Inc.\nTimonium, MD",
+     "10.8",
+     "4\n4\n2\n4",
+     "390",
+     "340",
+     "23.6%",
+     "14.3%",
+     "61.6%",
+     "$0",
+     ""
+    ],
+    [
+     "Future Care Old Court\nRandallstown, MD",
+     "11.0",
+     "5\n5\n4\n4",
+     "141",
+     "137",
+     "24.0%",
+     "9.6%",
+     "56.7%",
+     "$0",
+     ""
+    ],
+    [
+     "North Oaks Communities\nBaltimore, MD",
+     "11.1",
+     "4\n5\n1\n5",
+     "37",
+     "24",
+     "30.9%",
+     "12.4%",
+     "22.7%",
+     "$0",
+     ""
+    ],
+    [
+     "Glen Meadows Retirement Com.\nGlen Arm, MD",
+     "11.1",
+     "4\n2\n5\n5",
+     "31",
+     "30",
+     "40.1%",
+     "10.5%",
+     "62.1%",
+     "$31,233",
+     ""
+    ],
+    [
+     "Lorien Mays Chapel\nTimonium, MD",
+     "11.9",
+     "4\n4\n3\n2",
+     "93",
+     "83",
+     "20.0%",
+     "16.0%",
+     "64.9%",
+     "$0",
+     ""
+    ],
+    [
+     "The Lutheran Village At Miller's Grant\nEllicott City, MD",
+     "13.4",
+     "5\n5\n3\n5",
+     "16",
+     "13",
+     "",
+     "",
+     "",
+     "$0",
+     ""
+    ],
+    [
+     "Broadmead\nCockeysville, MD",
+     "14.6",
+     "5\n5\n5\n5",
+     "70",
+     "38",
+     "17.9%",
+     "10.6%",
+     "70.3%",
+     "$0",
+     ""
+    ],
+    [
+     "Residences At Vantage Point\nColumbia, MD",
+     "14.9",
+     "5\n4\n5\n5",
+     "44",
+     "19",
+     "0.0%",
+     "11.5%",
+     "57.9%",
+     "$0",
+     ""
+    ]
+   ]
+  ],
+  "altText": "32 facilities rated 4–5★ overall (excluding special-focus and abuse-icon facilities) with 3,381 certified beds in total; their simple average short-stay rehospitalization is 18.9% versus 20.2% weighted across current destinations. This hospital sent 106 discharges (66%) to 1–2★ facilities in the period.",
+  "hospital": "210009",
+  "options": [
+   "Johns Hopkins Hospital (210009) · 161 discharges",
+   "LAC+USC Medical Center (050600) · 35 discharges"
+  ],
+  "ls": 1044,
+  "body": "Discharge flows\n\nWhere a hospital's patients go after discharge, and how much of that volume lands in high- versus low-rated facilities. CMS publishes no hospital-to-SNF flows, so this page runs on counts a hospital provides. The schema is fixed so real data drops in without any rework; a modeled catchment option (built from public Medicare utilization and hospital service-area files) is planned and will carry a “modeled” label everywhere it appears.\n\nUpload CSV\nDownload the template\nRemove uploaded data\nUse aggregated counts (hospital → SNF → number of discharges in a period), not patient records. Data stays in this browser; nothing is uploaded to a server.\nColumns: hospital_ccn, hospital_name, snf_ccn, period_start, period_end, n_discharges · optional hospital_lat, hospital_lng (needed for distances and nearby alternatives). Dates as YYYY-MM-DD. Keep leading zeros in CCNs.\nprevious upload (this browser): 12 valid rows, 2 hospitals\nHospital\nJohns Hopkins Hospital (210009) · 161 discharges\nLAC+USC Medical Center (050600) · 35 discharges\n2025-01-01 to 2025-12-31 · hospital-reported\nDischarges to SNFs\n161\n10 facilities\nTo 4–5★ facilities\n10%\n16 discharges\nTo 3★ facilities\n19%\n30 discharges\nTo 1–2★ facilities\n66%\n106 discharges\nUnrated or unmatched CCN\n6%\n0 to CCNs not in the CMS file\nVolume-weighted averages of the destinations' CMS measures:\noverall stars 2.09\nshort-stay rehospitalization 20.2%\n30-day preventable readmission after SNF discharge 11.3%\ndischarge to community 49.3%\nWeighted by discharges; facilities with a suppressed value are left out of that average. These are facility-level CMS rates, not this hospital's own patients' outcomes.\nDestinations · 10\nFacility\tDischarges\tShare\tStars\tMiles\tRehosp. %\tReadmit %\tTo community %\tFines 3-yr\tG–L deficiencies\nWhite Oak Rehabilitation and Nursing Center\nHyattsville, MD · abuse icon\n\t40\t25%\t\n1\n1\n4\n3\n\t30.9\t21.9%\t11.9%\t43.4%\t$76,515\t2\nFairland Center\nSilver Spring, MD\n\t30\t19%\t\n2\n2\n3\n2\n\t25.2\t18.3%\t11.6%\t53.1%\t$0\t0\nAutumn Lake Healthcare At Long Green\nBaltimore, MD\n\t25\t16%\t\n1\n1\n3\n2\n\t5.0\t22.7%\t10.7%\t39.7%\t$0\t0\nSt. Elizabeth Rehabilitation & Nursing Center\nBaltimore, MD\n\t18\t11%\t\n3\n3\n4\n3\n\t4.6\t13.8%\t10.2%\t64.7%\t$66,996\t3\nAutumn Lake Healthcare At Ballenger Creek\nFrederick, MD\n\t12\t7%\t\n3\n2\n5\n3\n\t40.6\t14.6%\t10.8%\t57.1%\t$0\t2\nCarroll Park Healthcare\nBaltimore, MD · abuse icon\n\t11\t7%\t\n2\n2\n4\n2\n\t4.6\t20.2%\t11.6%\t38.0%\t$306,550\t4\nComplete Care At Annapolis\nAnnapolis, MD\n\t9\t6%\t\n5\n4\n5\n3\n\t23.8\t27.1%\t12.9%\t53.6%\t$0\t0\nSt. Mary's Nursing Center Inc\nLeonardtown, MD\n\t7\t4%\t\n5\n5\n5\n3\n\t68.9\t17.8%\t10.2%\t68.1%\t$0\t0\nPines Nursing and Rehab\nEaston, MD · SFF\n\t5\t3%\t\n–\n–\n–\n–\n\t46.7\t18.8%\t11.7%\t38.4%\t$24,088\t5\nFuture Care Annapolis\nAnnapolis, MD\n\t4\t2%\t\n–\n–\n–\n–\n\t22.4\t38.2%\t\t\t$0\t0\n4–5★ facilities near this hospital\nwithin\n15 mi\n32 facilities rated 4–5★ overall (excluding special-focus and abuse-icon facilities) with 3,381 certified beds in total; their simple average short-stay rehospitalization is 18.9% versus 20.2% weighted across current destinations. This hospital sent 106 discharges (66%) to 1–2★ facilities in the period.\nArithmetic on CMS facility averages, for sizing the conversation. It does not say these facilities have capacity or are clinically right for the patients, and it is not an estimate of readmissions avoided.\nFacility\tMiles\tStars\tBeds\tResidents/day\tRehosp. %\tReadmit %\tTo community %\tFines 3-yr\tAlready a destination\nTransitional Care Services At Mercy Medical Center\nBaltimore, MD\n\t1.2\t\n5\n5\n5\n5\n\t35\t26\t27.0%\t9.5%\t66.2%\t$0\t\nFuture Care Canton Harbor\nBaltimore, MD\n\t1.7\t\n5\n5\n5\n4\n\t160\t153\t20.0%\t12.4%\t58.5%\t$13,627\t\nFuture Care Charles Village\nBaltimore, MD\n\t1.9\t\n4\n3\n5\n3\n\t109\t102\t20.1%\t12.3%\t65.4%\t$0\t\nRoland Park Place\nBaltimore, MD\n\t2.2\t\n5\n5\n5\n5\n\t16\t12\t3.7%\t10.0%\t73.6%\t$0\t\nFuture Care Sandtown-Winchester\nBaltimore, MD\n\t2.4\t\n5\n4\n5\n4\n\t148\t142\t16.7%\t10.6%\t56.6%\t$0\t\nFuture Care Northpoint\nBaltimore, MD\n\t3.1\t\n5\n4\n5\n3\n\t180\t144\t15.4%\t10.3%\t57.5%\t$0\t\nKeswick Multi-Care Center\nBaltimore, MD\n\t3.4\t\n4\n3\n4\n5\n\t170\t156\t18.8%\t11.7%\t63.5%\t$0\t\nGood Samaritan Nursing Home Operator, LLC\nBaltimore, MD\n\t4.3\t\n4\n4\n4\n3\n\t146\t141\t21.1%\t11.8%\t66.7%\t$0\t\nNorthwest Healthcare Center\nBaltimore, MD\n\t5.0\t\n4\n4\n4\n4\n\t91\t83\t15.8%\t11.2%\t45.8%\t$0\t\nFuture Care Irvington\nBaltimore, MD\n\t5.2\t\n4\n4\n4\n3\n\t200\t182\t23.9%\t11.3%\t61.7%\t$8,417\t\nCharlestown Community Inc\nCatonsville, MD\n\t6.3\t\n5\n4\n4\n5\n\t103\t83\t20.2%\t8.8%\t62.5%\t$0\t\nComplete Care At Multi Medical Center LLC\nTowson, MD\n\t6.3\t\n5\n4\n5\n3\n\t118\t106\t23.3%\t14.3%\t60.8%\t$0\t\nLittle Sisters of the Poor\nBaltimore, MD\n\t6.3\t\n4\n4\n1\n5\n\t20\t17\t\t\t\t$0\t\nLochearn Nursing Home, LLC\nBaltimore, MD\n\t7.0\t\n5\n4\n5\n3\n\t200\t192\t13.1%\t10.5%\t55.5%\t$0\t\nAutumn Lake Healthcare At Parkville\nBaltimore, MD\n\t7.4\t\n4\n4\n4\n2\n\t135\t124\t23.1%\t13.6%\t44.5%\t$0\t\nFranklin Woods Center\nBaltimore, MD\n\t7.5\t\n4\n4\n4\n3\n\t117\t105\t18.2%\t16.1%\t62.0%\t$0\t\nEdenwald\nTowson, MD\n\t7.6\t\n5\n5\n5\n5\n\t70\t34\t11.1%\t9.7%\t16.9%\t$0\t\nPickersgill Retirement Community\nTowson, MD\n\t7.7\t\n4\n4\n3\n4\n\t43\t31\t15.4%\t10.3%\t49.7%\t$0\t\nChestnut Grn Hlth Ctr Blakehur\nTowson, MD\n\t8.0\t\n5\n4\n3\n5\n\t49\t38\t19.2%\t11.4%\t55.6%\t$0\t\nOak Crest Village\nParkville, MD\n\t8.1\t\n4\n4\n4\n4\n\t80\t77\t13.1%\t11.1%\t66.6%\t$49,725\t\nSt. Joseph's Nursing Home\nCatonsville, MD\n\t8.2\t\n5\n5\n4\n5\n\t44\t40\t\t\t\t$0\t\nAdvanced Rehab At Autumn Lake Healthcare\nLutherville, MD\n\t8.6\t\n4\n4\n4\n2\n\t110\t82\t18.4%\t12.9%\t65.8%\t$8,021\t\nMeadow Park Rehabilitation and Healthcare Center\nCatonsville, MD\n\t8.6\t\n4\n3\n5\n2\n\t120\t115\t11.3%\t12.9%\t53.7%\t$11,452\t\nMarley Neck Rehabilitation and Wellness Center\nGlen Burnie, MD\n\t9.9\t\n4\n3\n5\n3\n\t95\t90\t24.1%\t13.2%\t59.4%\t$0\t\nStella Maris, Inc.\nTimonium, MD\n\t10.8\t\n4\n4\n2\n4\n\t390\t340\t23.6%\t14.3%\t61.6%\t$0\t\nFuture Care Old Court\nRandallstown, MD\n\t11.0\t\n5\n5\n4\n4\n\t141\t137\t24.0%\t9.6%\t56.7%\t$0\t\nNorth Oaks Communities\nBaltimore, MD\n\t11.1\t\n4\n5\n1\n5\n\t37\t24\t30.9%\t12.4%\t22.7%\t$0\t\nGlen Meadows Retirement Com.\nGlen Arm, MD\n\t11.1\t\n4\n2\n5\n5\n\t31\t30\t40.1%\t10.5%\t62.1%\t$31,233\t\nLorien Mays Chapel\nTimonium, MD\n\t11.9\t\n4\n4\n3\n2\n\t93\t83\t20.0%\t16.0%\t64.9%\t$0\t\nThe Lutheran Village At Miller's Grant\nEllicott City, MD\n\t13.4\t\n5\n5\n3\n5\n\t16\t13\t\t\t\t$0\t\nBroadmead\nCockeysville, MD\n\t14.6\t\n5\n5\n5\n5\n\t70\t38\t17.9%\t10.6%\t70.3%\t$0\t\nResidences At Vantage Point\nColumbia, MD\n\t14.9\t\n5\n4\n5\n5\n\t44\t19\t0.0%\t11.5%\t57.9%\t$0\t\nSource labels: every row above is “hospital-reported” (your upload). CMS facility data as of 2026-09-01."
+ }
+}

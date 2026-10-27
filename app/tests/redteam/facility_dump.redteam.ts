@@ -19,7 +19,7 @@ for (const ccn of Object.keys(picked)) {
       const head = h1.parentElement!
       const subs = [...head.querySelectorAll(':scope > div.text-sm')].map(t)
       const flags = [...head.querySelectorAll(':scope > div.flex span')].map(t)
-      const cards = [...document.querySelectorAll('div.mt-6.grid.grid-cols-4 > div')].map(c => ({ label: t(c.children[0]), body: t(c.children[1]), fnTitle: c.querySelector('[title]:not(span.inline-flex)')?.getAttribute('title') ?? null }))
+      const cards = [...document.querySelectorAll('h1 ~ * div.nothing, div.mt-6.grid.gap-3 > div')].map(c => ({ label: t(c.children[0]), body: t(c.children[1]), fnTitle: c.querySelector('[title]:not(span.inline-flex)')?.getAttribute('title') ?? null }))
       const measures: Record<string, { cells: (string | null)[]; fnTitle: string | null }> = {}
       document.querySelectorAll('[data-testid^="measure-"]').forEach(r => {
         const k = r.getAttribute('data-testid')!.slice(8)
@@ -28,7 +28,7 @@ for (const ccn of Object.keys(picked)) {
       })
       const sections = [...document.querySelectorAll('section')].map(s => ({ h2: t(s.querySelector('h2')), text: t(s) }))
       const enf = [...document.querySelectorAll('section')].find(s => s.querySelector('h2')?.textContent?.startsWith('Inspections'))!
-      const grid2 = enf.querySelector('div.grid.grid-cols-2')!
+      const grid2 = enf.querySelector('div.grid.mt-4')!
       const penHeader = t(grid2.children[0].children[0])
       const penRows = [...grid2.children[0].querySelectorAll('tr')].map(tr => [...tr.querySelectorAll('td')].map(t))
       const citHeader = t(grid2.children[1].children[0])
@@ -36,7 +36,8 @@ for (const ccn of Object.keys(picked)) {
       const ownSec = [...document.querySelectorAll('section')].find(s => s.querySelector('h2')?.textContent?.startsWith('Ownership'))!
       const ownIntro = t(ownSec.querySelector('p'))
       const ownGroups = [...ownSec.querySelectorAll('div.grid > div')].map(g => ({ role: t(g.children[0]), people: [...g.children].slice(1).map(t) }))
-      return { h1: t(h1), subs, flags, cards, measures, penHeader, penRows, citHeader, citRows, ownIntro, ownGroups, sectionTitles: sections.map(s => s.h2) }
+      const vbpSec = [...document.querySelectorAll('section')].find(s => s.querySelector('h2')?.textContent?.startsWith('SNF Value'))
+      return { vbpText: t(vbpSec), refError: t(document.querySelector('[role=alert]')), h1: t(h1), subs, flags, cards, measures, penHeader, penRows, citHeader, citRows, ownIntro, ownGroups, sectionTitles: sections.map(s => s.h2) }
     })
     fs.writeFileSync(path.join(OUT, `facility_${ccn}.json`), JSON.stringify({ ...dump, errors }, null, 1))
     await page.screenshot({ path: path.resolve(HERE, `../screenshots/redteam-facility-${ccn}.png`), fullPage: true })

@@ -1,0 +1,52 @@
+{
+ "mdChipSelected": {
+  "cls": "press h-6 rounded-[5px] text-[11px] tabular-nums bg-ink text-white",
+  "color": "rgb(21, 34, 30)",
+  "bg": "rgb(21, 34, 30)",
+  "fontSize": "16px",
+  "fontWeight": "400"
+ },
+ "akChip": {
+  "cls": "press h-6 rounded-[5px] text-[11px] tabular-nums bg-paper text-ink-2 hover:text-ink",
+  "color": "rgb(21, 34, 30)",
+  "bg": "rgb(242, 244, 243)",
+  "fontSize": "16px",
+  "fontWeight": "400"
+ },
+ "sortHeaderActive": {
+  "cls": "press shrink-0 text-left text-xs px-2 h-12 flex items-end gap-1 border-b border-hairline text-ink font-semibold ",
+  "color": "rgb(21, 34, 30)",
+  "bg": "rgba(0, 0, 0, 0)",
+  "fontSize": "16px",
+  "fontWeight": "400"
+ },
+ "sortHeaderInactive": {
+  "cls": "press shrink-0 text-left text-xs px-2 h-12 flex items-end gap-1 border-b border-hairline text-ink-2 hover:text-ink ",
+  "color": "rgb(21, 34, 30)",
+  "bg": "rgba(0, 0, 0, 0)",
+  "fontSize": "16px",
+  "fontWeight": "400"
+ },
+ "clearBtn": {
+  "cls": "press btn btn-quiet text-xs px-2 py-1",
+  "color": "rgb(74, 87, 83)",
+  "bg": "rgba(0, 0, 0, 0)",
+  "fontSize": "16px",
+  "fontWeight": "500"
+ },
+ "star5": {
+  "cls": "press h-7 w-9 rounded-[6px] text-sm font-semibold opacity-80 hover:opacity-100",
+  "color": "rgb(255, 255, 255)",
+  "bg": "rgb(31, 102, 89)",
+  "fontSize": "16px",
+  "fontWeight": "400"
+ },
+ "searchInput": {
+  "cls": "control w-full mb-4",
+  "color": "rgb(21, 34, 30)",
+  "bg": "rgb(255, 255, 255)",
+  "fontSize": "16px",
+  "fontWeight": "400"
+ },
+ "bodyFont": "\"Public Sans\", system-ui, -apple-system, \"Segoe UI\", sans-serif"
+}

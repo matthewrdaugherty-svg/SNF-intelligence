@@ -1,4 +1,6 @@
 {
+ "vbpText": "SNF Value-Based Purchasing, FY2026\n\nCMS withholds 2% of Medicare Part A payments and pays back 60% of the pool by performance. A multiplier below 1.0 is a net cut; the floor is 0.980322.\n\nMeasure\nThis facility\nDot = facility · tall mark = state · short mark = nation\nComparison\nProgram ranking (1 = best of 13,900)\n#5,048\nPerformance score (0–100)\n37.6\nIncentive payment multiplier\n0.9908\nNet Part A payment change (derived: multiplier − 1)\nOur arithmetic, not a CMS value.\n-0.92%\nFY2024 risk-standardized readmission rate (SNFRM)\nCMS publishes this as a fraction (e.g. 0.20); shown here as a percentage.\nCase minimum not met - not reported\nNation 20.53%\nFY2024 risk-standardized infection rate\nCMS publishes this as a fraction; shown here as a percentage.\nCase minimum not met - not reported\nNation 7.27%\nFY2024 total nursing staff turnover\nCMS publishes this as a fraction (e.g. 0.58); shown here as a percentage.\n41.4%\nNation 47.7%\nFY2024 adjusted nurse hours per resident-day\n3.66\nNation 3.80",
+ "refError": null,
  "h1": "Good Samaritan Society - Blackduck",
  "subs": [
   "172 Summit Avenue West, Blackduck, MN 56630 · Beltrami County · CCN 245600",
@@ -32,6 +34,7 @@
    "cells": [
     "Long-stay quality measures",
     "1",
+    "",
     ""
    ],
    "fnTitle": null
@@ -40,6 +43,7 @@
    "cells": [
     "Short-stay quality measures",
     "–fn 2",
+    "",
     ""
    ],
    "fnTitle": "Not enough data available to calculate a star rating."
@@ -48,7 +52,8 @@
    "cells": [
     "Staffing",
     "4",
-    "State 4★ · Nation 3★"
+    "",
+    "State avg 4.1 · Nation 2.9"
    ],
    "fnTitle": null
   },
@@ -57,7 +62,7 @@
     "Short-stay residents rehospitalized (QM 521)\nRisk-adjusted. Calendar 2025.",
     "20.3%",
     "",
-    "State 23.5% · Nation 23.8%\n3.2% better than state"
+    "State avg 23.5% · Nation 23.8%\n3.2 pts better than state"
    ],
    "fnTitle": null
   },
@@ -66,7 +71,7 @@
     "Short-stay residents with an outpatient ED visit (QM 522)",
     "0.0%",
     "",
-    "State 14.8% · Nation 12.0%\n14.8% better than state"
+    "State avg 14.8% · Nation 12.0%\n14.8 pts better than state"
    ],
    "fnTitle": null
   },
@@ -75,7 +80,7 @@
     "Long-stay hospitalizations per 1,000 resident-days (QM 551)",
     "fn 9",
     "",
-    "State 1.61 · Nation 1.90"
+    "State avg 1.61 · Nation 1.90"
    ],
    "fnTitle": "The number of residents or resident stays is too small to report. Call the facility to discuss this quality measure."
   },
@@ -84,7 +89,7 @@
     "Long-stay ED visits per 1,000 resident-days (QM 552)",
     "fn 9",
     "",
-    "State 1.90 · Nation 1.78"
+    "State avg 1.90 · Nation 1.78"
    ],
    "fnTitle": "The number of residents or resident stays is too small to report. Call the facility to discuss this quality measure."
   },
@@ -227,6 +232,7 @@
    "cells": [
     "Program ranking (1 = best of 13,900)",
     "#5,048",
+    "",
     ""
    ],
    "fnTitle": null
@@ -260,28 +266,28 @@
   },
   "vbp_fy24_rsrr": {
    "cells": [
-    "FY2024 risk-standardized readmission rate (SNFRM)",
+    "FY2024 risk-standardized readmission rate (SNFRM)\nCMS publishes this as a fraction (e.g. 0.20); shown here as a percentage.",
     "Case minimum not met - not reported",
     "",
-    "Nation 0.2053"
+    "Nation 20.53%"
    ],
    "fnTitle": "Case minimum not met - not reported"
   },
   "vbp_fy24_hai_rate": {
    "cells": [
-    "FY2024 risk-standardized infection rate",
+    "FY2024 risk-standardized infection rate\nCMS publishes this as a fraction; shown here as a percentage.",
     "Case minimum not met - not reported",
     "",
-    "Nation 0.0727"
+    "Nation 7.27%"
    ],
    "fnTitle": "Case minimum not met - not reported"
   },
   "vbp_fy24_turnover": {
    "cells": [
-    "FY2024 total nursing staff turnover",
-    "0.4138",
+    "FY2024 total nursing staff turnover\nCMS publishes this as a fraction (e.g. 0.58); shown here as a percentage.",
+    "41.4%",
     "",
-    "Nation 0.4766"
+    "Nation 47.7%"
    ],
    "fnTitle": null
   },
@@ -299,7 +305,7 @@
     "Health deficiencies, most recent standard inspection cycle",
     "9",
     "",
-    "State 7 · Nation 9\n2 worse than state"
+    "State avg 7.1 · Nation 9.2\n1.9 worse than state"
    ],
    "fnTitle": null
   },
@@ -389,7 +395,7 @@
     "Fines",
     "1",
     "",
-    "State 1 · Nation 1\n0 worse than state"
+    "State avg 0.8 · Nation 0.9\n0.2 worse than state"
    ],
    "fnTitle": null
   },
@@ -398,7 +404,7 @@
     "Total fines",
     "$22,205",
     "",
-    "State $24,507 · Nation $30,972\n$2,302 better than state"
+    "State avg $24,507 · Nation $30,972\n$2,302 better than state"
    ],
    "fnTitle": null
   },
@@ -443,7 +449,7 @@
     "Total nurse hours per resident-day",
     "4.01",
     "",
-    "State 4.19 · Nation 3.86\n0.19 worse than state"
+    "State avg 4.19 · Nation 3.86\n0.19 worse than state"
    ],
    "fnTitle": null
   },
@@ -452,7 +458,7 @@
     "RN hours per resident-day",
     "0.74",
     "",
-    "State 1.06 · Nation 0.69\n0.32 worse than state"
+    "State avg 1.06 · Nation 0.69\n0.32 worse than state"
    ],
    "fnTitle": null
   },
@@ -470,7 +476,7 @@
     "Weekend total nurse hours per resident-day",
     "3.73",
     "",
-    "State 3.71 · Nation 3.42\n0.02 better than state"
+    "State avg 3.71 · Nation 3.42\n0.02 better than state"
    ],
    "fnTitle": null
   },
@@ -479,7 +485,7 @@
     "Physical therapist hours per resident-day",
     "0.00",
     "",
-    "State 0.07 · Nation 0.07\n0.07 worse than state"
+    "State avg 0.07 · Nation 0.07\n0.07 worse than state"
    ],
    "fnTitle": null
   },
@@ -488,7 +494,7 @@
     "Total nursing staff turnover",
     "53.7%",
     "",
-    "State 42.2% · Nation 45.8%\n11.5% worse than state"
+    "State avg 42.2% · Nation 45.8%\n11.5 pts worse than state"
    ],
    "fnTitle": null
   },
@@ -497,7 +503,7 @@
     "RN turnover",
     "50.0%",
     "",
-    "State 38.6% · Nation 42.9%\n11.4% worse than state"
+    "State avg 38.6% · Nation 42.9%\n11.4 pts worse than state"
    ],
    "fnTitle": null
   },
@@ -506,7 +512,7 @@
     "Administrators who left",
     "0",
     "",
-    "State 1 · Nation 1\n1 better than state"
+    "State avg 0.6 · Nation 0.5\n0.6 better than state"
    ],
    "fnTitle": null
   },
@@ -515,7 +521,7 @@
     "Nursing case-mix index (resident acuity)",
     "1.27",
     "",
-    "State 1.22 · Nation 1.41"
+    "State avg 1.22 · Nation 1.41"
    ],
    "fnTitle": null
   },
@@ -524,7 +530,7 @@
     "Newly received an antipsychotic (QM 434)",
     "0.0%",
     "",
-    "State 1.9% · Nation 1.6%\n1.9% better than state"
+    "State avg 1.9% · Nation 1.6%\n1.9 pts better than state"
    ],
    "fnTitle": null
   },
@@ -533,7 +539,7 @@
     "Pneumococcal vaccine given (QM 430)",
     "13.1%",
     "",
-    "State 88.1% · Nation 82.0%\n75.0% worse than state"
+    "State avg 88.1% · Nation 82.0%\n75.0 pts worse than state"
    ],
    "fnTitle": null
   },
@@ -542,7 +548,7 @@
     "Flu vaccine given (QM 472)",
     "fn 9",
     "",
-    "State 82.7% · Nation 79.8%"
+    "State avg 82.7% · Nation 79.8%"
    ],
    "fnTitle": "The number of residents or resident stays is too small to report. Call the facility to discuss this quality measure."
   },
@@ -551,7 +557,7 @@
     "Need for help with daily activities increased (QM 401)",
     "15.6%",
     "",
-    "State 18.2% · Nation 13.9%\n2.6% better than state"
+    "State avg 18.2% · Nation 13.9%\n2.6 pts better than state"
    ],
    "fnTitle": null
   },
@@ -560,7 +566,7 @@
     "Falls with major injury (QM 410)",
     "4.0%",
     "",
-    "State 4.0% · Nation 3.2%\n0.0% worse than state"
+    "State avg 4.0% · Nation 3.2%\nabout the same as state"
    ],
    "fnTitle": null
   },
@@ -569,7 +575,7 @@
     "Pressure ulcers (QM 479)",
     "3.7%",
     "",
-    "State 5.2% · Nation 4.6%\n1.4% better than state"
+    "State avg 5.2% · Nation 4.6%\n1.4 pts better than state"
    ],
    "fnTitle": null
   },
@@ -578,7 +584,7 @@
     "Received an antipsychotic (QM 481)",
     "14.8%",
     "",
-    "State 17.1% · Nation 15.4%\n2.3% better than state"
+    "State avg 17.1% · Nation 15.4%\n2.3 pts better than state"
    ],
    "fnTitle": null
   },
@@ -587,7 +593,7 @@
     "Received an antianxiety or hypnotic (QM 452)",
     "1.1%",
     "",
-    "State 12.5% · Nation 19.5%\n11.5% better than state"
+    "State avg 12.5% · Nation 19.5%\n11.5 pts better than state"
    ],
    "fnTitle": null
   },
@@ -596,7 +602,7 @@
     "Urinary tract infection (QM 407)",
     "2.2%",
     "",
-    "State 2.6% · Nation 1.6%\n0.4% better than state"
+    "State avg 2.6% · Nation 1.6%\n0.4 pts better than state"
    ],
    "fnTitle": null
   },
@@ -605,7 +611,7 @@
     "Catheter left in bladder (QM 406)",
     "2.8%",
     "",
-    "State 1.9% · Nation 0.8%\n0.9% worse than state"
+    "State avg 1.9% · Nation 0.8%\n0.9 pts worse than state"
    ],
    "fnTitle": null
   },
@@ -614,7 +620,7 @@
     "Ability to walk worsened (QM 451)",
     "29.3%",
     "",
-    "State 20.5% · Nation 14.1%\n8.7% worse than state"
+    "State avg 20.5% · Nation 14.1%\n8.7 pts worse than state"
    ],
    "fnTitle": null
   },
@@ -623,7 +629,7 @@
     "New or worsened incontinence (QM 480)",
     "36.1%",
     "",
-    "State 24.5% · Nation 19.0%\n11.6% worse than state"
+    "State avg 24.5% · Nation 19.0%\n11.6 pts worse than state"
    ],
    "fnTitle": null
   },
@@ -632,7 +638,7 @@
     "Lost too much weight (QM 404)",
     "3.4%",
     "",
-    "State 4.1% · Nation 5.2%\n0.6% better than state"
+    "State avg 4.1% · Nation 5.2%\n0.6 pts better than state"
    ],
    "fnTitle": null
   },
@@ -641,7 +647,7 @@
     "Depressive symptoms (QM 408)",
     "18.1%",
     "",
-    "State 4.1% · Nation 12.8%\n13.9% worse than state"
+    "State avg 4.1% · Nation 12.8%\n13.9 pts worse than state"
    ],
    "fnTitle": null
   },
@@ -650,7 +656,7 @@
     "Physically restrained (QM 409)",
     "0.0%",
     "",
-    "State 0.1% · Nation 0.1%\n0.1% better than state"
+    "State avg 0.1% · Nation 0.1%\n0.1 pts better than state"
    ],
    "fnTitle": null
   },
@@ -659,7 +665,7 @@
     "Pneumococcal vaccine given (QM 415)",
     "87.0%",
     "",
-    "State 97.4% · Nation 93.6%\n10.4% worse than state"
+    "State avg 97.4% · Nation 93.6%\n10.4 pts worse than state"
    ],
    "fnTitle": null
   },
@@ -668,7 +674,7 @@
     "Flu vaccine given (QM 454)",
     "72.4%",
     "",
-    "State 96.1% · Nation 95.5%\n23.7% worse than state"
+    "State avg 96.1% · Nation 95.5%\n23.7 pts worse than state"
    ],
    "fnTitle": null
   }
@@ -694,7 +700,7 @@
    "desc": "Ensure menus must meet the nutritional needs of residents, be prepared in advance, be followed, be updated, be reviewed by dietician, and meet the needs of the resident."
   }
  ],
- "ownIntro": "As reported to CMS. Legal business name: The Evangelical Lutheran Good Samaritan Society.",
+ "ownIntro": "Ownership interests, operational/managerial control and partnership roles as reported to CMS; officers, directors, managing employees and lenders are in the workbook's Ownership sheet. Legal business name: The Evangelical Lutheran Good Samaritan Society.",
  "ownGroups": [
   {
    "role": "5% Or Greater Direct Ownership Interest",

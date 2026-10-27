@@ -1,0 +1,20 @@
+{
+ "counts": {
+  "facility_master.arrow": 1,
+  "penalties.arrow": 1,
+  "citations_gl.arrow": 1,
+  "state_averages.arrow": 1,
+  "inspection_cutpoints.arrow": 1,
+  "ownership.arrow": 1,
+  "meta.json": 1,
+  "footnotes.json": 1,
+  "lineage.json": 1,
+  "measure_catalog.json": 1,
+  "limitations.json": 1,
+  "readme.json": 1,
+  "reconciliation.json": 1,
+  "qrp_national.json": 1,
+  "vbp_aggregate.json": 1
+ },
+ "tables": "n/a"
+}

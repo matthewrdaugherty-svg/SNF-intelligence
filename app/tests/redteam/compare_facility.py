@@ -17,14 +17,17 @@ for line in src.splitlines():
         mm = re.search(rf"\b{f}: '([^']*)'", line); d[f] = mm.group(1) if mm else None
     mm = re.search(r"decimals: (\d+)", line); d['decimals'] = int(mm.group(1)) if mm else None
     M.append(d)
-DEF = {'pct': 1, 'per1000': 2, 'hours': 2, 'count': 0, 'ratio': 2, 'fraction': 4, 'stars': 0, 'rank': 0, 'score': 1, 'usd': 0}
+DEF = {'fraction_pct': 1, 'pct': 1, 'per1000': 2, 'hours': 2, 'count': 0, 'ratio': 2, 'fraction': 4, 'stars': 0, 'rank': 0, 'score': 1, 'usd': 0}
 def num(v, d):
     q = Decimal(repr(float(v))).quantize(Decimal(1).scaleb(-d), rounding=ROUND_HALF_UP)
     s = f"{abs(q):,.{d}f}"; return ('-' if q < 0 else '') + s
+def AVG(v, m):
+    return f'{v:.1f}' if m['unit'] in ('stars', 'count') else fmt(v, m['unit'], m['decimals'])
 def fmt(v, unit, d=None):
     if v is None: return ''
     d = DEF.get(unit, 0) if d is None else d
     if unit == 'pct': return num(v, d) + '%'
+    if unit == 'fraction_pct': return num(float(v) * 100, d) + '%'
     if unit == 'usd': return '$' + num(v, 0) if v >= 0 else '-$' + num(-v, 0)
     if unit == 'stars': return num(v, 0) + '★'
     if unit == 'rank': return '#' + num(v, 0)
@@ -61,6 +64,9 @@ for ccn, label in picked.items():
     if row['chain_name']:
         checked += 1; e = f"({int(row['number_of_facilities_in_chain'])} facilities)"
         if e not in page['subs'][1]: bad(ccn, 'chain size', e, page['subs'][1])
+    checked += 1
+    cl = row['county_parish']; exp_cl = (cl.title() + ' Parish') if st == 'LA' else cl.title() if cl.lower().endswith(' city') else cl.title() + ' County'
+    if exp_cl.lower() not in page['subs'][0].lower(): bad(ccn, 'county label', exp_cl, page['subs'][0])
     # flags
     exp_flags = ([row['special_focus_status']] if row['special_focus_status'] else []) + (['Abuse icon'] if row['abuse_icon'] == 'Y' else [])
     checked += 1
@@ -81,7 +87,12 @@ for ccn, label in picked.items():
     for m in M:
         k = m['key']
         if k in ('overall_rating', 'health_inspection_rating', 'qm_rating'): continue
-        if k not in page['measures']: bad(ccn, f'measure row missing {k}', 'present', 'absent'); continue
+        if k not in page['measures']:
+            if k.startswith(('vbp_', 'x_vbp')) and row['vbp_in_program'] != 'Y':
+                checked += 1
+                if 'Not in the SNF Value-Based Purchasing program' not in (page.get('vbpText') or ''): bad(ccn, 'VBP not-in-program note', 'present', page.get('vbpText'))
+                continue
+            bad(ccn, f'measure row missing {k}', 'present', 'absent'); continue
         cells = page['measures'][k]['cells']; valcell = cells[1]; cmpcell = cells[-1] if len(cells) >= 4 else ''
         v = row.get(k); v = None if v is None else float(v)
         fnv = row.get(m['fn']) if m['fn'] else None
@@ -106,23 +117,29 @@ for ccn, label in picked.items():
         sa = f2(state_avg[st].get(m['state'])) if m['state'] else None
         na = nat.get(m['national']) if m['national'] else (f2(state_avg['NATION'].get(m['state'])) if m['state'] else None)
         if m['unit'] == 'stars':
-            if sa is not None: checked += 1; bad(ccn, f'{k} state avg shown as stars', f'State {num(sa,1)} (as top card)', cmpcell.split(chr(10))[0], 'CONSISTENCY') if f'State {fmt(sa,"stars")}' in cmpcell else None
+            if sa is not None:
+                checked += 1
+                if f'State avg {sa:.1f}' not in cmpcell: bad(ccn, f'{k} state avg (stars)', f'State avg {sa:.1f}', cmpcell, 'CONSISTENCY')
             continue
         if sa is not None:
-            checked += 1; e = f"State {fmt(sa, m['unit'], m['decimals'])}"
+            checked += 1; e = f"State avg {AVG(sa, m)}"
             if e not in cmpcell: bad(ccn, f'{k} state', e, cmpcell)
         if na is not None:
-            checked += 1; e = f"Nation {fmt(na, m['unit'], m['decimals'])}"
+            checked += 1; e = f"Nation {AVG(na, m)}"
             if e not in cmpcell: bad(ccn, f'{k} nation', e, cmpcell)
         # delta
         if sa is not None and v is not None and m['direction'] != 'none':
             checked += 1
             d = v - sa
             better = d < 0 if m['direction'] == 'lower' else d > 0
-            if abs(d) < 1e-9: exp = 'same as state'
-            else: exp = f"{fmt(abs(d), m['unit'], m['decimals'])} {'better' if better else 'worse'} than state"
+            dec = 1 if m['unit'] == 'count' else 0 if m['unit'] == 'usd' else (m['decimals'] if m['decimals'] is not None else (1 if m['unit'] in ('pct', 'fraction_pct') else 2))
+            shown = float(f"{abs(d) * (100 if m['unit'] == 'fraction_pct' else 1):.{dec}f}")
+            if shown == 0: exp = 'about the same as state'
+            else:
+                ab = f"{shown:.{dec}f} pts" if m['unit'] in ('pct', 'fraction_pct') else fmt(shown, 'usd') if m['unit'] == 'usd' else f"{shown:.1f}" if m['unit'] == 'count' else fmt(shown, m['unit'], dec)
+                exp = f"{ab} {'better' if better else 'worse'} than state"
             if exp not in cmpcell: bad(ccn, f'{k} delta', exp, cmpcell)
-            shown = re.search(r'([\d.,$%]+) (better|worse) than state', cmpcell)
+            shown = re.search(r'([\d.,$%]+)( pts)? (better|worse) than state', cmpcell)
             if shown and re.fullmatch(r'[$]?0(\.0+)?%?', shown.group(1)):
                 bad(ccn, f'{k} delta rounds to zero but says {shown.group(2)}', f'diff {d:+.4f} → should read "about the same"', shown.group(0), 'DISPLAY')
             if m['unit'] == 'pct' and shown: pass
@@ -150,7 +167,7 @@ for ccn, label in picked.items():
     exp_c = sorted([(str(x[0]), f'Severity {x[1]}', f'Tag {x[2]}', x[4]) for x in cits])
     act_c = sorted([(r['meta'][0], r['meta'][1], r['meta'][2], r['desc']) for r in page['citRows']])
     checked += len(cits)
-    if exp_c != act_c: bad(ccn, 'G-L citation rows', exp_c[:3], act_c[:3])
+    if [(a,b,c_,' '.join(d_.split())) for a,b,c_,d_ in exp_c] != act_c: bad(ccn, 'G-L citation rows', exp_c[:3], act_c[:3])
     if len(cits) != (row['hc_n_actual_harm_GHI'] or 0) + (row['hc_n_immediate_jeopardy_JKL'] or 0): bad(ccn, 'G-L list vs GHI+JKL counts', (row['hc_n_actual_harm_GHI'], row['hc_n_immediate_jeopardy_JKL']), len(cits), 'CROSSCHECK')
     # ownership (app shows only ownership-interest / operational-control / partnership roles)
     own = c.sql(f"""select role_played_by_owner_or_manager_in_facility, owner_name, ownership_percentage_raw, association_date from ownership where ccn='{ccn}'
@@ -165,7 +182,7 @@ for ccn, label in picked.items():
         hit = [p for g in page['ownGroups'] for p in g['people'] if (pct is None or pct in p) and (o[3] is None or str(o[3]) in p)]
         if not hit: bad(ccn, 'ownership entry', o, '(not found)')
     hidden = [(r, n) for r, n in allown if not re.search('OWNERSHIP INTEREST|OPERATIONAL/MANAGERIAL CONTROL|PARTNERSHIP', r)]
-    if hidden: bad(ccn, 'ownership roles in CMS file not shown on the page', hidden, '(omitted)', 'SCOPE')
+    if hidden and 'officers, directors, managing employees and lenders' not in page['ownIntro']: bad(ccn, 'ownership roles omitted without saying so', hidden, page['ownIntro'], 'SCOPE')
 print(f'checked {checked} values across {len(picked)} facilities; {len(issues)} findings')
 from collections import Counter
 print(Counter(i[0] for i in issues))
