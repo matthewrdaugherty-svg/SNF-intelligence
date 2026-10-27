@@ -8,7 +8,7 @@ import ehWorker from '@duckdb/duckdb-wasm/dist/duckdb-browser-eh.worker.js?url'
 
 export type Row = Record<string, unknown>
 
-const FILES = ['facility_master', 'penalties', 'citations_gl', 'state_averages', 'inspection_cutpoints', 'ownership', 'hospital_master', 'hospital_service_area', 'snf_utilization', 'hospital_system', 'hospital_owner_org', 'hospital_family', 'hospital_family_member', 'snf_pecos'] as const
+const FILES = ['facility_master', 'penalties', 'citations_gl', 'state_averages', 'inspection_cutpoints', 'ownership', 'hospital_master', 'hospital_service_area', 'snf_utilization', 'hospital_system', 'hospital_owner_org', 'hospital_family', 'hospital_family_member', 'snf_pecos', 'snf_services'] as const
 
 let dbPromise: Promise<duckdb.AsyncDuckDBConnection> | null = null
 let progressListeners: ((msg: string) => void)[] = []
@@ -34,6 +34,12 @@ async function init(): Promise<duckdb.AsyncDuckDBConnection> {
     if (table.numRows === 0) throw new Error(`${f}.arrow is empty`)   // insertArrowTable never returns on an empty table
     await conn.insertArrowTable(table, { name: f, create: true })
   }
+  // Services layer (CMS-671): joined onto facility_master so every page, filter and cohort field can use it like any other column.
+  await conn.query(`ALTER TABLE facility_master RENAME TO facility_master_base`)
+  await conn.query(`CREATE TABLE facility_master AS SELECT b.*, s.certification_detail, CASE WHEN s.hospital_based THEN 'Y' WHEN s.hospital_based IS NULL THEN NULL ELSE 'N' END AS ltc_hospital_based,
+    s.beds_ventilator, s.beds_dialysis, s.beds_alzheimers, s.beds_hospice, s.beds_head_trauma, s.beds_rehab, s.beds_aids, s.beds_huntingtons, s.beds_pediatric,
+    s.census_total, s.census_medicare, s.census_medicaid, s.census_other, s.census_unreliable, s.census_medicare_share, s.census_medicaid_share, s.ccrc, s.multi_facility, s.ltc671_certification_date
+    FROM facility_master_base b LEFT JOIN snf_services s USING (ccn)`)
   // Discharge flows the user uploads live here for the session. Fixed schema = the plug-in contract (see Flows page and docs/DECISION_LOG.md D-013).
   await conn.query(`CREATE TABLE user_flows (hospital_ccn VARCHAR, hospital_name VARCHAR, snf_ccn VARCHAR, period_start DATE, period_end DATE, n_discharges INTEGER, source VARCHAR, method VARCHAR, loaded_at DATE)`)
   await conn.query(`CREATE TABLE user_hospitals (hospital_ccn VARCHAR, hospital_name VARCHAR, lat DOUBLE, lng DOUBLE)`)

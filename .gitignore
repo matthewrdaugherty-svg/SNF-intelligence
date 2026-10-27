@@ -14,3 +14,5 @@ app/scripts/
 
 # raw PECOS downloads (scripts/08_download_pecos.sh re-creates them)
 raw/pecos/
+
+raw/ltc671/

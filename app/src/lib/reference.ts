@@ -1,7 +1,7 @@
 // Reference data shipped as JSON next to the Parquet files (small, loaded once).
 import { q } from './db'
 
-export interface Meta { data_vintage: string; release: string; n_facilities: number; window_12m_start: string; built: string; validation: string; hospital_layer?: { pecos_release?: string; hwr_note?: string } }
+export interface Meta { data_vintage: string; release: string; n_facilities: number; window_12m_start: string; built: string; validation: string; hospital_layer?: { pecos_release?: string; ltc671_release?: string; hwr_note?: string } }
 export interface Footnote { meaning: string; applies_to: string }
 export interface Lineage { 'Facility_Master header': string; 'db column': string; source_file: string; original_header: string; how_derived: string }
 export interface CatalogRow { source: string; measure_code: string; description: string; resident_type: string | null; used_in_5star: string | null; period: string; master_column: string | null }

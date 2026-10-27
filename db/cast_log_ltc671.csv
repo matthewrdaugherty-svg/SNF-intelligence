@@ -1,0 +1,15 @@
+table,column,type,raw_nonblank,typed
+ltc671_raw,number_of_aids_beds,BIGINT,14696,14696
+ltc671_raw,number_of_alzheimers_disease_beds,BIGINT,14696,14696
+ltc671_raw,number_of_dialysis_beds,BIGINT,14696,14696
+ltc671_raw,number_of_disabled_children_young_adult_beds,BIGINT,14696,14696
+ltc671_raw,number_of_head_trauma_beds,BIGINT,14696,14696
+ltc671_raw,number_of_hospice_beds,BIGINT,14696,14696
+ltc671_raw,number_of_huntingtons_disease_beds,BIGINT,14696,14696
+ltc671_raw,number_of_ventilator_beds,BIGINT,14696,14696
+ltc671_raw,number_of_other_specialized_rehab_beds,BIGINT,14696,14696
+ltc671_raw,medicare_census,BIGINT,14696,14696
+ltc671_raw,medicaid_census,BIGINT,14696,14696
+ltc671_raw,other_census,BIGINT,14696,14696
+ltc671_raw,total_residents,BIGINT,14696,14696
+ltc671_raw,certification_date,DATE,14696,14696

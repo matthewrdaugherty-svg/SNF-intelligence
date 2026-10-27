@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router'
 import { q, sqlStr } from '../lib/db'
 import { GROUPS, MEASURE_COLS, type Measure } from '../lib/measures'
 import { fmt, fmtUsd, fmtPct, titleCase, countyLabel } from '../lib/format'
+import { CERT_SHORT } from '../components/DataTable'
 import { useCompare, compareStore, MAX_COMPARE } from '../lib/compare'
 import { Fn, Flag, Stars, Empty, Stat, StatRow, tierWord, useReference, ReferenceError } from '../components/ui'
 import type { Reference } from '../lib/reference'
@@ -85,10 +86,51 @@ function Snapshot({ row, ref, state }: { row: Row; ref: Reference | null; state:
   return <p className="t-lead mt-4" data-testid="snapshot">{parts.map((p, i) => <span key={i}>{p}</span>)}</p>
 }
 
+/** What the home has set up to handle, and who is in its beds — from the CMS-671 facility application. Self-reported; shown with that caveat. */
+const UNITS: [string, string][] = [['beds_ventilator', 'Ventilator'], ['beds_dialysis', 'Dialysis'], ['beds_alzheimers', "Alzheimer's / dementia"], ['beds_hospice', 'Hospice'], ['beds_head_trauma', 'Head trauma'], ['beds_rehab', 'Specialized rehab'], ['beds_pediatric', 'Children / young adults'], ['beds_aids', 'AIDS'], ['beds_huntingtons', "Huntington's"]]
+function ServicesPanel({ row, ref }: { row: Row; ref: Reference | null }) {
+  const has = row.certification_detail != null
+  const units = UNITS.map(([k, l]) => [l, num(row[k])] as const).filter(([, n]) => n != null && n > 0)
+  const total = num(row.census_total), mc = num(row.census_medicare), md = num(row.census_medicaid), ot = num(row.census_other)
+  const beds = num(row.number_of_certified_beds)
+  return (
+    <section className="panel panel-pad" data-testid="services">
+      <div className="flex flex-wrap items-baseline gap-x-3"><h2 className="section-title">Services and who is in the beds</h2><span className="t-caption">CMS-671 facility application, {ref?.meta.hospital_layer?.ltc671_release?.slice(0, 7) ?? 'latest'} · self-reported by the facility</span></div>
+      {!has ? <p className="t-body text-ink-2 mt-2">No CMS-671 record for this CCN in the current release.</p> : (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-3">
+          <div>
+            <div className="t-label">Dedicated special-care units</div>
+            {units.length === 0 ? <div className="t-body text-ink-2 mt-1">None reported. The home may still accept such patients; the form only records dedicated units.</div> : (
+              <ul className="mt-1 flex flex-wrap gap-1.5">{units.map(([l, n]) => <li key={l} className="inline-flex items-baseline gap-1 rounded-[6px] bg-well px-2 py-1 t-body"><span>{l}</span><span className="t-caption tabular-nums">{n} beds</span></li>)}</ul>
+            )}
+          </div>
+          <div>
+            <div className="t-label">Certification</div>
+            <div className="t-body mt-1">{CERT_SHORT[String(row.certification_detail)] ?? String(row.certification_detail)}{row.ltc_hospital_based === 'Y' ? ' · hospital-based' : ''}{row.ccrc ? ' · continuing-care retirement community' : ''}</div>
+            <div className="t-caption mt-1">{beds != null ? `${beds.toLocaleString()} certified beds (Care Compare)` : ''}{row.ltc671_certification_date ? ` · certified ${String(row.ltc671_certification_date)}` : ''}</div>
+          </div>
+          <div>
+            <div className="t-label">Residents by payer at the last survey</div>
+            {total == null || total === 0 ? <div className="t-body text-ink-2 mt-1">{row.census_unreliable ? 'The reported census could not be real (it exceeds the certified beds or is not a count), so it is not shown.' : 'Not reported.'}</div> : (
+              <>
+                <div className="flex h-2.5 rounded overflow-hidden mt-2" aria-hidden>
+                  <div style={{ width: `${100 * (mc ?? 0) / total}%`, background: 'var(--color-accent)' }} /><div style={{ width: `${100 * (md ?? 0) / total}%`, background: 'var(--color-ink-3)' }} /><div style={{ width: `${100 * (ot ?? 0) / total}%`, background: 'var(--color-hairline)' }} />
+                </div>
+                <div className="t-label mt-1.5 tabular-nums"><span className="text-ink">{total.toLocaleString()} residents</span> · Medicare {Math.round(100 * (mc ?? 0) / total)}% · Medicaid {Math.round(100 * (md ?? 0) / total)}% · other {Math.round(100 * (ot ?? 0) / total)}%</div>
+                <div className="t-caption mt-1">Who is paying on the day of the survey — a snapshot, not the year's admissions. Medicare residents are mostly short-stay rehab patients after a hospital stay; Medicaid residents are mostly long-stay.</div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+    </section>
+  )
+}
+
 /** Averages are shown to one decimal for stars and counts so the same number never appears two ways. */
 const avg = (v: number, m: Measure) => m.unit === 'stars' || m.unit === 'count' ? v.toFixed(1) : fmt(v, m.unit, m.decimals)
 function MeasureRow({ m, row, ref, state }: { m: Measure; row: Row; ref: Reference | null; state: string }) {
-  const raw = row[m.key]; const v = raw == null || raw === '' ? null : Number(raw)
+  const raw = row[m.key]; const v = raw == null || raw === '' || m.unit === 'text' ? null : Number(raw)
   const st = m.state ? ref?.stateAvg[state]?.[m.state] ?? null : null
   const nat = m.national ? ref?.national[m.national] ?? null : m.state ? ref?.stateAvg['NATION']?.[m.state] ?? null : null
   const fn = m.fn ? row[m.fn] : null
@@ -98,7 +140,7 @@ function MeasureRow({ m, row, ref, state }: { m: Measure; row: Row; ref: Referen
     <div className="grid grid-cols-[1fr_auto] md:grid-cols-[1fr_120px_1fr_200px] items-center gap-x-4 gap-y-1 py-2 border-b border-hairline/60 last:border-0" data-testid={`measure-${m.key}`}>
       <div className="text-sm text-ink">{m.label}<div className="text-[11px] text-ink-3">{m.direction === 'lower' ? 'Lower is better' : m.direction === 'higher' ? 'Higher is better' : ''}{m.note ? `${m.direction !== 'none' ? ' · ' : ''}${m.note}` : ''}</div></div>
       <div className="text-right text-sm tabular-nums">
-        {m.unit === 'stars' ? <Stars value={v} /> : <span className="font-medium">{fmt(v, m.unit, m.decimals)}</span>}
+        {m.unit === 'stars' ? <Stars value={v} /> : m.unit === 'text' ? <span className="font-medium">{raw == null || raw === '' ? <span className="text-ink-3">—</span> : CERT_SHORT[String(raw)] ?? (String(raw) === 'Y' ? 'Yes' : String(raw) === 'N' ? 'No' : String(raw))}</span> : <span className="font-medium">{fmt(v, m.unit, m.decimals)}</span>}
         {v == null && <Fn code={fn} ref={ref} />}
         {v != null && fn ? <Fn code={fn} ref={ref} /> : null}
       </div>
@@ -203,6 +245,8 @@ export default function Facility() {
             how={<>{m.label}. {howText(k, ref, m)} Bar: green when better than the state average as displayed, red when worse, amber when the same{cp ? '; for this measure CMS\u2019s own comparison to the national rate decides' : ''}.</>} />
         })}
       </StatRow>
+
+      <ServicesPanel row={row} ref={ref} />
 
       <div className="t-label flex flex-wrap items-center gap-x-5 gap-y-1" aria-hidden>
         <span className="t-label text-ink">How to read the measure tables</span>

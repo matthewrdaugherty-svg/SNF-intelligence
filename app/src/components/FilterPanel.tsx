@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
-import { EMPTY, STATES, countActive, type Filters } from '../lib/filters'
+import { EMPTY, STATES, SERVICE_KEYS, SERVICE_LABELS, countActive, type Filters } from '../lib/filters'
 import { starFg, tierWord } from './ui'
 import HospitalPicker from './HospitalPicker'
 
@@ -36,7 +36,7 @@ export default function FilterPanel({ f, onPatch, onClear, resultCount, open, on
   const [place, setPlace] = useState(f.place)
   const [geoState, setGeoState] = useState<'idle' | 'busy' | 'none' | 'error'>('idle')
   useEffect(() => { setPlace(f.place) }, [f.place])
-  const toggleIn = (key: 'stars' | 'ownership' | 'states', v: never) => {
+  const toggleIn = (key: 'stars' | 'ownership' | 'states' | 'services', v: never) => {
     const cur = f[key] as unknown[]
     onPatch({ [key]: cur.includes(v) ? cur.filter(x => x !== v) : [...cur, v].sort() } as Partial<Filters>)
   }
@@ -105,6 +105,13 @@ export default function FilterPanel({ f, onPatch, onClear, resultCount, open, on
         <div className="flabel mt-3">Warnings</div>
         <Check checked={f.sff} onChange={v => onPatch({ sff: v })}>Special focus facility or candidate</Check>
         <Check checked={f.abuse} onChange={v => onPatch({ abuse: v })}>Abuse icon</Check>
+      </section>
+
+      <section className="fgroup" aria-labelledby="fg-services">
+        <div id="fg-services" className="fgroup-title">Services</div>
+        <div className="flabel">Dedicated units the home reports</div>
+        {SERVICE_KEYS.map(k => <Check key={k} checked={f.services.includes(k)} onChange={() => toggleIn('services', k as never)}>{SERVICE_LABELS[k]}</Check>)}
+        <div className="fhelp">Self-reported on the CMS-671 facility application (Q2 2026). A home without a dedicated unit may still take such patients.</div>
       </section>
 
       <section className="fgroup" aria-labelledby="fg-facility">

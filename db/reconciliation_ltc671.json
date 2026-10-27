@@ -1,0 +1,100 @@
+{
+ "certification_detail_vs_provider_type": [
+  [
+   "Medicaid",
+   "Nursing Facility (NF) - Medicaid Participation",
+   180
+  ],
+  [
+   "Medicaid",
+   "NF (Medicaid) Only",
+   67
+  ],
+  [
+   "Medicare",
+   "Skilled Nursing Facility (SNF) - Medicare Participation",
+   392
+  ],
+  [
+   "Medicare",
+   "SNF (Medicare) Only",
+   143
+  ],
+  [
+   "Medicare",
+   "SNF/NF Dual Certification",
+   2
+  ],
+  [
+   "Medicare",
+   "SNF/NF - Medicare/Medicaid",
+   1
+  ],
+  [
+   "Medicare and Medicaid",
+   "SNF/NF - Medicare/Medicaid",
+   9201
+  ],
+  [
+   "Medicare and Medicaid",
+   "SNF/NF Dual Certification",
+   4103
+  ],
+  [
+   "Medicare and Medicaid",
+   "SNF/NF Distinct Part",
+   576
+  ],
+  [
+   "Medicare and Medicaid",
+   "SNF (Medicare) Only",
+   6
+  ],
+  [
+   "Medicare and Medicaid",
+   "Nursing Facility (NF) - Medicaid Participation",
+   5
+  ],
+  [
+   "Medicare and Medicaid",
+   "NF (Medicaid) Only",
+   4
+  ],
+  [
+   "Medicare and Medicaid",
+   "Skilled Nursing Facility (SNF) - Medicare Participation",
+   4
+  ],
+  [
+   "Medicare and Medicaid",
+   null,
+   2
+  ]
+ ],
+ "medicaid_only_agreement": [
+  14675,
+  14684
+ ],
+ "hospital_based_vs_provider_resides_in_hospital": [
+  [
+   "N",
+   false,
+   14070
+  ],
+  [
+   "Y",
+   true,
+   575
+  ],
+  [
+   "Y",
+   false,
+   27
+  ],
+  [
+   "N",
+   true,
+   14
+  ]
+ ]
+}

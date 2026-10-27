@@ -13,6 +13,7 @@ import Flows from './pages/Flows'
 import About from './pages/About'
 import Hospital, { HospitalSearch } from './pages/Hospitals'
 import Cohorts from './pages/Cohorts'
+import Guide from './pages/Guide'
 
 function Gate() {
   const [ready, setReady] = useState(false)
@@ -33,6 +34,7 @@ const router = createBrowserRouter([
     { path: 'compare', element: <Compare /> },
     { path: 'flows', element: <Flows /> },
     { path: 'about', element: <About /> },
+    { path: 'guide', element: <Guide /> },
     { path: '*', element: <Navigate to="/explore" replace /> },
   ] },
 ])

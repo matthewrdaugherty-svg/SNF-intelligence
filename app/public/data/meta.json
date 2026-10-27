@@ -10,6 +10,7 @@
   "inpatient_year": 2024,
   "pacpuf_year": 2024,
   "care_compare_hospitals_release": "2026-07-22 (general info), 2026-09-10 (unplanned visits), 2026-01-26 (spending by claim)",
+  "ltc671_release": "Q2 2026 (CMS-671 Long-Term Care Facility Characteristics, data.cms.gov, published 2026-07-29)",
   "pecos_release": "2026-09-29 (Hospital/SNF All Owners, Enrollments, Change of Ownership; data.cms.gov)",
   "hwr_note": "The hospital-wide readmission measure (Hybrid HWR) is 'Not Available' for every hospital in this release (CMS footnote 4); condition-specific 30-day readmission rates are shown instead."
  }

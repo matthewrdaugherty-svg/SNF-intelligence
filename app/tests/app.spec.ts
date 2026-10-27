@@ -376,3 +376,21 @@ test('certification filter separates Medicare-certified SNFs from Medicaid-only 
   await ready(page)
   await expect(count(page)).toHaveText('14,690')
 })
+
+test('services filter and panel come from the CMS-671 file', async ({ page }) => {
+  await page.goto('/explore?st=MD&svc=vent')
+  await ready(page)
+  await expect(count(page)).toHaveText('15')
+  await page.getByRole('checkbox', { name: 'Dialysis unit' }).click()
+  await expect(count(page)).toHaveText('1')
+  await page.getByRole('button', { name: 'MD', exact: true }).click()   // drop the state → nationwide vent + dialysis
+  await expect(count(page)).toHaveText('86')
+  await expect(page).toHaveURL(/svc=dialysis%2Cvent/)
+  await page.goto('/facility/215085')
+  const svc = page.getByTestId('services')
+  await expect(svc).toContainText('None reported', { timeout: 120_000 })
+  await expect(svc).toContainText('SNF/NF, Medicare & Medicaid')
+  await expect(svc).toContainText('90 residents · Medicare 9% · Medicaid 58% · other 33%')
+  await page.goto('/guide')
+  await expect(page.getByRole('heading', { level: 2, name: 'Where a patient can go after a hospital stay' })).toBeVisible()
+})

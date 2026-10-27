@@ -14,12 +14,15 @@ const ROW = 40
 const OWN_SHORT: Record<string, string> = { 'For profit - Limited Liability company': 'For profit · LLC', 'For profit - Corporation': 'For profit · corporation', 'For profit - Individual': 'For profit · individual', 'For profit - Partnership': 'For profit · partnership',
   'Non profit - Corporation': 'Non profit · corporation', 'Non profit - Other': 'Non profit · other', 'Non profit - Church related': 'Non profit · church', 'Government - County': 'Government · county', 'Government - Hospital district': 'Government · hospital district',
   'Government - State': 'Government · state', 'Government - City/county': 'Government · city/county', 'Government - City': 'Government · city', 'Government - Federal': 'Government · federal' }
+export const CERT_SHORT: Record<string, string> = { 'SNF/NF - Medicare/Medicaid': 'SNF/NF, Medicare & Medicaid', 'SNF/NF Dual Certification': 'SNF/NF, dual certification', 'SNF/NF Distinct Part': 'SNF/NF, distinct part', 'Skilled Nursing Facility (SNF) - Medicare Participation': 'SNF, Medicare', 'SNF (Medicare) Only': 'SNF, Medicare only', 'Nursing Facility (NF) - Medicaid Participation': 'NF, Medicaid', 'NF (Medicaid) Only': 'NF, Medicaid only' }
 function displayText(key: string, val: unknown): string {
   if (val == null) return ''
   const s = String(val)
   if (key === 'ownership_type') return OWN_SHORT[s] ?? s
   if (key === 'city_town' || key === 'county_parish' || key === 'chain_name') return titleCase(s)
   if (key === 'provider_type') return s.replace('Medicare and Medicaid', 'Medicare & Medicaid')
+  if (key === 'certification_detail') return CERT_SHORT[s] ?? s
+  if (['abuse_icon', 'high_performing_icon', 'vbp_in_program', 'provider_resides_in_hospital', 'ltc_hospital_based'].includes(key)) return s === 'Y' ? 'Yes' : s === 'N' ? 'No' : s
   return s
 }
 

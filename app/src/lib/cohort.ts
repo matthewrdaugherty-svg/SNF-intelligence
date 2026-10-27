@@ -16,7 +16,7 @@ const extra: CohortField[] = [
   { key: 'hospital_area', label: "In a hospital's service area (hospital CCN)", unit: 'text', group: 'Facility', kind: 'hospital' },
 ]
 const fromCols: CohortField[] = TABLE_COLS.map((c: TableCol) => ({ key: c.key, label: c.label, unit: c.unit, group: c.group,
-  kind: c.unit === 'text' ? (['abuse_icon', 'high_performing_icon', 'vbp_in_program', 'provider_resides_in_hospital'].includes(c.key) ? 'flag' : 'text') : 'number' }))
+  kind: c.unit === 'text' ? (['abuse_icon', 'high_performing_icon', 'vbp_in_program', 'provider_resides_in_hospital', 'ltc_hospital_based'].includes(c.key) ? 'flag' : 'text') : 'number' }))
 export const COHORT_FIELDS: CohortField[] = [...extra, ...fromCols]
 export const fieldByKey = (k: string) => COHORT_FIELDS.find(f => f.key === k)
 
