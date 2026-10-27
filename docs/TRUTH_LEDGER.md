@@ -89,3 +89,9 @@ All 18 files in manifest.json arrived; byte sizes match the manifest exactly.
 
 ## T-016 Medicaid-only facilities DO have claims-based QMs
 - 167 of 247 Medicaid-only facilities have QM 551 values (e.g. CCN 04A293). They are excluded from SNF QRP/VBP (QRP footnote 14), not from the Care Compare claims QMs.
+
+## T-017 Live deployment checks (2026-10-26, in Matt's Chrome against https://snf-intelligence.vercel.app)
+- Explore ?st=MD&stars=5 → 54 facilities (matches db). Map radius 10 mi around Johns Hopkins Hospital (39.2970, -76.5929) → 63 facilities, nearest first.
+- Facility 215340 (Blue Point Healthcare Center): total fines $341,978, VBP ranking #3,239, QM 521 = 19.7% — all match the raw CMS values.
+- Two deployment-only defects found and fixed the same evening: (1) MapLibre worker file not bundled → 404 → no map rendered; (2) MapLibre's unlayered CSS overrode the Tailwind `absolute inset-0` utility → 0-height map. Both were invisible in the sandbox run because the earlier test only checked that the map element existed; the test now asserts a worker-error-free load and real map dimensions.
+- Lesson (Operating Rule candidate): a "renders" test must assert something about the rendered output (dimensions, pixels, data), never just element existence.
