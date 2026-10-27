@@ -1,0 +1,11 @@
+# raw CMS files are re-downloadable (scripts/00_download_raw.md); the database and outputs are rebuilt by the scripts
+raw/*.csv
+raw/*.pdf
+db/snf.duckdb
+output/
+app/node_modules/
+app/dist/
+app/test-results/
+app/tests/screenshots/
+.DS_Store
+__pycache__/

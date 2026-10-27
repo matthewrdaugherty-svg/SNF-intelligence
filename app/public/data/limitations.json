@@ -1,0 +1,14 @@
+[
+ "1. No hospital\u2192SNF discharge flow or referral-source information exists in any CMS Care Compare nursing-home file. Catchment / 'where do a hospital's patients go' analysis requires a different source (docs/EXTERNAL_DATA_SOURCES.md): no free public source has true flows; MedPAR (paid, research DUA) does; a modeled catchment can be built from free files.",
+ "2. No cost or revenue fields. Spending signals: the SNF QRP Medicare Spending per Beneficiary ratio (relative to national, not dollars) and the SNF VBP incentive multiplier (a % change to Part A payments, not dollars).",
+ "3. Quality measures are facility-level averages over a reporting window (Measure_Catalog / Collection_Intervals); they do not describe individual patients or condition-specific outcomes.",
+ "4. MDS quality measures are self-reported by facilities via MDS assessments; claims-based measures (QM 521/522/551/552; SNF QRP 004/005/006/039; VBP readmission and HAI) come from Medicare claims; VBP turnover and staffing come from Payroll-Based Journal data.",
+ "5. Reporting windows differ by measure and are older than the refresh date: SNF QRP 004/005/006 cover 10/2022\u20139/2024; SNF VBP FY2026 uses FY2024 performance; most MDS QMs 2025Q2\u20132026Q1 (flu-vaccine QMs 454/472: 2024Q3\u20132025Q2; short-stay 430/434 start 2025Q1); claims QMs CY2025. See Collection_Intervals.",
+ "6. Provider Info 'Rating Cycle 1' deficiency counts differ from Survey Summary 'Inspection Cycle 1' counts for 449 facilities; 287 explained (citations under dispute), 162 unexplained \u2014 open item for the Quality Expert.",
+ "7. Ownership text columns on Facility_Master are our concatenation of CMS ownership rows by role; 637 facilities have no ownership data (flag column). Use Ownership_Detail for exact records, including the raw percentage text ('NOT APPLICABLE' / 'NO PERCENTAGE PROVIDED').",
+ "8. Health-inspection star ratings are relative within state (Inspection_Cutpoints) \u2014 a 3-star in Maryland is not the same deficiency score as a 3-star in Kentucky.",
+ "9. Medicaid-only facilities (247) are not in the SNF QRP/VBP programs (QRP footnote 14), but CMS does publish claims-based QMs for many of them (167 of 247 have QM 551) because those measures use all Medicare claims for their residents.",
+ "10. Complaint counts here are deficiencies from complaint inspections and complaint inspections that produced citations. The number of complaints filed or substantiated is not public in these files.",
+ "11. The A\u2013L severity grid labels (actual harm / immediate jeopardy) are industry-standard but not defined in the CMS data dictionary; they are pending verification against the CMS Five-Star Technical Users' Guide.",
+ "12. Any 'x_' column is OUR derivation, not a CMS value: x_vbp_net_part_a_payment_change_pct on Facility_Master and the direction column on Measure_Catalog (which still needs Quality Expert sign-off)."
+]

@@ -1,0 +1,78 @@
+{
+ "1": {
+  "meaning": "Newly certified nursing home with less than 12-15 months of data available or the nursing home opened less than 6 months ago, and there were no data to submit or claims for this measure.",
+  "applies_to": "QM and QRP measures (Table 22)"
+ },
+ "2": {
+  "meaning": "Not enough data available to calculate a star rating.",
+  "applies_to": "star ratings (Provider Information rating footnotes; the dictionary does not list which)"
+ },
+ "6": {
+  "meaning": "This facility submitted data that did not meet the criteria required to calculate a staffing measure.",
+  "applies_to": "staffing (wording changed 202501; 23/25 replace it \"when applicable\" for staffing level measures)"
+ },
+ "7": {
+  "meaning": "CMS determined that the percentage was not accurate, or data suppressed by CMS for one or more quarters.",
+  "applies_to": "QM measures; QRP (Table 22)"
+ },
+ "9": {
+  "meaning": "The number of residents or resident stays is too small to report. Call the facility to discuss this quality measure.",
+  "applies_to": "QM; QRP (Table 22): min denominator 20 (assessment-based and MSPB; denominator 1-19) or 25 (PPR, DTC, SNF HAI claims-based; denominator 1-24)"
+ },
+ "10": {
+  "meaning": "The data for this measure is missing or was not submitted. Call the facility to discuss this quality measure.",
+  "applies_to": "QM; QRP (Table 22)"
+ },
+ "13": {
+  "meaning": "Results are based on a shorter time period than required.",
+  "applies_to": "QM; QRP (assessment-based) (Table 22)"
+ },
+ "14": {
+  "meaning": "This nursing home is not required to submit data for the Skilled Nursing Facility Quality Reporting Program.",
+  "applies_to": "QRP (Table 22)"
+ },
+ "18": {
+  "meaning": "This facility is not rated due to a history of serious quality issues and is included in the special focus facility program.",
+  "applies_to": "ratings (SFF)"
+ },
+ "20": {
+  "meaning": "The accuracy of the data for this rating could not be validated by CMS.",
+  "applies_to": "ratings (added 202301; wording changed 202501)"
+ },
+ "21": {
+  "meaning": "The accuracy of the data for this measure could not be validated by CMS.",
+  "applies_to": "measures (added 202301; wording changed 202501)"
+ },
+ "22": {
+  "meaning": "The street address for this facility could not be matched to latitude/longitude coordinates. Therefore, the latitude/longitude coordinates are based on the facility's zip code.",
+  "applies_to": "`Geocoding Footnote` (added 202308)"
+ },
+ "23": {
+  "meaning": "This facility did not submit staffing data.",
+  "applies_to": "staffing level (added 202501)"
+ },
+ "24": {
+  "meaning": "This facility reported a high number of days without a registered nurse onsite.",
+  "applies_to": "staffing (added 202501 per the 202501 row \"replaced with footnotes 23-25\")"
+ },
+ "25": {
+  "meaning": "The accuracy of the staffing data for this measure could not be validated by CMS.",
+  "applies_to": "staffing level (added 202501)"
+ },
+ "26": {
+  "meaning": "This facility did not submit staffing data or submitted staffing data that is considered to be invalid for the purpose of calculating turnover. This measure will receive the minimum points for calculating the overall staffing score and rating.",
+  "applies_to": "turnover measures (added 202504)"
+ },
+ "27": {
+  "meaning": "This facility submitted staffing data that did not meet the criteria required to calculate a turnover measure. This measure will be excluded from the staffing rating and the staffing score will be rescaled.",
+  "applies_to": "turnover measures (added 202504)"
+ },
+ "28": {
+  "meaning": "This is an annual measure. Data for individual quarters is not available.",
+  "applies_to": "MDS QMs only calculated annually (currently the flu vaccination measures) (added 202504)"
+ },
+ "29": {
+  "meaning": "This was a Risk-Based Survey. Unlike a standard inspection, a Risk-Based inspection involves a shorter visit with a smaller inspection team and is only given to higher performing facilities.",
+  "applies_to": "`Survey Footnote` in Inspection Dates, Health Deficiencies, Survey Summary; \"can apply to standard surveys\" (added 202609)"
+ }
+}
