@@ -32,8 +32,8 @@ export default function DataTable({ rows, cols, sort, onSort, ref, showDistance,
     return (
       <div key={key} role="columnheader" aria-sort={on ? (sort.dir === 'asc' ? 'ascending' : 'descending') : 'none'} className="shrink-0 border-b border-hairline" style={{ width: w }}>
         <button onClick={() => onSort({ key, dir: on && sort.dir === 'desc' ? 'asc' : 'desc' })}
-          className={`press w-full px-2 h-12 flex items-end ${numeric ? 'text-right' : 'text-left'} ${on ? 'text-ink font-semibold' : 'text-ink-2 hover:text-ink'}`} title={`Sort by ${label}`}>
-          <span className="block w-full text-xs leading-4 line-clamp-2">{node ?? label}{on && <span aria-hidden className="ml-0.5">{sort.dir === 'desc' ? '↓' : '↑'}</span>}</span>
+          className={`press w-full px-2 h-14 flex items-end ${numeric ? 'text-right' : 'text-left'} ${on ? 'text-ink font-semibold' : 'text-ink-2 hover:text-ink'}`} title={`Sort by ${label}`}>
+          <span className="block w-full text-xs leading-4 line-clamp-3">{node ?? label}{on && <span aria-hidden className="ml-0.5">{sort.dir === 'desc' ? '↓' : '↑'}</span>}</span>
         </button>
       </div>
     )
@@ -47,7 +47,7 @@ export default function DataTable({ rows, cols, sort, onSort, ref, showDistance,
           {head('provider_name', 'Facility', false, 300)}
           {head('overall_rating', STRIP_HEADER, false, 172, <StripHeader />)}
           {showDistance && head('distance_mi', 'Miles', true, 72)}
-          {showShare && head('modeled_share', 'Modeled share of hospital SNF volume', true, 96)}
+          {showShare && head('modeled_share', 'Modeled share', true, 96)}
           {cols.map(c => head(c.key, c.short ?? c.label, c.unit !== 'text', c.width ?? 96))}
         </div>
         <div style={{ height: v.getTotalSize(), position: 'relative' }}>

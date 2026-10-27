@@ -67,18 +67,19 @@ export default function Explore() {
     const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `snf-explore-${new Date().toISOString().slice(0, 10)}.csv`; a.click(); URL.revokeObjectURL(a.href)
   }
 
+  useEffect(() => { if (!picker && !filtersOpen) return; const k = (e: KeyboardEvent) => { if (e.key === 'Escape') { setPicker(false); setFiltersOpen(false) } }; document.addEventListener('keydown', k); return () => document.removeEventListener('keydown', k) }, [picker, filtersOpen])
   const groups = useMemo(() => { const g = new Map<string, TableCol[]>(); for (const c of TABLE_COLS) g.set(c.group, [...(g.get(c.group) ?? []), c]); return [...g.entries()] }, [])
 
   return (
     <div className="flex h-[calc(100dvh-56px)] relative">
       <FilterPanel f={f} onPatch={onPatch} onClear={onClear} resultCount={rows?.length ?? null} open={filtersOpen} onClose={() => setFiltersOpen(false)} />
       <section className="flex-1 min-w-0 flex flex-col relative">
-        <div className="flex items-center gap-3 px-4 h-14 shrink-0">
-          <button className="press btn btn-surface md:hidden" onClick={() => setFiltersOpen(o => !o)} aria-expanded={filtersOpen}>Filters</button>
-          <div className="text-sm text-ink-2">{rows ? <><span className="text-ink font-medium tabular-nums" data-testid="result-count">{rows.length.toLocaleString()}</span> facilities</> : 'Loading…'}{hasDist && f.place ? <span className="text-ink-3"> · within {f.miles} mi of {f.place}</span> : null}{hasHosp ? <span className="text-ink-3"> · in the service area of {f.hospitals.length} hospital{f.hospitals.length > 1 ? 's' : ''} (modeled)</span> : null}</div>
+        <div className="flex items-center gap-3 px-4 h-14 shrink-0 min-w-0">
+          <button className="press btn btn-surface md:hidden shrink-0" onClick={() => setFiltersOpen(o => !o)} aria-expanded={filtersOpen}>Filters</button>
+          <div className="text-sm text-ink-2 min-w-0 truncate">{rows ? <><span className="text-ink font-medium tabular-nums" data-testid="result-count">{rows.length.toLocaleString()}</span> facilities</> : 'Loading…'}{hasDist && f.place ? <span className="text-ink-3"> · within {f.miles} mi of {f.place}</span> : null}{hasHosp ? <span className="text-ink-3"> · in the service area of {f.hospitals.length} hospital{f.hospitals.length > 1 ? 's' : ''} (modeled)</span> : null}</div>
           <div className="ml-auto flex items-center gap-2 relative shrink-0">
-            <button className="press btn btn-surface" onClick={() => setPicker(p => !p)} aria-expanded={picker}>Columns · {cols.length}</button>
-            <button className="press btn btn-primary" onClick={exportCsv} disabled={!rows?.length}>Export CSV</button>
+            <button className="press btn btn-surface" onClick={() => setPicker(p => !p)} aria-expanded={picker}><span className="hidden sm:inline">Columns · {cols.length}</span><span className="sm:hidden">Cols</span></button>
+            <button className="press btn btn-primary" onClick={exportCsv} disabled={!rows?.length}><span className="hidden sm:inline">Export CSV</span><span className="sm:hidden">CSV</span></button>
             {picker && (
               <div className="absolute right-0 top-10 w-[min(520px,calc(100vw-2rem))] max-h-[70vh] overflow-auto bg-surface rounded-[10px] p-4 z-20" style={{ boxShadow: 'var(--shadow-float)' }} role="dialog" aria-label="Choose columns" onKeyDown={e => { if (e.key === 'Escape') setPicker(false) }}>
                 <div className="flex items-center justify-between mb-2"><div className="font-medium">Columns</div><button className="press btn btn-quiet btn-sm" onClick={() => setColKeys(TABLE_COLS.filter(c => c.default).map(c => c.key))}>Reset to default</button></div>

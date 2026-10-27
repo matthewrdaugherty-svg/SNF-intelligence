@@ -35,12 +35,12 @@ export default function About() {
             <div key={g.id} className="mb-4">
               <div className="font-medium">{g.title}</div>
               {g.blurb && <div className="text-xs text-ink-2 mb-1">{g.blurb}</div>}
-              <table className="w-full"><tbody>
+              <div className="overflow-x-auto"><table className="tbl tbl-compact"><tbody>
                 {g.measures.map(m => {
                   const cat = ref.catalog.find(c => c.master_column === m.key)
-                  return <tr key={m.key} className="border-t border-hairline/60"><td className="py-1 pr-3 w-1/2">{m.label}</td><td className="py-1 pr-3 text-ink-2 text-xs">{m.direction === 'none' ? 'no direction' : m.direction === 'lower' ? 'lower is better' : 'higher is better'}</td><td className="py-1 text-ink-3 text-xs">{cat ? `${cat.source} ${cat.measure_code} · ${cat.period}` : ''}<code className="ml-2">{m.key}</code></td></tr>
+                  return <tr key={m.key}><td className="w-1/2 [overflow-wrap:anywhere]">{m.label}</td><td className="text-ink-2 text-xs whitespace-nowrap">{m.direction === 'none' ? 'no direction' : m.direction === 'lower' ? 'lower is better' : 'higher is better'}</td><td className="text-ink-3 text-xs [overflow-wrap:anywhere]">{cat ? `${cat.source} ${cat.measure_code} · ${cat.period}` : ''}<code className="ml-2">{m.key}</code></td></tr>
                 })}
-              </tbody></table>
+              </tbody></table></div>
             </div>
           ))}
         </div>

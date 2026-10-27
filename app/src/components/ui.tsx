@@ -119,7 +119,7 @@ export function Stat({ label, value, unit, note, how, tone, source }: { label: s
   const bar = tone === 'good' ? 'var(--color-q5)' : tone === 'mid' ? '#dc6803' : tone === 'bad' ? 'var(--color-q2)' : 'transparent'
   void source
   return (
-    <div className="panel relative p-4 grid gap-2 min-w-0" style={{ gridTemplateRows: '32px 32px 32px auto' }}>
+    <div className="panel relative p-4 grid gap-2 min-w-0" style={{ gridTemplateRows: '32px 32px 32px' }}>
       <div className="t-label line-clamp-2 pr-7" title={label}>{label}</div>
       {how && <button className="press absolute top-3 right-3 w-6 h-6 rounded-full text-ink-3 hover:text-ink hover:bg-well text-[12px] leading-6 text-center" onClick={() => setOpen(o => !o)} aria-expanded={open} aria-label={`How this is calculated: ${label}`} title="How this is calculated">i</button>}
       <div className="flex items-baseline gap-1.5 whitespace-nowrap overflow-hidden">
@@ -128,7 +128,7 @@ export function Stat({ label, value, unit, note, how, tone, source }: { label: s
         {tone && <span className="ml-auto self-center h-1 w-8 rounded shrink-0" style={{ background: bar }} aria-hidden />}
       </div>
       <div className="t-label line-clamp-2">{note}</div>
-      {open && how && <div className="t-label border-t border-hairline pt-2">{how}</div>}
+      {open && how && <div className="absolute left-2 right-2 top-10 z-20 panel p-3 t-label" style={{ boxShadow: 'var(--shadow-float)' }} role="note" onKeyDown={e => { if (e.key === 'Escape') setOpen(false) }}><div className="t-label text-ink font-medium mb-1">How this is calculated</div>{how}<button className="press btn btn-quiet btn-sm mt-2" onClick={() => setOpen(false)}>Close</button></div>}
     </div>
   )
 }

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router'
 import { useCompare } from '../lib/compare'
 import { useReference } from './ui'
@@ -17,6 +17,7 @@ export default function Shell() {
   const compare = useCompare()
   const ref = useReference()
   const [menu, setMenu] = useState(false)
+  useEffect(() => { if (!menu) return; const k = (e: KeyboardEvent) => { if (e.key === 'Escape') setMenu(false) }; document.addEventListener('keydown', k); return () => document.removeEventListener('keydown', k) }, [menu])
   const loc = useLocation()
   const current = NAV.find(n => loc.pathname.startsWith(n.to) || (n.to === '/hospitals' && loc.pathname.startsWith('/hospital/')) || (n.to === '/explore' && loc.pathname.startsWith('/facility/')))
   return (

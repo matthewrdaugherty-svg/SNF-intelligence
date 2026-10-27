@@ -28,7 +28,7 @@ export function HospitalSearch() {
         {list.map(h => (
           <Link key={h.hospital_ccn} to={`/hospital/${h.hospital_ccn}`} className="press flex items-center gap-4 px-4 min-h-12 py-2 border-b border-hairline/60 last:border-0 hover:bg-paper">
             <div className="min-w-0 flex-1">
-              <div className="t-body truncate">{titleCase(h.hospital_name)}</div>
+              <div className="t-body" title={titleCase(h.hospital_name)}>{titleCase(h.hospital_name)}</div>
               <div className="t-caption">{titleCase(h.city)}, {h.state} · {h.hospital_type}</div>
             </div>
             <div className="text-right t-body tabular-nums w-28">{h.medicare_discharges_2024 != null ? fmtInt(Number(h.medicare_discharges_2024)) : <span className="text-ink-3">—</span>}</div>
@@ -90,7 +90,7 @@ export default function Hospital() {
             {sl.ccns.length > sl.stateCcns.length ? <>{sl.stateCcns.length > 0 ? ' or ' : ' · nursing homes serving '}<Link to={`/explore?h=${sl.ccns.join(',')}`} className="text-accent hover:underline">all {sl.ccns.length} with service-area data</Link></> : null}
             {sl.ccns.length === 0 ? ' — none of its hospitals has service-area data' : ''}</div>)}
         </div>
-        <div className="shrink-0 flex flex-row md:flex-col items-start md:items-end gap-2 md:w-64">
+        <div className="shrink-0 flex flex-col sm:flex-row md:flex-col items-stretch md:items-end gap-2 w-full md:w-64">
           <Link to={exploreLink} className="press btn btn-primary">Explore nursing homes in this service area</Link>
           <Link to={`/map?h=${ccn}`} className="press btn btn-surface">Show on the map</Link>
         </div>
@@ -122,9 +122,9 @@ export default function Hospital() {
       {/* quality mix */}
       {mix && mix.n_snf > 0 && (
         <StatRow source="Modeled" note="share of the hospital's modeled nursing-home volume by rating tier">
-          <Stat label="Modeled SNF volume in 4–5★ facilities" value={pct(mix.high, 0)} note={`${fmtInt(mix.n_high)} facilities`} source="Modeled" tone="good" how="Sum of modeled weights for SNFs rated 4 or 5 stars overall, divided by the sum of all modeled weights for this hospital." />
-          <Stat label="In 3★ facilities" value={pct(mix.mid, 0)} note={`${fmtInt(mix.n_mid)} facilities`} source="Modeled" tone="mid" how="Same method, overall rating = 3." />
-          <Stat label="In 1–2★ facilities" value={pct(mix.low, 0)} note={`${fmtInt(mix.n_low)} facilities`} source="Modeled" tone="bad" how="Same method, overall rating 1 or 2." />
+          <Stat label="Modeled SNF volume in 4–5★ facilities" value={pct(mix.high, 0)} note={`${fmtInt(mix.n_high)} nursing homes`} source="Modeled" how="Sum of modeled weights for SNFs rated 4 or 5 stars overall, divided by the sum of all modeled weights for this hospital." />
+          <Stat label="In 3★ facilities" value={pct(mix.mid, 0)} note={`${fmtInt(mix.n_mid)} nursing homes`} source="Modeled" how="Same method, overall rating = 3." />
+          <Stat label="In 1–2★ facilities" value={pct(mix.low, 0)} note={`${fmtInt(mix.n_low)} nursing homes`} source="Modeled" how="Same method, overall rating 1 or 2." />
           <Stat label="Volume-weighted average star rating" value={mix.wstars != null ? Number(mix.wstars).toFixed(2) : '–'} unit="stars" note={<>Rehospitalized {mix.w521 != null ? fmtPct(mix.w521) : 'n/a'}<br />Readmitted after SNF {mix.w004 != null ? fmtPct(mix.w004) : 'n/a'} · to community {mix.w005 != null ? fmtPct(mix.w005) : 'n/a'}</>} source="Modeled" how="Each SNF's CMS measure weighted by its modeled share; facilities with a suppressed value are left out of that average. These are facility rates, not this hospital's patients' outcomes." />
         </StatRow>
       )}

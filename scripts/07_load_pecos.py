@@ -93,23 +93,29 @@ print("  Hopkins:", hop); assert any(x[1]==8 for x in hop), hop   # 7 CCNs + 09S
 # controlled hospitals is a subsidiary of the largest such organization; (4) a family is the resulting tree, labelled with its
 # largest member that is not named as a holding/acquisition vehicle, carrying every member name as an alias.
 print("== Hospital families")
-rows=con.execute("""SELECT upper(trim(owner_name)) AS name, hospital_ccn, max(coalesce(pct, 100)) AS pct
+rows=con.execute("""SELECT upper(trim(owner_name)) AS name, hospital_ccn, max(coalesce(pct, 100)) AS pct, max(pct) AS pct_reported
   FROM hospital_owner_org WHERE in_hospital_master GROUP BY 1,2""").fetchall()
-sets={}; allsets={}
-for name,ccn,pct in rows:
+sets={}; allsets={}; docsets={}
+for name,ccn,pct,pct_rep in rows:
     allsets.setdefault(name,set()).add(ccn)
-    if pct>=50: sets.setdefault(name,set()).add(ccn)
+    if pct>=50: sets.setdefault(name,set()).add(ccn)                       # controls (reported >=50% or unreported)
+    if pct_rep is not None and pct_rep>=50: docsets.setdefault(name,set()).add(ccn)   # documented control (reported >=50%)
 names=sorted(allsets, key=lambda n:(-len(sets.get(n,())), n))
+# Attachment (subsidiary → parent) needs DOCUMENTED control by the parent on at least two-thirds of the child's controlled hospitals
+# (every attachment between 2/3 and 80% was checked by hand on 2026-10-27 and all 24 were real subsidiaries, e.g. Dignity → CommonSpirit), and a child
+# with at least two controlled hospitals. Unreported shares still make a hospital a member of its owner's family, but they can never
+# make one organization a subsidiary of another: in joint ventures both partners are usually listed with no percentage, and a
+# single-hospital investor is not a holding company.
 parent={}
 for n in names:
     A=sets.get(n,set())
-    if not A: continue
+    if len(A)<2: continue
     best=None
     for m in names:
         if m==n: continue
-        B=sets.get(m,set())
-        if len(B)<len(A) or (len(B)==len(A) and m>n): continue
-        if len(A&B)/len(A)>=0.8 and (best is None or len(B)>len(sets[best])): best=m
+        B=docsets.get(m,set())
+        if len(sets.get(m,()))<len(A) or (len(sets.get(m,()))==len(A) and m>n): continue
+        if len(A&B)/len(A)>=2/3 and (best is None or len(sets[m])>len(sets[best])): best=m
     if best: parent[n]=best
 def root(n):
     while n in parent: n=parent[n]
@@ -148,6 +154,10 @@ assert famof('HCA INC')==famof('HCA HEALTHCARE INC')==famof('HEALTHTRUST INC - T
 # but their minority stakes must never add hospitals: every HCA-family hospital is controlled by an HCA entity with a reported >=50% share or an unreported share.
 assert con.execute("SELECT count(*) FROM hospital_family_member WHERE family_id=? AND NOT controlled",[famof('HCA INC')[0]]).fetchone()[0]==0
 assert famof('HENRY FORD HEALTH SYSTEM')!=famof('ASCENSION HEALTH'), "JV partner merged (Henry Ford → Ascension)"
+assert famof('BAYLOR UNIVERSITY MEDICAL CENTER')!=famof('TENET HEALTHCARE CORPORATION'), "JV partner merged (Baylor → Tenet)"
+assert famof('DIGNITY HEALTH')==famof('COMMONSPIRIT HEALTH'), "wholly-owned subsidiary split (Dignity ≠ CommonSpirit)"
+# Known limit: VHS San Antonio Partners LLC (9 joint-venture surgical hospitals) stays its own family because Tenet reports no percentage on any of them.
+assert famof('BAIN CAPITAL FUND IX LP')!=famof('HCA INC') and famof("ST. DAVID'S FOUNDATION")!=famof('HCA INC') if famof("ST. DAVID'S FOUNDATION") else True, "single-hospital investor became an HCA alias"
 assert len({famof(x)[0] for x in ['HCA INC','UNIVERSAL HEALTH SERVICES INC','COMMONSPIRIT HEALTH','TENET HEALTHCARE CORPORATION','THE JOHNS HOPKINS HEALTH SYSTEM CORPORATION']})==5
 hop=con.execute("SELECT state, count(*) FROM hospital_family_member WHERE controlled AND family_id=(SELECT family_id FROM hospital_family_org WHERE org_name='THE JOHNS HOPKINS HEALTH SYSTEM CORPORATION') GROUP BY 1 ORDER BY 1").fetchall()
 print("  Hopkins family by state (controlled):", hop)

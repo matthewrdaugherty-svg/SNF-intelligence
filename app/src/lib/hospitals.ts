@@ -12,7 +12,7 @@ export async function searchHospitals(text: string, limit = 25): Promise<Hospita
     ORDER BY (cases_visible IS NULL), medicare_discharges_2024 DESC NULLS LAST, hospital_name LIMIT ${limit}`) as Promise<HospitalLite[]>
 }
 export const hospitalsByCcn = (ccns: string[]) => ccns.length ? q<HospitalLite & Row>(`SELECT hospital_ccn, hospital_name, city, state, hospital_type, hospital_overall_rating, medicare_discharges_2024, cases_visible FROM hospital_master WHERE hospital_ccn IN (${ccns.map(sqlStr).join(',')})`) as Promise<HospitalLite[]> : Promise.resolve([])
-export interface FamilyLite { family_id: number; label: string; aliases: string | null; n_member_orgs: number; n_hospitals: number; n_with_service_area: number; n_states: number; n_minority_stakes?: number; matched_alias?: string | null }
+export interface FamilyLite { family_id: number; label: string; aliases: string | null; n_member_orgs: number; n_hospitals: number; n_with_service_area: number; n_states: number; n_minority_stakes?: number; matched_alias?: string | null; tier?: number }
 /** Hospital systems ("families"): PECOS owner organizations grouped across their holding companies (see Methodology). Search matches the label and every alias. */
 export async function searchSystems(text: string, limit = 20): Promise<FamilyLite[]> {
   const t = text.trim().toUpperCase().replace(/[%_\\]/g, m => '\\' + m)

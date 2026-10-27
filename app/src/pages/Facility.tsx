@@ -173,7 +173,7 @@ export default function Facility() {
             {row.most_recent_health_inspection_more_than_2_years_ago === 'Y' ? <span className="text-[11px] px-1.5 py-0.5 rounded bg-well text-ink-2">Last health inspection more than 2 years ago</span> : null}
           </div>
         </div>
-        <div className="shrink-0 flex flex-row md:flex-col items-start md:items-end gap-2">
+        <div className="shrink-0 flex flex-col sm:flex-row md:flex-col items-stretch md:items-end gap-2 w-full md:w-auto">
           <button className={`press btn ${inCmp ? 'btn-surface' : 'btn-primary'}`} onClick={() => compareStore.toggle(ccn)} disabled={!inCmp && compare.length >= MAX_COMPARE}>
             {inCmp ? 'Remove from compare' : compare.length >= MAX_COMPARE ? `Compare is full (${MAX_COMPARE})` : 'Add to compare'}
           </button>
@@ -199,7 +199,7 @@ export default function Facility() {
           const na = m.national ? ref?.national[m.national] ?? null : m.state ? ref?.stateAvg['NATION']?.[m.state] ?? null : null
           const cmp = sa ?? na; const cp = m.compPerf ? row[m.compPerf] : null
           return <Stat key={k} label={cardLabel} value={v == null ? <span className="text-ink-3">{fn ? <Fn code={fn} ref={ref} /> : '–'}</span> : fmt(v, m.unit, m.decimals)} source="CMS" tone={tone(v, cmp, m, cp)}
-            note={cmp != null ? <>{cp ? <span style={verdictStyle(String(cp).toLowerCase().startsWith('better') ? 'better' : String(cp).toLowerCase().startsWith('worse') ? 'worse' : 'same')}>CMS: {String(cp).toLowerCase()}</span> : v != null && sa != null ? <Delta value={v} cmp={sa} m={m} /> : null}<br />{sa != null ? `${state} ${avg(sa, m)}` : ''}{sa != null && na != null ? ' · ' : ''}{na != null ? `US ${avg(na, m)}` : ''}</> : m.note}
+            note={cmp != null ? <>{cp ? <><span style={verdictStyle(String(cp).toLowerCase().startsWith('better') ? 'better' : String(cp).toLowerCase().startsWith('worse') ? 'worse' : 'same')}>CMS: {String(cp).toLowerCase()}</span><br /></> : v != null && sa != null ? <><Delta value={v} cmp={sa} m={m} /><br /></> : null}{sa != null ? `${state} ${avg(sa, m)}` : ''}{sa != null && na != null ? ' · ' : ''}{na != null ? `US ${avg(na, m)}` : ''}</> : m.note}
             how={<>{m.label}. {howText(k, ref, m)} Bar: green when better than the state average as displayed, red when worse, amber when the same{cp ? '; for this measure CMS\u2019s own comparison to the national rate decides' : ''}.</>} />
         })}
       </StatRow>

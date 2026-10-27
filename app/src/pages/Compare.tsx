@@ -19,7 +19,7 @@ export default function Compare() {
     return () => { live = false }
   }, [ccns])
   if (!ccns.length) return <Empty title="Nothing to compare yet."><p>Tick facilities in Explore or on a facility page. Up to {MAX_COMPARE} at a time.</p><Link to="/explore" className="underline">Go to Explore</Link></Empty>
-  const colW = `minmax(112px, 1fr)`
+  const colW = `minmax(176px, 1fr)`
   return (
     <div className="page">
       <div className="flex items-center gap-3 mb-6">

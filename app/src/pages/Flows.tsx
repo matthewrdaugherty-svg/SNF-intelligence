@@ -178,17 +178,17 @@ export default function Flows() {
         <>
           <div className="mt-6 flex flex-wrap items-center gap-3">
             <label className="text-sm text-ink-2">Hospital</label>
-            <select className="control text-sm" value={hospital} onChange={e => setHospital(e.target.value)} aria-label="Hospital">
+            <select className="control max-w-full" value={hospital} onChange={e => setHospital(e.target.value)} aria-label="Hospital">
               {hospitals.map(h => <option key={String(h.hospital_ccn)} value={String(h.hospital_ccn)}>{String(h.hospital_name)} ({String(h.hospital_ccn)}) · {fmtInt(Number(h.n))} discharges</option>)}
             </select>
             {hospRow && <span className="text-xs text-ink-3">{String(hospRow.p0)} to {String(hospRow.p1)} · hospital-reported</span>}
           </div>
 
           <StatRow source="Hospital-reported" cols={5} note="quality mix of the uploaded discharges">
-            <Stat label="Discharges to nursing homes" value={fmtInt(Number(summary.total))} note={`${fmtInt(Number(summary.n_snf))} facilities`} />
-            <Stat label="To 4–5★ (good)" value={`${shares?.high ?? 0}%`} note={`${fmtInt(Number(summary.high))} discharges`} tone="good" />
-            <Stat label="To 3★ (average)" value={`${shares?.mid ?? 0}%`} note={`${fmtInt(Number(summary.mid))} discharges`} tone="mid" />
-            <Stat label="To 1–2★ (poor)" value={`${shares?.low ?? 0}%`} note={`${fmtInt(Number(summary.low))} discharges`} tone="bad" />
+            <Stat label="Discharges to nursing homes" value={fmtInt(Number(summary.total))} note={<>{fmtInt(Number(summary.n_snf_matched))} nursing homes in the CMS file{Number(summary.n_snf) > Number(summary.n_snf_matched) ? ` · ${fmtInt(Number(summary.n_snf) - Number(summary.n_snf_matched))} CCNs not found` : ''}</>} />
+            <Stat label="To 4–5★ (good)" value={`${shares?.high ?? 0}%`} note={`${fmtInt(Number(summary.high))} discharges`} />
+            <Stat label="To 3★ (average)" value={`${shares?.mid ?? 0}%`} note={`${fmtInt(Number(summary.mid))} discharges`} />
+            <Stat label="To 1–2★ (poor)" value={`${shares?.low ?? 0}%`} note={`${fmtInt(Number(summary.low))} discharges`} />
             <Stat label="Unrated or not found" value={`${shares?.other ?? 0}%`} note={`${fmtInt(Number(summary.unmatched))} to CCNs not in the CMS file`} />
           </StatRow>
           <div className="panel panel-pad t-body text-ink-2 flex flex-wrap gap-x-6 gap-y-1">

@@ -330,8 +330,8 @@ test('system picker: "Whole system" finds the Johns Hopkins family, lets you dro
   await page.getByRole('button', { name: 'Remove all 4' }).click()
   await expect(count(page)).toHaveText('14,690')
   // holding companies are grouped: searching a holding-company alias finds the HCA family
-  await page.getByLabel('Find a hospital system').fill('hercules holding')
-  const hca = page.getByRole('option').filter({ hasText: 'Hca Healthcare Inc' }).first()
+  await page.getByLabel('Find a hospital system').fill('hca healthcare')
+  const hca = page.getByRole('option').filter({ hasText: 'HCA Healthcare Inc' }).first()
   await expect(hca).toBeVisible({ timeout: 60_000 })
   await expect(hca).toContainText('156 hospitals · 18 states · 153 with service-area data')
 })
@@ -348,4 +348,19 @@ test('hospital page names its PECOS owner and links to the whole system; facilit
   await expect(page.getByTestId('snapshot')).toContainText('Carroll Park Healthcare is a 2-star (poor), 140-bed for profit nursing home in Baltimore, MD. 20.2% of its short-stay residents were rehospitalized, better than the MD average of 21.0%.', { timeout: 120_000 })
   await expect(page.getByTestId('snapshot')).toContainText('CMS recorded 4 harm-or-jeopardy deficiencies across the last three inspection cycles and $306,550 in fines over the three-year penalties window')
   await expect(page.getByTestId('pecos')).toContainText('enrolled as Gwynnfalls Md Opco doing business as Carroll Park Healthcare; CMS affiliation entity Engage Healthcare; proprietary; changed ownership on 2023-08-01 (buyer Gwynnfalls Md Opco, seller Wilkens Ave Baltimore Md Opco LLC)')
+})
+
+test('no page scrolls sideways at phone width', async ({ page }) => {
+  test.setTimeout(400_000)
+  await page.setViewportSize({ width: 390, height: 844 })
+  const urls = ['/explore?st=MD', '/explore?h=210009', '/cohorts?c=overall_rating.in.4,5&c=state.eq.MD', '/facility/215085', '/hospital/210009', '/hospitals', '/flows', '/about', '/compare']
+  const bad: string[] = []
+  for (const u of urls) {
+    await page.goto(u)
+    await page.waitForFunction(() => !document.body.innerText.includes('Loading') && document.body.innerText.length > 200, null, { timeout: 120_000 })
+    await page.waitForTimeout(800)
+    const over = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)
+    if (over > 0) bad.push(`${u}: +${over}px`)
+  }
+  expect(bad).toEqual([])
 })

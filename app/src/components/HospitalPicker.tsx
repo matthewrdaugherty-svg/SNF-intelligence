@@ -13,16 +13,17 @@ export default function HospitalPicker({ selected, onChange }: { selected: strin
   const [chosen, setChosen] = useState<HospitalLite[]>([])
   const [open, setOpen] = useState(false)
   const [note, setNote] = useState<string | null>(null)
+  const [searched, setSearched] = useState(false)
   // a system picked but not yet added: its members, and which states are ticked
   const [pending, setPending] = useState<{ fam: FamilyLite; members: FamilyMember[]; states: Set<string> } | null>(null)
   const box = useRef<HTMLDivElement>(null)
   useEffect(() => { let live = true; hospitalsByCcn(selected).then(r => { if (live) setChosen(selected.map(c => r.find(x => x.hospital_ccn === c)).filter(Boolean) as HospitalLite[]) }); return () => { live = false } }, [selected])
   useEffect(() => {
-    if (!text.trim()) { setHospitals([]); setSystems([]); return }
+    if (!text.trim()) { setHospitals([]); setSystems([]); setSearched(false); return }
     let live = true
     const t = setTimeout(() => {
-      if (mode === 'hospital') searchHospitals(text).then(r => { if (live) { setHospitals(r); setSystems([]); setOpen(true) } })
-      else searchSystems(text).then(r => { if (live) { setSystems(r); setHospitals([]); setOpen(true) } })
+      if (mode === 'hospital') searchHospitals(text).then(r => { if (live) { setHospitals(r); setSystems([]); setOpen(true); setSearched(true) } })
+      else searchSystems(text).then(r => { if (live) { setSystems(r); setHospitals([]); setOpen(true); setSearched(true) } })
     }, 200)
     return () => { live = false; clearTimeout(t) }
   }, [text, mode])
@@ -53,7 +54,7 @@ export default function HospitalPicker({ selected, onChange }: { selected: strin
     <div ref={box} className="relative">
       <div className="mb-1.5"><Segmented value={mode} onChange={m => { setMode(m as Mode); reset() }} options={[{ value: 'hospital', label: 'Hospital' }, { value: 'system', label: 'System' }]} ariaLabel="Pick by" /></div>
       <input className="control w-full" value={text} onChange={e => setText(e.target.value)} onFocus={() => results && setOpen(true)}
-        onKeyDown={e => { if (e.key === 'Escape') setOpen(false); if (e.key === 'ArrowDown' && open) { e.preventDefault(); (box.current?.querySelector('#hosp-results button:not([disabled])') as HTMLButtonElement | null)?.focus() } if (e.key === 'Enter' && open) { if (mode === 'hospital' && hospitals[0]) addHospital(hospitals[0]); if (mode === 'system' && systems[0]) pickSystem(systems[0]) } }}
+        onKeyDown={e => { if (e.key === 'Escape') setOpen(false); if (e.key === 'ArrowDown' && open) { e.preventDefault(); (box.current?.querySelector('#hosp-results button:not([disabled])') as HTMLButtonElement | null)?.focus() } if (e.key === 'Enter' && open) { if (mode === 'hospital' && hospitals[0]) addHospital(hospitals[0]); if (mode === 'system' && systems[0] && Number(systems[0].tier ?? 2) < 2) pickSystem(systems[0]) } }}
         placeholder={mode === 'hospital' ? 'Hospital name, city or CCN' : 'System or owner name, e.g. Johns Hopkins, HCA'} aria-label={mode === 'hospital' ? 'Find a hospital' : 'Find a hospital system'} role="combobox" aria-expanded={open} aria-controls="hosp-results" />
       {open && results > 0 && (
         <ul id="hosp-results" role="listbox" className="absolute left-0 right-0 top-full mt-1 max-h-72 overflow-auto bg-surface rounded-[8px] z-30 py-1" style={{ boxShadow: 'var(--shadow-float)' }}>
@@ -91,6 +92,7 @@ export default function HospitalPicker({ selected, onChange }: { selected: strin
           </div>
         </div>
       )}
+      {searched && results === 0 && text.trim() && <div className="t-caption mt-1" role="status">No {mode === 'hospital' ? 'hospital' : 'system or owner'} matches “{text.trim()}”. Try part of the name{mode === 'system' ? ', or search the hospital itself' : ''}.</div>}
       {mode === 'system' && !pending && <div className="text-[11px] text-ink-3 mt-1">A system is the organization that controls the hospital (a 50%-or-greater or unreported share in CMS's PECOS file), grouped with its holding companies. Minority stakes and joint-venture partners are not included.</div>}
       {note && <div className="text-[12px] text-ink-2 mt-1.5" role="status">{note}</div>}
       {chosen.length > 0 && (
