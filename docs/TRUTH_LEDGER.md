@@ -95,3 +95,8 @@ All 18 files in manifest.json arrived; byte sizes match the manifest exactly.
 - Facility 215340 (Blue Point Healthcare Center): total fines $341,978, VBP ranking #3,239, QM 521 = 19.7% — all match the raw CMS values.
 - Two deployment-only defects found and fixed the same evening: (1) MapLibre worker file not bundled → 404 → no map rendered; (2) MapLibre's unlayered CSS overrode the Tailwind `absolute inset-0` utility → 0-height map. Both were invisible in the sandbox run because the earlier test only checked that the map element existed; the test now asserts a worker-error-free load and real map dimensions.
 - Lesson (Operating Rule candidate): a "renders" test must assert something about the rendered output (dimensions, pixels, data), never just element existence.
+
+## T-018 App validation round 3 (docs/VALIDATION_REPORT_03_APP.md, independent agent, different model, 2026-10-26)
+- Data correctness: 8 facilities × every displayed value (1,673 values) vs db/snf.duckdb → 0 mismatches. 28/28 Explore filter combinations match DuckDB counts; haversine distances match Python; CSV keeps leading zeros. Flows quality mix, weighted averages, unmatched bucket and nearby alternatives match a Python recompute.
+- Verdict FAIL on packaging: 16 defects, led by a SQL-injection path through the `sort` URL parameter (DuckDB-wasm executes multi-statement strings; a crafted link could alter the in-browser tables for that session — never the source files or other users). All 16 fixed in app v1.1 (commit c99296a); 5 regression tests added. Re-verification requested (report 04).
+- Correction to the report: the count for "baltimore" within Maryland is 40 (DuckDB), not 41.
