@@ -31,15 +31,26 @@ Rebuild from scratch: `python3 scripts/01_profile.py && python3 scripts/02_load.
 
 ## Web app (app/)
 Vite + React + TypeScript; DuckDB runs in the browser over `app/public/data/*.arrow` (exported by scripts/04_export_app_data.py).
-Pages: Explore (filters in the URL, virtualized table, column picker, CSV export), Facility profile (every measure with footnote,
-vs state/nation), Map (radius/catchment), Compare (≤6), Discharge flows (the plug-in: upload hospital→SNF counts; schema in D-013),
-Methodology & trust. Tests: `cd app && npm run build && npx playwright test` (9 end-to-end tests asserting values read from the DB).
-Design rules: two meaning-carrying hues only (teal ramp = star rating; rust = enforcement/harm), Public Sans, text-first rows.
+Live at https://snf-intelligence.vercel.app (Vercel, static, no server; deploys on every push to main of
+github.com/matthewrdaugherty-svg/SNF-intelligence). Pages: Explore (filters in the URL, virtualized table, column picker, CSV export,
+filter by a hospital's or a whole system's service area), Cohorts (stackable conditions, benchmarks, group breakdowns, shareable
+links), Facility profile (snapshot sentence, key-number cards with provenance, every measure with footnote vs state/nation, PECOS
+ownership), Hospitals (service area, modeled quality mix, owners/system), Map, Compare (≤6), Discharge flows (the plug-in: upload
+hospital→SNF counts; schema in D-013), Methodology & trust. Tests: `cd app && npm run build && npx playwright test`
+(22 end-to-end tests asserting values read from the DB). Design rules: rating colors carry meaning (1–2★ red, 3★ amber, 4–5★ green;
+D-022), rust = enforcement/harm, accent blue for interaction only, Public Sans, every modeled number tagged "Modeled".
 
-## Status (2026-10-26)
-- DONE: load, join, reconcile, workbook v2.1 (validation rounds 1–2 passed), data-dictionary digest, external-source research,
-  web app v1 built and e2e-tested, git repo initialised (push pending GitHub connection), Vercel config ready (deploy pending).
+## Hospital and PECOS layers
+scripts/05–08 load Care Compare hospital files, HSAF 2025, PAC PUF 2024 and the PECOS owner/enrollment/CHOW files (release
+2026-09-29). Service-area model: D-020 / T-020. Hospital systems grouped across holding companies: D-024, D-025 / T-021.
+
+## Status (2026-10-26, evening)
+- DONE: load, join, reconcile, workbook v2.1 (validation rounds 1–2), data-dictionary digest, external-source research, web app
+  deployed and red-teamed (rounds 3–4 fixed), hospital layer + modeled service areas, cohort builder, PECOS systems with state
+  filter, facility snapshot/cards. Red-team round 5 (cohorts, PECOS, families, snapshot) in progress → docs/VALIDATION_REPORT_05_APP.md.
 - OPEN: 162 unexplained rating-cycle vs inspection-cycle count differences (T-009); severity grid A–L confirmation from the
-  Five-Star Technical Users' Guide; Matt's answers on commercial use / client discharge data / permanent home for the project.
-- NOT STARTED: modeled hospital catchment layer (needs Post-Acute Care PUF + Hospital Service Area File + Hospital Spending by Claim),
-  composite `x_` scores (need Quality Expert + Validator sign-off per D-005), independent red-team of the live app once deployed.
+  Five-Star Technical Users' Guide; Hybrid HWR unavailable this release (T-019); ZIP centroids for service-area model v2 need
+  www2.census.gov allowed; friendlier system display names (override file) if Matt wants them; the raw PECOS CSVs remain in one
+  pushed commit's history (untracked since 29a015d) — rewriting main needs Matt's OK.
+- NOT STARTED: composite `x_` scores (need Quality Expert + Validator sign-off per D-005); unified "Modeled" source on the
+  Discharge flows page (today it links to the Hospitals pages instead).
