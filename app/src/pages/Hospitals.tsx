@@ -3,7 +3,11 @@ import { Link, useNavigate, useParams } from 'react-router'
 import { q, type Row } from '../lib/db'
 import { dischargeMix, familyMembers, hospitalDetail, hospitalFamilies, hospitalOwners, qualityMix, serviceArea, snfsServing, searchHospitals, type HospitalLite, type Mix } from '../lib/hospitals'
 import { fmtInt, fmtPct, fmtUsd, titleCase, countyLabel } from '../lib/format'
-import { Empty, Fn, QualityStrip, StripHeader, Stars, Stat, StatRow, useReference } from '../components/ui'
+import { Empty, FlagCell, Fn, NameModeToggle, QualityStrip, StripHeader, Stars, Stat, StatRow, useReference } from '../components/ui'
+import { useSystemName } from '../lib/systemNames'
+
+/** CMS RUCA description → its short head ("Metropolitan area core"); the full CMS wording stays in the tooltip. */
+const rucaShort = (r: string) => r.includes(':') ? r.slice(0, r.indexOf(':')) : r
 
 const pct = (x: unknown, d = 1) => x == null ? '' : fmtPct(100 * Number(x), d)
 
@@ -43,6 +47,7 @@ export function HospitalSearch() {
 
 /** /hospital/:ccn — service area, the SNFs that serve it, and the quality mix of that (modeled) volume. */
 export default function Hospital() {
+  const sysName = useSystemName()
   const { ccn = '' } = useParams()
   const [h, setH] = useState<Row | null | undefined>(undefined)
   const [area, setArea] = useState<Row[]>([])
@@ -62,7 +67,7 @@ export default function Hospital() {
       if (!live) return; setH(d); setArea(a); setSnfs(s); setMix(m); setOwners(o); setDmix(dm)
       const fams = (await hospitalFamilies(ccn)).filter(f => Number(f.n_hospitals) > 1)
       const links = await Promise.all(fams.map(async f => { const mem = await familyMembers(Number(f.family_id)); const usable = mem.filter(m => m.has_service_area)
-        return { name: titleCase(String(f.label)), n: mem.length, ccns: usable.map(m => m.hospital_ccn), stateCcns: usable.filter(m => m.state === String(d?.state)).map(m => m.hospital_ccn) } }))
+        return { name: String(f.label), n: mem.length, ccns: usable.map(m => m.hospital_ccn), stateCcns: usable.filter(m => m.state === String(d?.state)).map(m => m.hospital_ccn) } }))
       if (live) setSysLinks(links)
     }).catch(() => { if (live) setH(null) })
     return () => { live = false }
@@ -82,15 +87,17 @@ export default function Hospital() {
       <div className="flex flex-col md:flex-row md:items-start gap-3 md:gap-6">
         <div className="min-w-0 flex-1">
           <h1>{name}</h1>
-          <div className="text-sm text-ink-2 mt-1">{titleCase(String(h.address))}, {titleCase(String(h.city))}, {state} {String(h.zip)} · {countyLabel(String(h.county), state)} · CCN {ccn}</div>
-          <div className="text-sm text-ink-2 mt-1">{String(h.hospital_type)} · {String(h.hospital_ownership)}{h.emergency_services === 'Yes' ? ' · emergency services' : ''}{h.ruca ? ` · ${String(h.ruca)}` : ''}</div>
+          <div className="t-body text-ink-2 mt-2">{titleCase(String(h.address))}, {titleCase(String(h.city))}, {state} {String(h.zip)} <span className="text-ink-3">· {countyLabel(String(h.county), state)} · CCN {ccn}</span></div>
+          <div className="mt-4 flex flex-wrap gap-2">
+            {[String(h.hospital_type), String(h.hospital_ownership), h.emergency_services === 'Yes' ? 'Emergency services' : null, h.ruca ? rucaShort(String(h.ruca)) : null].filter((x): x is string => !!x).map(t => <span key={t} className="pill pill-same font-medium" title={t === rucaShort(String(h.ruca ?? '')) && h.ruca ? String(h.ruca) : undefined}>{t}</span>)}
+          </div>
           {owners.length > 0 && (
-            <div className="text-sm text-ink-2 mt-1" data-testid="hospital-owners">Owned by {owners.map((o, i) => <span key={i}>{i > 0 ? (i === owners.length - 1 ? ' and ' : ', ') : ''}<span className="text-ink">{titleCase(String(o.owner_name))}</span>{o.role_code === '35' ? ' (indirect)' : ''}{o.pct != null && Number(o.pct) > 0 ? ` ${Number(o.pct).toFixed(0)}%` : ''}</span>)} <span className="text-ink-3">· PECOS, 5%-or-greater interests</span></div>
+            <div className="mt-4 t-body" data-testid="hospital-owners"><span className="t-label">Owned by</span><div className="mt-0.5">{owners.map((o, i) => <span key={i}>{i > 0 ? (i === owners.length - 1 ? ' and ' : ', ') : ''}<span className="font-semibold">{titleCase(String(o.owner_name))}</span>{o.role_code === '35' ? <span className="text-ink-3"> (indirect)</span> : ''}{o.pct != null && Number(o.pct) > 0 ? <span className="text-ink-2"> {Number(o.pct).toFixed(0)}%</span> : ''}</span>)}</div><div className="t-caption mt-0.5">PECOS, 5%-or-greater interests</div></div>
           )}
-          {sysLinks.map(sl => <div key={sl.name} className="text-sm text-ink-2 mt-1" data-testid="system-link">Part of <span className="text-ink">{sl.name}</span> ({sl.n} hospitals)
-            {sl.stateCcns.length > 0 ? <> · SNFs serving its <Link to={`/explore?h=${sl.stateCcns.join(',')}`} className="text-accent hover:underline">{state} hospitals ({sl.stateCcns.length})</Link></> : null}
-            {sl.ccns.length > sl.stateCcns.length ? <>{sl.stateCcns.length > 0 ? ' or ' : ' · SNFs serving '}<Link to={`/explore?h=${sl.ccns.join(',')}`} className="text-accent hover:underline">all {sl.ccns.length} with service-area data</Link></> : null}
-            {sl.ccns.length === 0 ? ' — none of its hospitals has service-area data' : ''}</div>)}
+          {sysLinks.map(sl => <div key={sl.name} className="mt-4 t-body" data-testid="system-link"><span className="t-label">Part of <span className="ml-2 inline-block align-middle"><NameModeToggle /></span></span><div className="mt-0.5"><span className="font-semibold" title={sysName(sl.name).title}>{sysName(sl.name).text}</span> <span className="text-ink-2">({sl.n} hospitals)</span></div>
+            <div className="t-label mt-0.5">{sl.stateCcns.length > 0 ? <>SNFs serving its <Link to={`/explore?h=${sl.stateCcns.join(',')}`} className="text-accent hover:underline">{state} hospitals ({sl.stateCcns.length})</Link></> : null}
+            {sl.ccns.length > sl.stateCcns.length ? <>{sl.stateCcns.length > 0 ? ' or ' : 'SNFs serving '}<Link to={`/explore?h=${sl.ccns.join(',')}`} className="text-accent hover:underline">all {sl.ccns.length} with service-area data</Link></> : null}
+            {sl.ccns.length === 0 ? 'None of its hospitals has service-area data' : ''}</div></div>)}
         </div>
         <div className="shrink-0 flex flex-col sm:flex-row md:flex-col items-stretch md:items-end gap-2 w-full md:w-64">
           <Link to={exploreLink} className="press btn btn-primary">Explore SNFs in this service area</Link>
@@ -100,16 +107,30 @@ export default function Hospital() {
       </div>
       </header>
 
-      {/* the sentence */}
+      {/* the sentence, with the tier mix as a small table beside it */}
       <section className="panel panel-pad">
       <h2 className="section-title">Where this hospital's patients come from <span className="t-caption font-normal ml-2">Modeled</span></h2>
-      {h.cases_visible != null ? (
-        <p className="t-lead mt-2">
-          In 2025, <span className="font-semibold tabular-nums">{fmtInt(Number(h.cases_visible))}</span> Medicare inpatient cases at {name} came from <span className="font-semibold tabular-nums">{fmtInt(Number(h.n_zips_visible))}</span> ZIP codes that each sent 11 or more patients.
-          {mix && mix.n_snf > 0 ? <> Those ZIP codes contain <span className="font-semibold tabular-nums">{fmtInt(mix.n_snf)}</span> SNFs. Weighting them by where the hospital's patients live and by each SNF's Medicare volume, <span className="font-semibold tabular-nums">{pct(mix.high, 0)}</span> of that modeled SNF volume sits in 4–5★ SNFs, <span className="font-semibold tabular-nums">{pct(mix.mid, 0)}</span> in 3★, and <span className="font-semibold tabular-nums" style={{ color: 'var(--color-rust)' }}>{pct(mix.low, 0)}</span> in 1–2★.</> : null}
-        </p>
-      ) : <p className="mt-2 text-sm text-ink-2">CMS publishes no service-area rows with 11 or more cases for this hospital, so the service-area view is not available.</p>}
-      <div className="mt-3 text-xs leading-4 text-ink-3 max-w-[68ch]">CMS does not publish which SNF each patient went to. The model assumes patients use the nursing homes in their home ZIP code in proportion to those SNFs' Medicare stays; ZIP codes with fewer than 11 of this hospital's patients are suppressed by CMS and not counted. {covered > 0 && covered < 0.999 ? `${pct(covered, 0)} of the visible volume comes from ZIP codes that contain at least one nursing home; the rest is not assigned.` : ''}</div>
+      <div className="mt-2 grid grid-cols-1 lg:grid-cols-[1fr_minmax(260px,320px)] gap-x-10 gap-y-4 items-start">
+        <div>
+          {h.cases_visible != null ? (
+            <p className="t-lead">
+              In 2025, <span className="font-semibold tabular-nums">{fmtInt(Number(h.cases_visible))}</span> Medicare inpatient cases at {name} came from <span className="font-semibold tabular-nums">{fmtInt(Number(h.n_zips_visible))}</span> ZIP codes that each sent 11 or more patients.
+              {mix && mix.n_snf > 0 ? <> Those ZIP codes contain <span className="font-semibold tabular-nums">{fmtInt(mix.n_snf)}</span> SNFs; weighting them by where the hospital's patients live and by each SNF's Medicare volume gives the modeled split by rating tier.</> : null}
+            </p>
+          ) : <p className="text-sm text-ink-2">CMS publishes no service-area rows with 11 or more cases for this hospital, so the service-area view is not available.</p>}
+          <div className="mt-3 text-xs leading-4 text-ink-3 max-w-[68ch]">CMS does not publish which SNF each patient went to. The model assumes patients use the nursing homes in their home ZIP code in proportion to those SNFs' Medicare stays; ZIP codes with fewer than 11 of this hospital's patients are suppressed by CMS and not counted. {covered > 0 && covered < 0.999 ? `${pct(covered, 0)} of the visible volume comes from ZIP codes that contain at least one nursing home; the rest is not assigned.` : ''}</div>
+        </div>
+        {mix && mix.n_snf > 0 && (
+          <table className="tbl tbl-compact" data-testid="tier-mix" aria-label="Modeled SNF volume by rating tier">
+            <thead><tr><th>Rating tier</th><th className="num">Share of volume</th><th className="num">SNFs</th></tr></thead>
+            <tbody>
+              {([['4–5★', 'q5', '#fff', mix.high, mix.n_high, 'Good'], ['3★', 'q3', 'var(--color-ink)', mix.mid, mix.n_mid, 'Average'], ['1–2★', 'q2', '#fff', mix.low, mix.n_low, 'Poor']] as const).map(([tier, c, fg, share, n, word]) => (
+                <tr key={tier}><td><span className="inline-flex items-center gap-2"><span className="inline-flex items-center justify-center h-5 min-w-10 px-1.5 rounded-md text-[11px] font-semibold tabular-nums" style={{ background: `var(--color-${c})`, color: fg }}>{tier}</span><span className="t-label">{word}</span></span></td><td className="num t-title font-semibold tabular-nums" style={tier === '1–2★' && Number(share) >= 0.3 ? { color: 'var(--color-rust)' } : undefined}>{pct(share, 0)}</td><td className="num text-ink-2">{fmtInt(n)}</td></tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
       </section>
 
       {/* hospital stats */}
@@ -181,11 +202,12 @@ export default function Hospital() {
           </div>
         </div>
         <div className="overflow-x-auto"><table className="tbl tbl-compact mt-2">
-          <thead><tr><th>SNF</th><th><StripHeader /></th><th className="num">Modeled share</th><th className="num" title="Modeled: how much of this hospital's 2024 Medicare discharge mix (by diagnosis chapter) the SNF's own admitted-patient mix covers, 0–100%">Case-mix overlap</th><th>Units</th><th className="num">ZIP share</th><th className="num">Medicare stays 2024</th><th className="num">Beds</th><th className="num">Rehospitalized</th><th className="num">Readmitted after SNF</th><th className="num">To community</th><th className="num">Fines, 3 yr</th><th className="num">Harm deficiencies</th></tr></thead>
+          <thead><tr><th>SNF</th><th><StripHeader /></th><th>Abuse icon</th><th className="num">Modeled share</th><th className="num" title="Modeled: how much of this hospital's 2024 Medicare discharge mix (by diagnosis chapter) the SNF's own admitted-patient mix covers, 0–100%">Case-mix overlap</th><th>Units</th><th className="num">ZIP share</th><th className="num">Medicare stays 2024</th><th className="num">Beds</th><th className="num">Rehospitalized</th><th className="num">Readmitted after SNF</th><th className="num">To community</th><th className="num">Fines, 3 yr</th><th className="num">Harm deficiencies</th></tr></thead>
           <tbody>{filtered.map(s => (
             <tr key={String(s.ccn)}>
-              <td><Link to={`/facility/${s.ccn}`} className="hover:text-accent hover:underline underline-offset-2">{titleCase(String(s.provider_name))}</Link><span className="sub">{titleCase(String(s.city_town))} {String(s.zip_code)}{s.special_focus_status ? <span className="text-rust"> · {String(s.special_focus_status)}</span> : ''}{s.abuse_icon === 'Y' ? <span className="text-rust"> · abuse icon</span> : ''}</span></td>
+              <td><Link to={`/facility/${s.ccn}`} className="hover:text-accent hover:underline underline-offset-2">{titleCase(String(s.provider_name))}</Link><span className="sub">{titleCase(String(s.city_town))} {String(s.zip_code)}</span></td>
               <td><QualityStrip row={s} /></td>
+              <td><FlagCell row={s} /></td>
               <td className="num font-medium">{(100 * Number(s.modeled_weight)).toFixed(2)}%</td>
               <td className="num">{s.casemix_overlap != null ? `${Math.round(100 * Number(s.casemix_overlap))}%` : <span className="empty" title={s.casemix_known != null ? `Only ${Math.round(100 * Number(s.casemix_known))}% of this SNF's 2024 stays fall in diagnosis categories large enough for CMS to publish, so the overlap is not computed` : 'No 2024 Medicare diagnosis mix published for this SNF'}>—</span>}</td>
               <td className="t-caption whitespace-nowrap">{[['beds_ventilator', 'Vent'], ['beds_dialysis', 'Dialysis'], ['beds_alzheimers', 'Dementia'], ['beds_hospice', 'Hospice'], ['beds_head_trauma', 'Head trauma'], ['beds_rehab', 'Rehab']].filter(([k]) => Number(s[k]) > 0).map(([, l]) => l).join(' · ') || <span className="empty">—</span>}</td>

@@ -225,9 +225,10 @@ test('hospital page: Johns Hopkins service area and modeled quality mix match th
   await expect(sentence).toContainText('10,834')
   await expect(sentence).toContainText('200')
   await expect(sentence).toContainText('209')
-  await expect(sentence).toContainText('43%')   // 4-5★ share of modeled volume (db: 42.9)
-  await expect(sentence).toContainText('19%')
-  await expect(sentence).toContainText('38%')
+  const tier = page.getByTestId('tier-mix')   // the split now lives in the tier table beside the sentence
+  await expect(tier.locator('tbody tr').nth(0)).toContainText('43%')   // 4-5★ share of modeled volume (db: 42.9)
+  await expect(tier.locator('tbody tr').nth(1)).toContainText('19%')
+  await expect(tier.locator('tbody tr').nth(2)).toContainText('38%')
   await expect(page.getByText('10,157').first()).toBeVisible()  // 2024 Medicare discharges
   // top ZIP row
   const firstZip = page.locator('section').filter({ hasText: 'Service area' }).locator('tbody tr').first()
@@ -314,7 +315,7 @@ test('system picker: "Whole system" finds the Johns Hopkins family, lets you dro
   await ready(page)
   await page.getByRole('radio', { name: 'System', exact: true }).click()
   await page.getByLabel('Find a hospital system').fill('johns hopkins')
-  const opt = page.getByRole('option').filter({ hasText: 'The Johns Hopkins Health System Corporation' }).first()
+  const opt = page.getByRole('option').filter({ hasText: 'The Johns Hopkins Health System' }).first()   // friendly name: 'Corporation' dropped
   await expect(opt).toBeVisible({ timeout: 60_000 })
   await expect(opt).toContainText('7 hospitals · 3 states · 5 with service-area data')
   await opt.getByRole('button').click()
@@ -331,16 +332,20 @@ test('system picker: "Whole system" finds the Johns Hopkins family, lets you dro
   await expect(count(page)).toHaveText('14,690')
   // holding companies are grouped: searching a holding-company alias finds the HCA family
   await page.getByLabel('Find a hospital system').fill('hca healthcare')
-  const hca = page.getByRole('option').filter({ hasText: 'HCA Healthcare Inc' }).first()
+  const hca = page.getByRole('option').filter({ hasText: 'HCA Healthcare' }).first()
   await expect(hca).toBeVisible({ timeout: 60_000 })
   await expect(hca).toContainText('156 hospitals · 18 states · 153 with service-area data')
 })
 
 test('hospital page names its PECOS owner and links to the whole system; facility page shows PECOS enrollment and ownership changes', async ({ page }) => {
   await page.goto('/hospital/210009')
-  await expect(page.getByTestId('hospital-owners')).toContainText('Owned by The Johns Hopkins Health System Corporation', { timeout: 120_000 })
+  await expect(page.getByTestId('hospital-owners')).toContainText('The Johns Hopkins Health System Corporation', { timeout: 120_000 })   // owners stay legal: it is the PECOS record
   const link = page.getByTestId('system-link')
-  await expect(link).toContainText('Part of The Johns Hopkins Health System Corporation (7 hospitals)')
+  await expect(link).toContainText('Part of')
+  await expect(link).toContainText('The Johns Hopkins Health System (7 hospitals)')   // friendly form by default
+  await link.getByRole('radio', { name: 'Legal (PECOS)' }).click()
+  await expect(link).toContainText('The Johns Hopkins Health System Corporation (7 hospitals)')   // legal form on the toggle
+  await link.getByRole('radio', { name: 'Friendly' }).click()
   await link.getByRole('link', { name: 'MD hospitals (4)' }).click()
   await ready(page)
   await expect(count(page)).toHaveText('226')
@@ -402,9 +407,9 @@ test('hospital discharge mix and SNF patient mix come from the CMS DRG and PAC f
   await expect(dm.locator('li').first()).toContainText('Cardiac surgery and procedures')
   await expect(dm.locator('li').first()).toContainText('912')
   const rows = page.locator('section').filter({ hasText: 'SNFs in the service area' }).locator('tbody tr')
-  await expect(rows.filter({ hasText: 'Future Care Pineview' }).first()).toContainText('47%')      // overlap computed: 91% of its stays published
+  await expect(rows.filter({ hasText: 'Future Care Pineview' }).first()).toContainText('48%')      // overlap computed (0.4779 after the fracture→injury chapter fix): 91% of its stays published
   await expect(rows.filter({ hasText: 'Future Care Pineview' }).first()).toContainText('Vent')
-  await expect(rows.filter({ hasText: 'Carroll Park Healthcare' }).first().locator('td').nth(3)).toContainText('—')   // 0% published → withheld
+  await expect(rows.filter({ hasText: 'Carroll Park Healthcare' }).first().locator('td').nth(4)).toContainText('—')   // 0% published → withheld (column 4 after the Abuse icon column)
   await page.goto('/facility/215328')
   const pt = page.getByTestId('patients')
   await expect(pt).toContainText('published shares cover 91% of stays', { timeout: 120_000 })
@@ -414,21 +419,33 @@ test('hospital discharge mix and SNF patient mix come from the CMS DRG and PAC f
   await expect(pt).toContainText('60%')
 })
 
-test('placement scenario for Johns Hopkins matches the arithmetic run directly on the database', async ({ page }) => {
+test('placement scenario for Johns Hopkins matches the arithmetic replicated outside the app (scripts/verify/scenario_replica.py)', async ({ page }) => {
+  // The figures below were produced independently by scripts/verify/scenario_replica.py (pure Python over the same Arrow files, written without reading the app's SQL).
   await page.goto('/scenarios?h=210009')
   const sum = page.getByTestId('scenario-summary')
-  await expect(sum).toContainText('55% goes to homes that do not meet the bar and could be moved to 99 acceptable homes within 10 miles', { timeout: 120_000 })
-  await expect(sum).toContainText('2% could not be placed')
-  await expect(sum).toContainText('3.0 miles farther')
-  await expect(sum).toContainText('11.6%')          // QRP 004 after
-  await expect(sum).toContainText('before 11.7%')
+  await expect(sum).toContainText('57% goes to homes that do not meet the bar', { timeout: 120_000 })   // 55.3% moved + 1.8% unreachable
+  await expect(sum).toContainText('reaches 99 homes')
+  await expect(sum).toContainText('2% of the volume has no acceptable home within reach')
+  await expect(sum).toContainText('on average 3.0 miles')
+  await expect(sum).toContainText('11.6%')          // QRP 004 after (11.58)
+  await expect(sum).toContainText('before 11.7%')   // (11.66)
   await expect(sum).toContainText('$13,981')        // payment per stay after
   await expect(sum).toContainText('before $15,638')
-  await expect(sum).toContainText('before 38%')     // 1–2★ share before
+  await expect(sum).toContainText('before 38%')     // 1–2★ share before (37.6)
   await expect(page.getByText('Homes that would receive patients · 99, largest 40 shown')).toBeVisible()
-  await expect(page.locator('section').filter({ hasText: 'Homes that would receive patients' }).locator('tbody tr').first()).toContainText('Future Care Northpoint')
+  const first = page.locator('section').filter({ hasText: 'Homes that would receive patients' }).locator('tbody tr').first()
+  await expect(first).toContainText('Future Care Northpoint')
+  await expect(first.locator('td').nth(1)).toContainText('5453')   // full strip 5 / 4 / 5 / 3, not just the overall rating
+  // the shift slider changes what moves, not what is below the bar
+  await page.goto('/scenarios?h=210009&shift=50')
+  await expect(sum).toContainText('57% goes to homes that do not meet the bar', { timeout: 120_000 })
+  await expect(sum).toContainText('Moving 50% of it')
   // with an annual count the rates become counts
   await page.getByLabel('Annual SNF discharges').fill('1800')
   await expect(sum).toContainText('per year', { timeout: 60_000 })
   await expect(page).toHaveURL(/n=1800/)
+  // a hospital with no service-area data gets a plain explanation, never NaN
+  await page.goto('/scenarios?h=010051')
+  await expect(page.getByText('no modeled SNF volume to work from')).toBeVisible({ timeout: 120_000 })
+  await expect(page.locator('body')).not.toContainText('NaN')
 })

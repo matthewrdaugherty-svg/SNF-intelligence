@@ -12,7 +12,7 @@ import { EMPTY } from '../lib/filters'
 const DEFAULT_METRIC = 'qm_521_adj'
 const NUMERIC = MEASURE_COLS.filter(c => c.unit !== 'text')
 
-function ConstraintRow({ c, onChange, onRemove }: { c: Constraint; onChange: (c: Constraint) => void; onRemove: () => void }) {
+function ConstraintRow({ c, onChange, onRemove, duplicate }: { c: Constraint; onChange: (c: Constraint) => void; onRemove: () => void; duplicate?: boolean }) {
   const f = fieldByKey(c.field)!
   const ops = OPS[f.kind]
   const needsA = !['blank', 'notblank', 'yes', 'no'].includes(c.op)
@@ -27,6 +27,7 @@ function ConstraintRow({ c, onChange, onRemove }: { c: Constraint; onChange: (c:
       {c.op === 'between' && <><span className="text-ink-3 text-sm">and</span><input className="control text-sm w-36" value={c.b ?? ''} onChange={e => onChange({ ...c, b: e.target.value })} aria-label="Upper value" /></>}
       <button className="press btn btn-quiet text-xs ml-auto" onClick={onRemove} aria-label={`Remove constraint ${describe(c)}`}>Remove</button>
       {problem(c) && <div className="basis-full text-xs" style={{ color: 'var(--color-rust)' }} role="alert">{problem(c)}</div>}
+      {!problem(c) && duplicate && <div className="basis-full text-xs text-ink-2" role="status"><span className="pill pill-same mr-1.5">Duplicate</span>Same as a constraint above — it adds nothing, so you can remove it.</div>}
     </div>
   )
 }
@@ -110,7 +111,7 @@ export default function Cohorts() {
           {conds.length > 0 && <button className="press btn btn-quiet" onClick={() => setConds([])}>Clear</button>}
         </div>
         {conds.length === 0 && <div className="text-sm text-ink-2 mt-2">No constraints yet — the cohort is every nursing home. Try: overall rating is any of 4,5 · short-stay rehospitalization at most 18 · fines last 12 months equals 0.</div>}
-        {conds.map((c, i) => <ConstraintRow key={i} c={c} onChange={nc => setConds(conds.map((x, j) => j === i ? nc : x))} onRemove={() => setConds(conds.filter((_, j) => j !== i))} />)}
+        {conds.map((c, i) => <ConstraintRow key={i} c={c} duplicate={serialize(conds.slice(0, i)).includes(serialize([c])[0])} onChange={nc => setConds(conds.map((x, j) => j === i ? nc : x))} onRemove={() => setConds(conds.filter((_, j) => j !== i))} />)}
         {conds.length > 0 && <div className="text-xs text-ink-3 mt-2">{conds.map(describe).join(' · ')}</div>}
         {dropped && <div className="text-xs mt-2" style={{ color: 'var(--color-rust)' }} role="alert">This link carried more than {MAX_CONSTRAINTS} constraints; only the first {MAX_CONSTRAINTS} are used.</div>}
       </section>
@@ -130,7 +131,7 @@ export default function Cohorts() {
             <Stat label="Nursing homes in cohort" value={n == null ? '…' : fmtInt(n)} note={n != null ? `${(100 * n / 14690).toFixed(1)}% of all nursing homes` : undefined} source="CMS" />
             <Stat label={`${m.short ?? m.label} — cohort median`} value={summary?.med != null ? fmt(summary.med, m.unit, 1) : '–'} note={summary ? <>mean {summary.mean != null ? fmt(summary.mean, m.unit, 1) : '–'} · p25 {summary.p25 != null ? fmt(summary.p25, m.unit, 1) : '–'} · p75 {summary.p75 != null ? fmt(summary.p75, m.unit, 1) : '–'} · {fmtInt(Number(summary.n_val))} with a value</> : undefined} source="Derived" how="Median and quartiles of the CMS value across the nursing homes in the cohort; suppressed values excluded." />
             <Stat label="All nursing homes — median" value={summary?.med_all != null ? fmt(summary.med_all, m.unit, 1) : '–'} note={summary?.mean_all != null ? `mean ${fmt(summary.mean_all, m.unit, 1)}` : undefined} source="Derived" how="Same statistic across all 14,690 nursing homes, for comparison." />
-            <Stat label="Rating mix in cohort" value={summary ? `${share(summary.share_good)} good` : '–'} note={summary ? <><span style={{ color: Number(summary.share_poor) > 0 ? 'var(--color-rust)' : undefined }}>{share(summary.share_poor)} poor (1–2★)</span> · avg {summary.stars != null ? Number(summary.stars).toFixed(2) : '–'}★</> : undefined} source="Derived" tone={summary && Number(summary.share_poor) > 0.3 ? 'bad' : summary && Number(summary.share_good) > 0.5 ? 'good' : 'mid'} how="Share of nursing homes in the cohort rated 4–5★ (good) and 1–2★ (poor) overall." />
+            <Stat label="Rating mix in cohort" value={summary ? `${share(summary.share_good)} good` : '–'} note={summary ? <>poor = 1–2★ · average {summary.stars != null ? Number(summary.stars).toFixed(2) : '–'}★</> : undefined} source="Derived" verdict={summary ? { kind: Number(summary.share_poor) > 0.3 ? 'worse' : Number(summary.share_good) > 0.5 ? 'better' : 'same', text: `${share(summary.share_poor)} poor` } : null} how="Share of nursing homes in the cohort rated 4–5★ (good) and 1–2★ (poor) overall." />
           </StatRow>
 
           {dist && dist.cohort.length > 0 && (

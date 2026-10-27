@@ -141,7 +141,7 @@ export const ALL_MEASURES: Measure[] = GROUPS.flatMap(g => g.measures)
 export const byKey = (k: string) => ALL_MEASURES.find(m => m.key === k)
 
 /** Columns available in the Explore table (beyond identity). Order = default order in the column picker. */
-export interface TableCol { key: string; label: string; short?: string; unit: Unit; width?: number; direction?: Direction; fn?: string; group: string; default?: boolean }
+export interface TableCol { key: string; label: string; short?: string; unit: Unit; width?: number; direction?: Direction; fn?: string; group: string; default?: boolean; decimals?: number; state?: string; national?: string }
 export const IDENTITY_COLS: TableCol[] = [
   { key: 'city_town', label: 'City', unit: 'text', group: 'Facility', width: 140, default: true },
   { key: 'state', label: 'State', unit: 'text', group: 'Facility', width: 56, default: true },
@@ -160,7 +160,7 @@ export const IDENTITY_COLS: TableCol[] = [
 ]
 const DEFAULT_MEASURE_COLS = new Set(['qm_521_adj', 'qrp_004_ppr_pd_rsrr', 'qrp_005_dtc_rs_rate', 'pen_total_fines_usd', 'hc_n_severity_G_or_worse', 'reported_total_nurse_staffing_hours_per_resident_per_day'])
 export const MEASURE_COLS: TableCol[] = [
-  ...GROUPS.filter(g => g.id !== 'ratings').flatMap(g => g.measures.map(m => ({ key: m.key, label: m.label, short: m.short, unit: m.unit, direction: m.direction, fn: m.fn, group: g.title, width: m.unit === 'usd' ? 110 : 104, default: DEFAULT_MEASURE_COLS.has(m.key) } as TableCol))),
+  ...GROUPS.filter(g => g.id !== 'ratings').flatMap(g => g.measures.map(m => ({ key: m.key, label: m.label, short: m.short, unit: m.unit, direction: m.direction, fn: m.fn, decimals: m.decimals, state: m.state, national: m.national, group: g.title, width: m.unit === 'usd' ? 110 : 104, default: DEFAULT_MEASURE_COLS.has(m.key) } as TableCol))),
   { key: 'hc_n_severity_G_or_worse', label: 'Harm or jeopardy deficiencies (G–L), three cycles', short: 'G–L deficiencies (3 cycles)', unit: 'count', direction: 'lower', group: 'Inspections, penalties and complaints', width: 96, default: true },
 ]
 export const TABLE_COLS: TableCol[] = [...IDENTITY_COLS, ...MEASURE_COLS]

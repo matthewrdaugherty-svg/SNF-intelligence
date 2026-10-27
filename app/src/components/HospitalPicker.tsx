@@ -1,11 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
+import { useSystemName } from '../lib/systemNames'
 import { familyMembers, hospitalsByCcn, searchHospitals, searchSystems, type FamilyLite, type FamilyMember, type HospitalLite } from '../lib/hospitals'
 import { titleCase } from '../lib/format'
-import { Segmented } from './ui'
+import { NameModeToggle, Segmented } from './ui'
 
 type Mode = 'hospital' | 'system'
 /** Search-and-pick hospitals, one at a time or a whole system (a PECOS ownership family), optionally limited to chosen states. */
 export default function HospitalPicker({ selected, onChange }: { selected: string[]; onChange: (ccns: string[]) => void }) {
+  const sysName = useSystemName()
   const [mode, setMode] = useState<Mode>('hospital')
   const [text, setText] = useState('')
   const [hospitals, setHospitals] = useState<HospitalLite[]>([])
@@ -52,7 +54,7 @@ export default function HospitalPicker({ selected, onChange }: { selected: strin
   const pendingCount = pending ? pending.members.filter(m => pending.states.has(m.state) && m.has_service_area).length : 0
   return (
     <div ref={box} className="relative">
-      <div className="mb-1.5"><Segmented value={mode} onChange={m => { setMode(m as Mode); reset() }} options={[{ value: 'hospital', label: 'Hospital' }, { value: 'system', label: 'System' }]} ariaLabel="Pick by" /></div>
+      <div className="mb-1.5 flex items-center gap-3"><div className="flex-1"><Segmented value={mode} onChange={m => { setMode(m as Mode); reset() }} options={[{ value: 'hospital', label: 'Hospital' }, { value: 'system', label: 'System' }]} ariaLabel="Pick by" /></div>{mode === 'system' && <NameModeToggle />}</div>
       <input className="control w-full" value={text} onChange={e => setText(e.target.value)} onFocus={() => results && setOpen(true)}
         onKeyDown={e => { if (e.key === 'Escape') setOpen(false); if (e.key === 'ArrowDown' && open) { e.preventDefault(); (box.current?.querySelector('#hosp-results button:not([disabled])') as HTMLButtonElement | null)?.focus() } if (e.key === 'Enter' && open) { if (mode === 'hospital' && hospitals[0]) addHospital(hospitals[0]); if (mode === 'system' && systems[0] && Number(systems[0].tier ?? 2) < 2) pickSystem(systems[0]) } }}
         placeholder={mode === 'hospital' ? 'Hospital name, city or CCN' : 'System or owner name, e.g. Johns Hopkins, HCA'} aria-label={mode === 'hospital' ? 'Find a hospital' : 'Find a hospital system'} role="combobox" aria-expanded={open} aria-controls="hosp-results" />
@@ -68,7 +70,7 @@ export default function HospitalPicker({ selected, onChange }: { selected: strin
           )) : systems.map(s => (
             <li key={s.family_id} role="option" aria-selected={false}>
               <button className="press w-full text-left px-3 py-1.5 hover:bg-paper" onClick={() => pickSystem(s)} disabled={s.n_with_service_area === 0}>
-                <div className="text-sm text-ink truncate" title={titleCase(s.label)}>{titleCase(s.label)}</div>
+                <div className="text-sm text-ink truncate" title={sysName(s.label).title ?? sysName(s.label).text}>{sysName(s.label).text}</div>
                 <div className="text-[11px] text-ink-3">{s.n_hospitals} hospital{s.n_hospitals === 1 ? '' : 's'} · {s.n_states} state{s.n_states === 1 ? '' : 's'}{s.n_with_service_area < s.n_hospitals ? ` · ${s.n_with_service_area} with service-area data` : ''}{s.n_member_orgs > 1 ? ` · ${s.n_member_orgs} owner names` : ''}</div>
                 {s.matched_alias ? <div className="text-[11px] text-ink-3 truncate">matches owner name {titleCase(s.matched_alias)}</div> : s.aliases ? <div className="text-[11px] text-ink-3 truncate" title={titleCase(s.aliases.split(' | ').join(', '))}>also {titleCase(s.aliases.split(' | ').slice(0, 3).join(', '))}{s.aliases.split(' | ').length > 3 ? ', …' : ''}</div> : null}
               </button>

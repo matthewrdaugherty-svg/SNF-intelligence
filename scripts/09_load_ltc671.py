@@ -35,7 +35,8 @@ print(f"  {len(LOG)} casts, all lossless")
 
 # ---------- facility-level services table ----------
 # CENSUS RULE: the census fields are typed by hand on the form and 19 rows carry impossible values (e.g. a CCN pasted into the field,
-# totals in the billions). A census is kept only when Total Residents <= 1.2 x certified beds (Care Compare) and <= 2,000; otherwise
+# totals in the billions). A census is kept only when Total Residents <= 2,000 and, when Care Compare has a bed count, <= 1.2 x certified beds;
+# a home with no Care Compare bed count keeps its census if it passes the 2,000 cap (Validation Report 06, finding 10). Otherwise
 # all four census fields are nulled and census_unreliable = TRUE. Total Residents equals the three parts in every row (asserted).
 assert con.execute("SELECT count(*) FROM ltc671_raw WHERE total_residents <> medicare_census + medicaid_census + other_census").fetchone()[0]==0
 con.execute("DROP TABLE IF EXISTS snf_services")
@@ -53,7 +54,7 @@ con.execute("""CREATE TABLE snf_services AS
          l.organized_residents_group = 'Yes' AS resident_council, l.organized_family_member_group = 'Yes' AS family_council,
          l.nurse_aide_training_and_competency_evaluation_program = 'Yes' AS nurse_aide_training_program,
          (l.provider_number IN (SELECT ccn FROM facility_master)) AS in_facility_master
-  FROM (SELECT l.*, (f.number_of_certified_beds IS NOT NULL AND l.total_residents <= 2000 AND l.total_residents <= 1.2 * f.number_of_certified_beds) AS ok
+  FROM (SELECT l.*, (l.total_residents <= 2000 AND (f.number_of_certified_beds IS NULL OR l.total_residents <= 1.2 * f.number_of_certified_beds)) AS ok
         FROM ltc671_raw l LEFT JOIN facility_master f ON f.ccn = l.provider_number) l""")
 r=con.execute("SELECT count(*), sum(in_facility_master), sum(census_unreliable), sum(beds_ventilator>0), sum(beds_dialysis>0), sum(beds_alzheimers>0), sum(hospital_based) FROM snf_services").fetchone()
 print(f"  services rows {r[0]:,}; in facility_master {r[1]:,}; census nulled as unreliable {r[2]}; with ventilator beds {r[3]}; dialysis {r[4]}; Alzheimer's {r[5]}; hospital-based {r[6]}")

@@ -34,11 +34,13 @@ export function toParams(s: ScenarioParams): URLSearchParams {
   return p
 }
 
+/** Straight-line miles between two Care Compare facility coordinates (facility_master latitude/longitude) — more precise than ZIP centroids. */
 const dist = (a: string, b: string) => `3958.8 * 2 * asin(sqrt(pow(sin(radians(${b}.latitude - ${a}.latitude) / 2), 2) + cos(radians(${a}.latitude)) * cos(radians(${b}.latitude)) * pow(sin(radians(${b}.longitude - ${a}.longitude) / 2), 2)))`
 
 /** Baseline volume per SNF as a share of the hospital's SNF volume. Hospital-reported counts when loaded, else the modeled service-area weights. */
 export const baselineSql = (h: string, source: 'reported' | 'modeled') => source === 'reported'
-  ? `SELECT snf_ccn AS ccn, sum(n_discharges) * 1.0 / (SELECT sum(n_discharges) FROM user_flows WHERE hospital_ccn = ${sqlStr(h)}) AS w FROM user_flows WHERE hospital_ccn = ${sqlStr(h)} GROUP BY 1`
+  // only SNFs that exist in Care Compare can carry rates; reported counts at other CCNs are left out and reported separately (unknownShare)
+  ? `SELECT snf_ccn AS ccn, sum(n_discharges) * 1.0 / (SELECT sum(n_discharges) FROM user_flows WHERE hospital_ccn = ${sqlStr(h)} AND snf_ccn IN (SELECT ccn FROM facility_master)) AS w FROM user_flows WHERE hospital_ccn = ${sqlStr(h)} AND snf_ccn IN (SELECT ccn FROM facility_master) GROUP BY 1`
   : `SELECT ccn, sum(modeled_weight) / (SELECT sum(modeled_weight) FROM snf_hospital_area WHERE hospital_ccn = ${sqlStr(h)}) AS w FROM snf_hospital_area WHERE hospital_ccn = ${sqlStr(h)} GROUP BY 1`
 
 export const viableSql = (s: ScenarioParams) => {
@@ -50,7 +52,15 @@ export const viableSql = (s: ScenarioParams) => {
   return `SELECT f.ccn FROM facility_master f LEFT JOIN (SELECT s.ccn, CASE WHEN k.known >= 0.6 THEN sum(least(h.share, s.share)) END AS casemix_overlap FROM hospital_chapter_mix h JOIN snf_chapter_mix s USING (chapter) JOIN (SELECT ccn, sum(share) AS known FROM snf_chapter_mix GROUP BY 1) k ON k.ccn = s.ccn WHERE h.hospital_ccn = ${sqlStr(s.hospital)} GROUP BY s.ccn, k.known) o USING (ccn) WHERE ${w.join(' AND ')}`
 }
 
-export interface Outcome { source: 'reported' | 'modeled'; before: Row; after: Row; moved: number; unplaced: number; addedMiles: number | null; gains: Row[]; losses: Row[]; nViable: number; nBaseline: number; nReceiving: number; nLosing: number }
+export interface Outcome {
+  source: 'reported' | 'modeled'; before: Row; after: Row
+  belowBar: number          // share of baseline volume in homes that do not meet the bar (independent of shift)
+  unreachable: number       // share of baseline volume in such homes with no acceptable home within maxMiles (independent of shift)
+  moved: number             // share actually moved = (belowBar − unreachable) × shift
+  unplaced: number          // unreachable × shift (the part of the shift that could not happen)
+  unknownShare: number      // reported baseline only: share of uploaded discharges at CCNs not in Care Compare, left out
+  addedMiles: number | null; gains: Row[]; losses: Row[]; nViable: number; nBaseline: number; nReceiving: number; nLosing: number
+}
 
 /** Run the scenario entirely in SQL: (1) baseline shares; (2) viable set; (3) each non-viable SNF's volume × shift goes to its k nearest viable SNFs within maxMiles, split equally; (4) volume-weighted rates before and after. */
 export async function runScenario(s: ScenarioParams): Promise<Outcome> {
@@ -58,6 +68,9 @@ export async function runScenario(s: ScenarioParams): Promise<Outcome> {
   const [{ n: reported }] = await q<{ n: number } & Row>(`SELECT count(*) AS n FROM user_flows WHERE hospital_ccn = ${h}`)
   const source: 'reported' | 'modeled' = Number(reported) > 0 ? 'reported' : 'modeled'
   await q(`CREATE OR REPLACE TEMP TABLE sc_base AS ${baselineSql(s.hospital, source)}`)
+  const [{ n: nBaseline }] = await q<{ n: number } & Row>(`SELECT count(*) AS n FROM sc_base`)
+  if (Number(nBaseline) === 0) throw new Error(source === 'reported' ? 'None of the uploaded SNF CCNs for this hospital is in Care Compare.' : 'CMS publishes no service-area rows with 11 or more cases for this hospital, so there is no modeled SNF volume to work from.')
+  const unknownShare = source === 'reported' ? Number((await q<Row>(`SELECT coalesce(sum(CASE WHEN snf_ccn NOT IN (SELECT ccn FROM facility_master) THEN n_discharges END),0) * 1.0 / nullif(sum(n_discharges),0) AS u FROM user_flows WHERE hospital_ccn = ${h}`))[0].u ?? 0) : 0
   await q(`CREATE OR REPLACE TEMP TABLE sc_viable AS ${viableSql(s)}`)
   // moves: non-viable baseline volume → k nearest viable SNFs within maxMiles of the SNF it would have used
   await q(`CREATE OR REPLACE TEMP TABLE sc_moves AS
@@ -84,12 +97,16 @@ export async function runScenario(s: ScenarioParams): Promise<Outcome> {
     FROM ${t} b JOIN facility_master f USING (ccn) LEFT JOIN snf_utilization u USING (ccn)`).then(r => r[0])
   const [before, after] = await Promise.all([metrics('sc_base'), metrics('sc_after')])
   const [mv] = await q<Row>(`SELECT coalesce(sum(moved),0) AS moved, coalesce(sum(moved * miles),0) / nullif(sum(moved),0) AS miles, count(DISTINCT to_ccn) AS n_to, count(DISTINCT from_ccn) AS n_from FROM sc_moves`)
-  const [np] = await q<Row>(`SELECT coalesce(sum(w),0) * ${s.shift} AS unplaced FROM sc_base WHERE ccn NOT IN (SELECT ccn FROM sc_viable) AND ccn NOT IN (SELECT from_ccn FROM sc_moves)`)
-  const gains = await q(`SELECT m.to_ccn AS ccn, f.provider_name, f.city_town, f.state, f.overall_rating, f.qm_521_adj, f.qrp_004_ppr_pd_rsrr, sum(m.moved) AS gained, coalesce(b.w, 0) AS before_w, avg(m.miles) AS miles
-    FROM sc_moves m JOIN facility_master f ON f.ccn = m.to_ccn LEFT JOIN sc_base b ON b.ccn = m.to_ccn GROUP BY 1,2,3,4,5,6,7,9 ORDER BY gained DESC LIMIT 40`)
-  const losses = await q(`SELECT m.from_ccn AS ccn, f.provider_name, f.city_town, f.state, f.overall_rating, f.special_focus_status, f.abuse_icon, f.qm_521_adj, f.qrp_004_ppr_pd_rsrr, sum(m.moved) AS lost, b.w AS before_w
-    FROM sc_moves m JOIN facility_master f ON f.ccn = m.from_ccn JOIN sc_base b ON b.ccn = m.from_ccn GROUP BY 1,2,3,4,5,6,7,8,9,11 ORDER BY lost DESC LIMIT 40`)
+  // shares of the baseline that sit below the bar, and that have no acceptable home in reach — both independent of the shift slider
+  const [bb] = await q<Row>(`SELECT coalesce(sum(w),0) / (SELECT sum(w) FROM sc_base) AS below_bar,
+      coalesce(sum(CASE WHEN ccn NOT IN (SELECT from_ccn FROM sc_moves) THEN w END),0) / (SELECT sum(w) FROM sc_base) AS unreachable
+    FROM sc_base WHERE ccn NOT IN (SELECT ccn FROM sc_viable)`)
+  const STRIP = 'f.overall_rating, f.health_inspection_rating, f.qm_rating, f.staffing_rating, f.special_focus_status, f.abuse_icon'
+  const gains = await q(`SELECT m.to_ccn AS ccn, f.provider_name, f.city_town, f.state, ${STRIP}, f.qm_521_adj, f.qrp_004_ppr_pd_rsrr, sum(m.moved) AS gained, coalesce(b.w, 0) AS before_w, avg(m.miles) AS miles
+    FROM sc_moves m JOIN facility_master f ON f.ccn = m.to_ccn LEFT JOIN sc_base b ON b.ccn = m.to_ccn GROUP BY ALL ORDER BY gained DESC LIMIT 40`)
+  const losses = await q(`SELECT m.from_ccn AS ccn, f.provider_name, f.city_town, f.state, ${STRIP}, f.qm_521_adj, f.qrp_004_ppr_pd_rsrr, sum(m.moved) AS lost, b.w AS before_w
+    FROM sc_moves m JOIN facility_master f ON f.ccn = m.from_ccn JOIN sc_base b ON b.ccn = m.from_ccn GROUP BY ALL ORDER BY lost DESC LIMIT 40`)
   const [{ n: nViable }] = await q<{ n: number } & Row>(`SELECT count(*) AS n FROM sc_viable`)
-  const [{ n: nBaseline }] = await q<{ n: number } & Row>(`SELECT count(*) AS n FROM sc_base`)
-  return { source, before, after, moved: Number(mv.moved), unplaced: Number(np.unplaced), addedMiles: mv.miles == null ? null : Number(mv.miles), gains, losses, nViable: Number(nViable), nBaseline: Number(nBaseline), nReceiving: Number(mv.n_to), nLosing: Number(mv.n_from) }
+  const belowBar = Number(bb.below_bar), unreachable = Number(bb.unreachable)
+  return { source, before, after, belowBar, unreachable, moved: Number(mv.moved), unplaced: unreachable * s.shift, unknownShare, addedMiles: mv.miles == null ? null : Number(mv.miles), gains, losses, nViable: Number(nViable), nBaseline: Number(nBaseline), nReceiving: Number(mv.n_to), nLosing: Number(mv.n_from) }
 }

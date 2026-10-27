@@ -116,6 +116,7 @@ function Footer({ rows, cols }: { rows: Record<string, unknown>[]; cols: TableCo
   const starAvg = (() => { const v = rows.map(r => r.overall_rating).filter(x => x != null).map(Number); return v.length ? v.reduce((a, b) => a + b, 0) / v.length : null })()
   return (
     <div className="shrink-0 border-t border-hairline bg-surface px-4 py-2 text-xs text-ink-2 flex flex-wrap gap-x-5 gap-y-1">
+      <span className="inline-flex items-center gap-1.5 mr-2"><span className="inline-block w-2 h-2 rounded-full" style={{ background: 'var(--color-q5)' }} aria-hidden />better than the national average · <span className="inline-block w-2 h-2 rounded-full" style={{ background: 'var(--color-rust)' }} aria-hidden />worse · grey same (as displayed)</span>
       <span>Averages of this set:</span>
       {starAvg != null && <span>overall stars <span className="text-ink tabular-nums">{starAvg.toFixed(2)}</span></span>}
       {stats.map(s => s.mean != null && <span key={s.c.key} title={`${s.c.label} · ${s.n.toLocaleString()} nursing homes with a value`}>{(s.c.short ?? s.c.label).replace(/\s*\(.*\)$/, '')} <span className="text-ink tabular-nums">{fmt(s.mean, s.c.unit, s.c.unit === 'count' ? undefined : 1)}</span></span>)}

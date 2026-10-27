@@ -47,6 +47,8 @@ json.dump(fn, open(f"{OUT}/footnotes.json","w"), indent=1)
 # national/state context: nation row of state_averages + VBP aggregate + QRP national
 nat = con.execute("SELECT * FROM qrp_national").df(); nat.to_json(f"{OUT}/qrp_national.json", orient="records")
 con.execute("SELECT * FROM vbp_aggregate").df().to_json(f"{OUT}/vbp_aggregate.json", orient="records")
+# the DRG → family / chapter mapping, so the Methods page can show it (Validation Report 06, finding 13)
+con.execute("SELECT f.drg, m.title, m.mdc, f.family, f.chapter FROM drg_family f JOIN msdrg m USING (drg) ORDER BY f.family, f.drg").df().to_json(f"{OUT}/drg_families.json", orient="records")
 meta={"data_vintage":"2026-09-01","release":"2026-09-30 (nursing home + SNF QRP provider files); SNF VBP FY2026 facility file 2025-11-01",
       "n_facilities":int(con.execute("SELECT count(*) FROM facility_master").fetchone()[0]),
       "window_12m_start":"2025-09-01","built":pd.Timestamp.today().strftime("%Y-%m-%d"),

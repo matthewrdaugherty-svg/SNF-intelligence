@@ -9,6 +9,7 @@ export interface CatalogRow { source: string; measure_code: string; description:
 const base = () => `${import.meta.env.BASE_URL}data/`
 async function json<T>(name: string): Promise<T> { const r = await fetch(base() + name); if (!r.ok) throw new Error(`Could not load ${name}`); return r.json() }
 
+export interface DrgFamily { drg: string; title: string; mdc: string | null; family: string; chapter: string | null }
 export interface Reference {
   meta: Meta
   footnotes: Record<string, Footnote>
@@ -19,15 +20,17 @@ export interface Reference {
   reconciliation: { Check: string; Result: string }[]
   national: Record<string, number>          // QRP national + VBP aggregate + state_averages NATION row
   stateAvg: Record<string, Record<string, number | null>>  // by state code
+  drgFamilies: DrgFamily[]                  // MS-DRG → plain-English family and PAC PUF chapter (scripts/11_load_drg.py)
 }
 let refPromise: Promise<Reference> | null = null
 export function getReference(): Promise<Reference> {
   if (refPromise) return refPromise
   refPromise = (async () => {
-    const [meta, footnotes, lineage, catalog, limitations, readme, reconciliation, qrpNat, vbpAgg] = await Promise.all([
+    const [meta, footnotes, lineage, catalog, limitations, readme, reconciliation, qrpNat, vbpAgg, drgFamilies] = await Promise.all([
       json<Meta>('meta.json'), json<Record<string, Footnote>>('footnotes.json'), json<Lineage[]>('lineage.json'), json<CatalogRow[]>('measure_catalog.json'),
       json<string[]>('limitations.json'), json<string[]>('readme.json'), json<{ Check: string; Result: string }[]>('reconciliation.json'),
       json<{ measure_code: string; score: string }[]>('qrp_national.json'), json<Record<string, unknown>[]>('vbp_aggregate.json'),
+      json<DrgFamily[]>('drg_families.json'),
     ])
     const national: Record<string, number> = {}
     for (const r of qrpNat) { const n = Number(r.score); if (!Number.isNaN(n)) national[r.measure_code] = n }
@@ -40,7 +43,7 @@ export function getReference(): Promise<Reference> {
       for (const [k, v] of Object.entries(r)) { if (k === 'state_or_nation' || k === 'processing_date') continue; const n = v == null || v === '' ? null : Number(v); rec[k] = n == null || Number.isNaN(n) ? null : n }
       stateAvg[code] = rec
     }
-    return { meta, footnotes, lineage, catalog, limitations, readme, reconciliation, national, stateAvg }
+    return { meta, footnotes, lineage, catalog, limitations, readme, reconciliation, national, stateAvg, drgFamilies }
   })()
   return refPromise
 }

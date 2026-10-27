@@ -1,6 +1,7 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import { onProgress } from '../lib/db'
 import { getReference, type Reference } from '../lib/reference'
+import { nameMode, useNameMode } from '../lib/systemNames'
 
 /** One star-rating cell on the quality ramp. Unrated renders as an empty well. */
 /** Text color that reads on each rating tier's background. */
@@ -10,7 +11,7 @@ export const tierWord = (n: number | null) => n == null ? 'not rated' : n <= 2 ?
 /** One star-rating cell. Color says what the number means: red = 1–2 (poor), amber = 3 (average), green = 4–5 (good). */
 export function Stars({ value, size = 'md', label }: { value: unknown; size?: 'sm' | 'md' | 'lg'; label?: string }) {
   const n = value == null ? null : Number(value)
-  const cls = { sm: 'h-5 w-9 text-[11px]', md: 'h-6 w-9 text-xs', lg: 'h-8 min-w-12 text-sm' }[size]
+  const cls = { sm: 'h-5 w-9 text-[11px]', md: 'h-6 w-9 text-xs', lg: 'h-7 min-w-12 text-sm rounded-md' }[size]
   if (n == null || Number.isNaN(n)) return <span className={`inline-flex items-center justify-center rounded px-1 bg-well text-ink-3 ${cls}`} title={label ? `${label}: not rated` : 'Not rated'}>–</span>
   return <span className={`inline-flex items-center justify-center rounded px-1 font-semibold ${cls}`} style={{ background: `var(--color-q${Math.round(n)})`, color: starFg(n) }} title={`${label ? label + ': ' : ''}${n} of 5 stars (${tierWord(n)})`}>{n}</span>
 }
@@ -111,20 +112,38 @@ export function Segmented<T extends string>({ value, options, onChange, ariaLabe
 export type Source = 'CMS' | 'Modeled' | 'Derived' | 'Hospital-reported'
 /** Big-number card on three fixed rows (label 32 · value 32 · note 32) so every card in a row shares the same baselines.
  *  No per-card footer: the source is stated once per row by StatRow; "How this is calculated" is the ⓘ button. */
-export function Stat({ label, value, unit, note, how, tone, source }: { label: string; value: ReactNode; unit?: string; note?: ReactNode; source?: Source; how?: ReactNode; tone?: 'good' | 'mid' | 'bad' }) {
+/** System names: friendly (brand / cleaned) or legal (PECOS) — one setting for the whole app, remembered in this browser. */
+export function NameModeToggle() {
+  const m = useNameMode()
+  return <div className="inline-flex items-center gap-2 t-caption"><span>System names</span><div className="seg !w-auto" role="radiogroup" aria-label="System names">{(['friendly', 'legal'] as const).map(v => <button key={v} role="radio" aria-checked={m === v} className="press seg-btn !flex-none !h-7 !px-2.5 !text-[11px]" onClick={() => nameMode.set(v)}>{v === 'friendly' ? 'Friendly' : 'Legal (PECOS)'}</button>)}</div></div>
+}
+export type VerdictKind = 'better' | 'worse' | 'same'
+/** Tinted capsule carrying a verdict in words; the tint is the verdict. `danger` is for flags (abuse icon, special focus). */
+export function Pill({ kind, children, title }: { kind: VerdictKind | 'danger'; children: ReactNode; title?: string }) {
+  return <span className={`pill pill-${kind}`} title={title}>{children}</span>
+}
+/** Danger flags as pills in their own table column: the abuse icon (CMS: abuse citation causing harm in the past year, or potential harm in each of the last two) and special-focus status. Dash when neither. */
+export function FlagCell({ row }: { row: Record<string, unknown> }) {
+  const sff = row.special_focus_status ? String(row.special_focus_status) : null
+  const abuse = row.abuse_icon === 'Y'
+  if (!sff && !abuse) return <span className="empty">—</span>
+  return <span className="inline-flex flex-wrap gap-1">{abuse && <Pill kind="danger" title="CMS abuse icon">Abuse icon</Pill>}{sff && <Pill kind="danger" title="CMS Special Focus Facility program">{/candidate/i.test(sff) ? 'SFF candidate' : 'Special focus'}</Pill>}</span>
+}
+export function Stat({ label, value, unit, note, how, verdict, source }: { label: string; value: ReactNode; unit?: string; note?: ReactNode; source?: Source; how?: ReactNode; verdict?: { kind: VerdictKind; text: string } | null }) {
   const [open, setOpen] = useState(false)
-  const bar = tone === 'good' ? 'var(--color-q5)' : tone === 'mid' ? '#dc6803' : tone === 'bad' ? 'var(--color-q2)' : 'transparent'
   void source
   return (
-    <div className="panel relative p-4 grid gap-2 min-w-0" style={{ gridTemplateRows: '32px 32px 32px' }}>
-      <div className="t-label line-clamp-2 pr-7" title={label}>{label}</div>
+    <div className="card relative p-4 grid gap-2 min-w-0" style={{ gridTemplateRows: '32px 32px 40px' }}>
+      <div className="card-label line-clamp-2 pr-7" title={label}>{label}</div>
       {how && <button className="press absolute top-3 right-3 w-6 h-6 rounded-full text-ink-3 hover:text-ink hover:bg-well text-[12px] leading-6 text-center" onClick={() => setOpen(o => !o)} aria-expanded={open} aria-label={`How this is calculated: ${label}`} title="How this is calculated">i</button>}
-      <div className="flex items-baseline gap-1.5 whitespace-nowrap overflow-hidden">
-        <span className="t-display">{value}</span>
+      <div className="flex items-center gap-1.5 whitespace-nowrap overflow-hidden">
+        <span className="t-display leading-8">{value}</span>
         {unit && <span className="t-body text-ink-2">{unit}</span>}
-        {tone && <span className="ml-auto self-center h-1 w-8 rounded shrink-0" style={{ background: bar }} aria-hidden />}
       </div>
-      <div className="t-label line-clamp-2">{note}</div>
+      {/* third row: the verdict pill (when there is one) over a one-line note, or a two-line note */}
+      <div className="t-label min-w-0">
+        {verdict ? <><div className="h-5 mb-[3px]"><Pill kind={verdict.kind}>{verdict.text}</Pill></div><div className="truncate" title={typeof note === 'string' ? note : undefined}>{note}</div></> : <div className="line-clamp-2">{note}</div>}
+      </div>
       {open && how && <div className="absolute left-2 right-2 top-10 z-20 panel p-3 t-label" style={{ boxShadow: 'var(--shadow-float)' }} role="note" onKeyDown={e => { if (e.key === 'Escape') setOpen(false) }}><div className="t-label text-ink font-medium mb-1">How this is calculated</div>{how}<button className="press btn btn-quiet btn-sm mt-2" onClick={() => setOpen(false)}>Close</button></div>}
     </div>
   )
@@ -135,7 +154,7 @@ export function StatRow({ source, children, cols = 4, note }: { source: Source; 
   return (
     <div>
       <div className={`grid grid-cols-1 ${grid} gap-4`}>{children}</div>
-      <div className="t-caption mt-2 flex items-center gap-1.5"><span className={`inline-block w-1.5 h-1.5 rounded-full ${source === 'Modeled' ? 'bg-accent' : 'bg-ink-3'}`} aria-hidden />Source: {source === 'CMS' ? 'CMS public files' : source === 'Modeled' ? 'modeled from CMS public files (see Methodology)' : source === 'Derived' ? 'derived from CMS public files' : 'hospital-reported upload'}{note ? <> · {note}</> : null}</div>
+      <div className="t-caption mt-2 flex items-start gap-1.5"><span className={`inline-block mt-[5px] shrink-0 w-1.5 h-1.5 rounded-full ${source === 'Modeled' ? 'bg-accent' : 'bg-ink-3'}`} aria-hidden />Source: {source === 'CMS' ? 'CMS public files' : source === 'Modeled' ? 'modeled from CMS public files (see Methodology)' : source === 'Derived' ? 'derived from CMS public files' : 'hospital-reported upload'}{note ? <> · {note}</> : null}</div>
     </div>
   )
 }

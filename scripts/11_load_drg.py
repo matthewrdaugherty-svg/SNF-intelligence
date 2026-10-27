@@ -20,14 +20,15 @@ print(f"  {len(rows)} MS-DRGs; {sum(1 for r in rows if not r[1])} without an MDC
 
 # ---- plain-English discharge families for post-acute placement. Named DRG sets come from the titles in the verified list; the rest fall
 # ---- back to the MDC. Every DRG lands in exactly one family (asserted).
-MDC_FAMILY={"01":"Stroke, brain and nervous system","02":"Eye","03":"Ear, nose, mouth and throat","04":"Lung and breathing","05":"Heart and circulation",
- "06":"Digestive","07":"Liver, pancreas and gallbladder","08":"Bones, joints and muscles","09":"Skin and wounds","10":"Diabetes, nutrition and metabolism",
- "11":"Kidney and urinary","12":"Male reproductive","13":"Female reproductive","14":"Pregnancy and childbirth","15":"Newborns","16":"Blood and immune",
- "17":"Cancer (lymphoma, leukemia, chemo)","18":"Sepsis and infections","19":"Mental health","20":"Alcohol and drug use","21":"Injuries and poisoning",
+# MDCs with named carve-outs below are labelled "(other)" so the remainder is never read as the whole category (Validation Report 06, finding 7).
+MDC_FAMILY={"01":"Brain and nervous system (other than stroke)","02":"Eye","03":"Ear, nose, mouth and throat","04":"Lung and breathing (other)","05":"Heart and circulation (other)",
+ "06":"Digestive","07":"Liver, pancreas and gallbladder","08":"Bones, joints and muscles (other)","09":"Skin (other)","10":"Diabetes, nutrition and metabolism",
+ "11":"Kidney and urinary (other)","12":"Male reproductive","13":"Female reproductive","14":"Pregnancy and childbirth","15":"Newborns","16":"Blood and immune",
+ "17":"Cancer (lymphoma, leukemia, chemo)","18":"Infections (other than sepsis)","19":"Mental health","20":"Alcohol and drug use","21":"Injuries and poisoning",
  "22":"Burns","23":"Rehabilitation and aftercare","24":"Multiple trauma","25":"HIV"}
 NAMED={  # family: DRG codes (all present in the v42.1 list; asserted)
- "Joint replacement (hip, knee)":["461","462","466","467","468","469","470","521","522"],
- "Hip and femur fracture or surgery":["480","481","482","533","534","535","536"],
+ "Joint replacement (hip, knee)":["461","462","466","467","468","469","470"],
+ "Hip and femur fracture or surgery":["480","481","482","521","522","533","534","535","536"],   # 521/522 = hip replacement FOR a hip fracture (title), so they are fracture cases
  "Spine surgery":["453","454","455","459","460","028","029","030","402","426","427","428","429","430","447","448","450","451","456","457","458","471","472","473","518","519","520"],
  "Stroke":["061","062","063","064","065","066","067","068","069"],
  "Heart failure":["291","292","293"],
@@ -38,10 +39,10 @@ NAMED={  # family: DRG codes (all present in the v42.1 list; asserted)
  "COPD and asthma":["190","191","192","202","203"],
  "Ventilator, tracheostomy and respiratory failure":["003","004","189","207","208","870"],
  "Sepsis":["871","872"],
- "Kidney failure and dialysis-related":["682","683","684","650","651","652","019"],
+ "Kidney failure and dialysis-related":["682","683","684"],
  "Urinary infection":["689","690"],
  "Wounds, ulcers and cellulitis":["570","571","572","573","574","575","592","593","594","602","603","463","464","465","622","623","624","901","902","903"],
- "Transplant":["001","002","005","006","007","008","010","014","016","017","018"],
+ "Transplant":["001","002","005","006","007","008","010","014","016","017","018","019","650","651","652"],   # 019 = simultaneous pancreas/kidney, 650–652 = kidney transplant
 }
 fam_of={}
 for fam,codes in NAMED.items():
@@ -54,7 +55,14 @@ MDC_CHAPTER={"01":"nervsystm","02":"entsys","03":"entsys","04":"rspsystm","05":"
  "10":"endonutrmet","11":"gusystm","12":"gusystm","13":"gusystm","14":"prgpericong","15":"prgpericong","16":"neobld","17":"neobld","18":"infctn","19":"mntbehneudis",
  "20":"mntbehneudis","21":"injpois","22":"injpois","23":"hlthsrv","24":"injpois","25":"infctn"}
 con.execute("DROP TABLE IF EXISTS drg_family"); con.execute("CREATE TABLE drg_family (drg VARCHAR, family VARCHAR, chapter VARCHAR)")
-con.executemany("INSERT INTO drg_family VALUES (?,?,?)", [(r[0], fam_of[r[0]], MDC_CHAPTER.get(r[1]) if r[1] else ("rspsystm" if r[0] in ("003","004") else "hlthsrv" if r[0] in ("981","982","983","987","988","989") else None)) for r in rows])
+# Fracture / dislocation DRGs sit in MDC 08 but their principal diagnosis is an injury (ICD-10 S codes), which the PAC PUF files under "injury and poisoning";
+# mapping them to the injury chapter keeps the hospital and SNF sides of the overlap on the same footing (Report 06, finding 8). Pathological fractures (M codes) stay musculoskeletal.
+INJURY_DRGS={"480","481","482","521","522","533","534","535","536","537","538","562","563"}
+def chapter(r):
+    if r[0] in INJURY_DRGS: return "injpois"
+    if r[1]: return MDC_CHAPTER.get(r[1])
+    return "rspsystm" if r[0] in ("003","004") else "hlthsrv" if r[0] in ("981","982","983","987","988","989") else None
+con.executemany("INSERT INTO drg_family VALUES (?,?,?)", [(r[0], fam_of[r[0]], chapter(r)) for r in rows])
 assert con.execute("SELECT count(*) FROM drg_family WHERE family IS NULL").fetchone()[0]==0
 print(f"  {len(set(fam_of.values()))} discharge families")
 

@@ -5,13 +5,15 @@ import { GROUPS, MEASURE_COLS, type Measure } from '../lib/measures'
 import { fmt, fmtUsd, fmtPct, titleCase, countyLabel } from '../lib/format'
 import { CERT_SHORT } from '../components/DataTable'
 import { useCompare, compareStore, MAX_COMPARE } from '../lib/compare'
-import { Fn, Flag, Stars, Empty, Stat, StatRow, tierWord, useReference, ReferenceError } from '../components/ui'
+import { Fn, Flag, Pill, Stars, Empty, Stat, StatRow, tierWord, useReference, ReferenceError } from '../components/ui'
+import { verdict, cmsVerdict, verdictColor, verdictStyle } from '../lib/verdict'
+export { verdict, verdictStyle }
 import type { Reference } from '../lib/reference'
 
 type Row = Record<string, unknown>
 
 /** Facility value vs state and national averages on one quiet track. */
-function Track({ value, state, nation, m }: { value: number | null; state: number | null; nation: number | null; m: Measure }) {
+function Track({ value, state, nation, m, color }: { value: number | null; state: number | null; nation: number | null; m: Measure; color?: string }) {
   const pts = [value, state, nation].filter((x): x is number => x != null && !Number.isNaN(x))
   if (value == null || !pts.length || m.unit === 'stars' || m.unit === 'rank' || m.unit === 'text' || m.unit === 'date') return null
   const lo = Math.min(0, ...pts), hi = Math.max(...pts) * 1.12 || 1
@@ -21,29 +23,9 @@ function Track({ value, state, nation, m }: { value: number | null; state: numbe
       <div className="absolute left-0 right-0 top-1/2 h-px bg-hairline" />
       {nation != null && <div className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 h-2.5 w-px bg-ink-3" style={{ left: x(nation) }} title={`Nation ${fmt(nation, m.unit, m.decimals)}`} />}
       {state != null && <div className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 h-3.5 w-px bg-ink-2" style={{ left: x(state) }} title={`State ${fmt(state, m.unit, m.decimals)}`} />}
-      {value != null && <div className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 h-2.5 w-2.5 rounded-full bg-ink" style={{ left: x(value) }} />}
+      {value != null && <div className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 h-3 w-3 rounded-full ring-2 ring-surface" style={{ left: x(value), background: color ?? 'var(--color-ink)' }} />}
     </div>
   )
-}
-
-/** Difference vs. the state average, worded so it cannot contradict the numbers beside it:
- *  percentage measures differ in points, counts are shown to one decimal, and anything that rounds to zero is "about the same". */
-/** The verdict is computed on the numbers as displayed (rounded to the shown precision), so the words can never contradict the figures beside them. */
-export function verdict(value: number | null, cmp: number | null, m: Measure): { kind: 'better' | 'worse' | 'same'; text: string } | null {
-  if (value == null || cmp == null || m.direction === 'none' || m.unit === 'stars') return null
-  const dec = m.unit === 'count' ? 1 : m.unit === 'usd' ? 0 : (m.decimals ?? (m.unit === 'pct' || m.unit === 'fraction_pct' ? 1 : 2))
-  const scale = m.unit === 'fraction_pct' ? 100 : 1
-  const d = Number((value * scale).toFixed(dec)) - Number((cmp * scale).toFixed(dec))
-  const shown = Number(Math.abs(d).toFixed(dec))
-  if (shown === 0) return { kind: 'same', text: 'same as state' }
-  const better = m.direction === 'lower' ? d < 0 : d > 0
-  const abs = m.unit === 'pct' || m.unit === 'fraction_pct' ? `${shown.toFixed(dec)} pts` : m.unit === 'usd' ? fmtUsd(shown) : m.unit === 'count' ? shown.toFixed(1) : fmt(shown, m.unit, dec)
-  return { kind: better ? 'better' : 'worse', text: `${abs} ${better ? 'better' : 'worse'} than state` }
-}
-export const verdictStyle = (k: 'better' | 'worse' | 'same' | undefined) => k === 'better' ? { color: 'var(--color-q5)', fontWeight: 600 } : k === 'worse' ? { color: 'var(--color-rust)', fontWeight: 600 } : { color: 'var(--color-ink-3)' }
-function Delta({ value, cmp, m }: { value: number | null; cmp: number | null; m: Measure }) {
-  const v = verdict(value, cmp, m); if (!v) return null
-  return <span style={verdictStyle(v.kind)}>{v.text}</span>
 }
 
 const ALL_MEASURES: Measure[] = [...GROUPS.flatMap(g => g.measures), ...MEASURE_COLS.map(c => ({ key: c.key, label: c.label, unit: c.unit, direction: c.direction, fn: c.fn } as Measure))]
@@ -55,15 +37,6 @@ function howText(key: string, ref: Reference | null, m: Measure) {
   if (!l) return m.note ?? null
   const file = l.source_file.replace(/^[a-z0-9]{4}-[a-z0-9]{4}_\d{4}-\d{2}-\d{2}_/, '').replace(/_Sep2026_\d\.csv$/, '').replace(/_/g, ' ')
   return <>{m.note ? m.note + ' ' : ''}From CMS file “{file}”, column “{l.original_header}”: {l.how_derived.replace(/ — scripts\/.*$/, '')}.</>
-}
-/** Tone bar = the same verdict as the words (better / worse / same); for QRP measures CMS's own comparison to the national rate wins. */
-const tone = (v: number | null, cmp: number | null, m: Measure, compPerf?: unknown): 'good' | 'mid' | 'bad' | undefined => {
-  const cp = compPerf == null ? '' : String(compPerf).toLowerCase()
-  if (cp.startsWith('better')) return 'good'
-  if (cp.startsWith('worse')) return 'bad'
-  if (cp.startsWith('no different')) return 'mid'
-  const k = verdict(v, cmp, m)?.kind
-  return k === 'better' ? 'good' : k === 'worse' ? 'bad' : k === 'same' ? 'mid' : undefined
 }
 /** One-paragraph snapshot in plain words. Every number comes from the row or the CMS averages; a sentence is dropped when its value is blank. */
 function Snapshot({ row, ref, state }: { row: Row; ref: Reference | null; state: string }) {
@@ -111,7 +84,7 @@ function ServicesPanel({ row, ref }: { row: Row; ref: Reference | null }) {
           </div>
           <div>
             <div className="t-label">Residents by payer at the last survey</div>
-            {total == null || total === 0 ? <div className="t-body text-ink-2 mt-1">{row.census_unreliable ? 'The reported census could not be real (it exceeds the certified beds or is not a count), so it is not shown.' : 'Not reported.'}</div> : (
+            {total == null || total === 0 ? <div className="t-body text-ink-2 mt-1">{row.census_unreliable ? 'The reported census failed a sanity check (above 2,000, or more than 1.2 times the certified beds), so it is not shown.' : 'Not reported.'}</div> : (
               <>
                 <div className="flex h-2.5 rounded overflow-hidden mt-2" aria-hidden>
                   <div style={{ width: `${100 * (mc ?? 0) / total}%`, background: 'var(--color-accent)' }} /><div style={{ width: `${100 * (md ?? 0) / total}%`, background: 'var(--color-ink-3)' }} /><div style={{ width: `${100 * (ot ?? 0) / total}%`, background: 'var(--color-hairline)' }} />
@@ -169,20 +142,22 @@ function MeasureRow({ m, row, ref, state }: { m: Measure; row: Row; ref: Referen
   const fn = m.fn ? row[m.fn] : null
   const comp = m.compPerf ? row[m.compPerf] : null
   const vol = m.volume ? row[m.volume] : null
+  // CMS's own comparison wins; otherwise the state average, or the nation when CMS publishes no state figure for this measure.
+  const vd = cmsVerdict(comp) ?? (st != null ? verdict(v, st, m, 'state') : verdict(v, nat, m, 'nation'))
+  const color = verdictColor(vd?.kind)
   return (
     <div className="grid grid-cols-[1fr_auto] md:grid-cols-[1fr_120px_1fr_200px] items-center gap-x-4 gap-y-1 py-2 border-b border-hairline/60 last:border-0" data-testid={`measure-${m.key}`}>
       <div className="text-sm text-ink">{m.label}<div className="text-[11px] text-ink-3">{m.direction === 'lower' ? 'Lower is better' : m.direction === 'higher' ? 'Higher is better' : ''}{m.note ? `${m.direction !== 'none' ? ' · ' : ''}${m.note}` : ''}</div></div>
       <div className="text-right text-sm tabular-nums">
-        {m.unit === 'stars' ? <Stars value={v} /> : m.unit === 'text' ? <span className="font-medium">{raw == null || raw === '' ? <span className="text-ink-3">—</span> : CERT_SHORT[String(raw)] ?? (String(raw) === 'Y' ? 'Yes' : String(raw) === 'N' ? 'No' : String(raw))}</span> : <span className="font-medium">{fmt(v, m.unit, m.decimals)}</span>}
+        {m.unit === 'stars' ? <Stars value={v} /> : m.unit === 'text' ? <span className="font-medium">{raw == null || raw === '' ? <span className="text-ink-3">—</span> : CERT_SHORT[String(raw)] ?? (String(raw) === 'Y' ? 'Yes' : String(raw) === 'N' ? 'No' : String(raw))}</span> : <span className="font-semibold" style={{ color }}>{fmt(v, m.unit, m.decimals)}</span>}
         {v == null && <Fn code={fn} ref={ref} />}
         {v != null && fn ? <Fn code={fn} ref={ref} /> : null}
       </div>
-      <div className="hidden md:block"><Track value={v} state={st} nation={nat} m={m} /></div>
-      <div className="text-[11px] text-ink-2 leading-tight col-span-2 md:col-span-1">
-        {st != null && <div>State avg {avg(st, m)}{nat != null ? ` · Nation ${avg(nat, m)}` : ''}</div>}
+      <div className="hidden md:block"><Track value={v} state={st} nation={nat} m={m} color={color} /></div>
+      <div className="text-[11px] text-ink-2 leading-tight col-span-2 md:col-span-1 space-y-1">
+        {vd && <div><Pill kind={vd.kind}>{vd.text}</Pill></div>}
+        {st != null && <div>State {avg(st, m)}{nat != null ? ` · Nation ${avg(nat, m)}` : ''}</div>}
         {st == null && nat != null && <div>Nation {avg(nat, m)}</div>}
-        {st != null && <Delta value={v} cmp={st} m={m} />}
-        {comp ? <div style={verdictStyle(String(comp).toLowerCase().startsWith('better') ? 'better' : String(comp).toLowerCase().startsWith('worse') ? 'worse' : 'same')}>CMS: {String(comp).toLowerCase()}</div> : null}
         {vol != null ? <div className="text-ink-3">{Number(vol).toLocaleString()} eligible stays</div> : null}
       </div>
     </div>
@@ -236,21 +211,18 @@ export default function Facility() {
         <div className="min-w-0 flex-1">
           <div className="t-caption mb-1"><Link to="/explore" className="hover:underline">Explore</Link> / {state}</div>
           <h1>{titleCase(String(row.provider_name))}</h1>
-          <div className="text-sm text-ink-2 mt-1">{titleCase(String(row.provider_address))}, {titleCase(String(row.city_town))}, {state} {String(row.zip_code)} · {countyLabel(String(row.county_parish), state)} · CCN {ccn}</div>
-          <div className="text-sm text-ink-2 mt-1">
-            {String(row.ownership_type)} · {row.number_of_certified_beds != null ? `${Number(row.number_of_certified_beds)} certified beds` : 'beds not reported'}
-            {row.average_number_of_residents_per_day != null ? ` · ${Number(row.average_number_of_residents_per_day).toFixed(1)} residents per day` : ''}
-            {row.chain_name ? ` · ${titleCase(String(row.chain_name))} (${Number(row.number_of_facilities_in_chain)} nursing homes)` : ''}
-            {row.provider_resides_in_hospital === 'Y' ? ' · located in a hospital' : ''} · {String(row.provider_type)}
-            {row.date_first_approved_to_provide_medicare_and_medicaid_services ? ` · certified since ${String(row.date_first_approved_to_provide_medicare_and_medicaid_services).slice(0, 4)}` : ''}
-          </div>
-          <div className="flex flex-wrap gap-1.5 mt-3">
+          <div className="t-body text-ink-2 mt-2">{titleCase(String(row.provider_address))}, {titleCase(String(row.city_town))}, {state} {String(row.zip_code)} <span className="text-ink-3">· {countyLabel(String(row.county_parish), state)} · CCN {ccn}</span></div>
+          <div className="mt-4 flex flex-wrap gap-2">
             {row.special_focus_status ? <Flag>{String(row.special_focus_status)}</Flag> : null}
             {row.abuse_icon === 'Y' ? <Flag>Abuse icon</Flag> : null}
-            {row.high_performing_icon === 'Y' ? <span className="text-[11px] font-medium px-1.5 py-0.5 rounded bg-well text-ink">High performing</span> : null}
-            {row.provider_changed_ownership_in_last_12_months === 'Y' ? <span className="text-[11px] px-1.5 py-0.5 rounded bg-well text-ink-2">Changed ownership in the last 12 months</span> : null}
-            {row.most_recent_health_inspection_more_than_2_years_ago === 'Y' ? <span className="text-[11px] px-1.5 py-0.5 rounded bg-well text-ink-2">Last health inspection more than 2 years ago</span> : null}
+            {[String(row.ownership_type), row.number_of_certified_beds != null ? `${Number(row.number_of_certified_beds)} certified beds` : 'Beds not reported',
+              row.average_number_of_residents_per_day != null ? `${Number(row.average_number_of_residents_per_day).toFixed(1)} residents per day` : null,
+              String(row.provider_type), row.provider_resides_in_hospital === 'Y' ? 'In a hospital' : null,
+              row.date_first_approved_to_provide_medicare_and_medicaid_services ? `Certified since ${String(row.date_first_approved_to_provide_medicare_and_medicaid_services).slice(0, 4)}` : null,
+              row.high_performing_icon === 'Y' ? 'High performing' : null, row.provider_changed_ownership_in_last_12_months === 'Y' ? 'Changed ownership in the last 12 months' : null,
+              row.most_recent_health_inspection_more_than_2_years_ago === 'Y' ? 'Last health inspection more than 2 years ago' : null].filter((x): x is string => !!x).map(t => <span key={t} className="pill pill-same font-medium">{t}</span>)}
           </div>
+          {row.chain_name ? <div className="mt-4 t-body" data-testid="chain"><span className="t-label">Chain</span><div className="mt-0.5"><span className="font-semibold">{titleCase(String(row.chain_name))}</span> <span className="text-ink-2">({Number(row.number_of_facilities_in_chain)} nursing homes)</span></div></div> : null}
         </div>
         <div className="shrink-0 flex flex-col sm:flex-row md:flex-col items-stretch md:items-end gap-2 w-full md:w-auto">
           <button className={`press btn ${inCmp ? 'btn-surface' : 'btn-primary'}`} onClick={() => compareStore.toggle(ccn)} disabled={!inCmp && compare.length >= MAX_COMPARE}>
@@ -277,9 +249,10 @@ export default function Facility() {
           const sa = m.state ? ref?.stateAvg[state]?.[m.state] ?? null : null
           const na = m.national ? ref?.national[m.national] ?? null : m.state ? ref?.stateAvg['NATION']?.[m.state] ?? null : null
           const cmp = sa ?? na; const cp = m.compPerf ? row[m.compPerf] : null
-          return <Stat key={k} label={cardLabel} value={v == null ? <span className="text-ink-3">{fn ? <Fn code={fn} ref={ref} /> : '–'}</span> : fmt(v, m.unit, m.decimals)} source="CMS" tone={tone(v, cmp, m, cp)}
-            note={cmp != null ? <>{cp ? <><span style={verdictStyle(String(cp).toLowerCase().startsWith('better') ? 'better' : String(cp).toLowerCase().startsWith('worse') ? 'worse' : 'same')}>CMS: {String(cp).toLowerCase()}</span><br /></> : v != null && sa != null ? <><Delta value={v} cmp={sa} m={m} /><br /></> : null}{sa != null ? `${state} ${avg(sa, m)}` : ''}{sa != null && na != null ? ' · ' : ''}{na != null ? `US ${avg(na, m)}` : ''}</> : m.note}
-            how={<>{m.label}. {howText(k, ref, m)} Bar: green when better than the state average as displayed, red when worse, amber when the same{cp ? '; for this measure CMS\u2019s own comparison to the national rate decides' : ''}.</>} />
+          const vd = cmsVerdict(cp) ?? (sa != null ? verdict(v, sa, m, 'state') : verdict(v, na, m, 'nation'))
+          return <Stat key={k} label={cardLabel} value={v == null ? <span className="text-ink-3">{fn ? <Fn code={fn} ref={ref} /> : '–'}</span> : fmt(v, m.unit, m.decimals)} source="CMS" verdict={vd}
+            note={cmp != null ? <>{sa != null ? `${state} ${avg(sa, m)}` : ''}{sa != null && na != null ? ' · ' : ''}{na != null ? `US ${avg(na, m)}` : ''}</> : m.note}
+            how={<>{m.label}. {howText(k, ref, m)} The pill compares this home with the {sa != null ? 'state' : 'national'} average as displayed{cp ? '; for this measure CMS\u2019s own comparison to the national rate decides' : ''}.</>} />
         })}
       </StatRow>
 
@@ -291,13 +264,13 @@ export default function Facility() {
         <span className="inline-flex items-center gap-1.5"><span className="inline-block w-2.5 h-2.5 rounded-full bg-ink" />This facility</span>
         <span className="inline-flex items-center gap-1.5"><span className="inline-block w-px h-3.5 bg-ink-2" />State average</span>
         <span className="inline-flex items-center gap-1.5"><span className="inline-block w-px h-2.5 bg-ink-3" />National average</span>
-        <span className="inline-flex items-center gap-1.5"><span style={verdictStyle('better')}>green</span> better than the state · <span style={verdictStyle('worse')}>red</span> worse · grey about the same</span>
+        <span className="inline-flex items-center gap-1.5"><Pill kind="better">better</Pill> than the state average (or the nation when CMS publishes no state figure) · <Pill kind="worse">worse</Pill> · <Pill kind="same">same</Pill> as displayed; for QRP measures CMS's own comparison decides</span>
       </div>
       {GROUPS.map(g => (
         <section key={g.id} className="panel panel-pad">
           <h2 className="section-title">{g.title}</h2>
           {g.blurb && <p className="t-label mt-1 mb-2">{g.blurb}</p>}
-          {g.id !== 'ratings' && <div className="hidden md:grid grid-cols-[1fr_120px_1fr_200px] gap-4 t-caption pb-2 border-b border-hairline"><div>Measure</div><div className="text-right">This facility</div><div /><div>Compared with the state</div></div>}
+          {g.id !== 'ratings' && <div className="hidden md:grid grid-cols-[1fr_120px_1fr_200px] gap-4 t-caption pb-2 border-b border-hairline"><div>Measure</div><div className="text-right">This facility</div><div /><div>Compared with the benchmark</div></div>}
           {g.id === 'vbp' && row.vbp_in_program !== 'Y' ? <div className="text-sm text-ink-2 py-2">Not in the SNF Value-Based Purchasing program for FY2026 (CMS excludes facilities with too few eligible stays, Medicaid-only facilities and some others), so there is no ranking, score or multiplier.</div>
             : (g.id === 'ratings' ? g.measures.slice(3) : g.measures).map(m => <MeasureRow key={m.key} m={m} row={row} ref={ref} state={state} />)}
           {g.id === 'enforcement' && (

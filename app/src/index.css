@@ -92,6 +92,15 @@ textarea.control { height: auto; padding: 8px 10px; }
 .tbl-compact td { padding: 6px 8px; }
 /* ---- Panels and cards ---- */
 .panel { background: var(--color-surface); border-radius: var(--radius-panel); }
+/* Card: a framed unit that reads as a box on the grey canvas AND inside a white panel (hairline, not shadow). */
+.card { background: var(--color-surface); border: 1px solid var(--color-hairline); border-radius: var(--radius-panel); }
+.card-label { font-size: 12px; line-height: 16px; font-weight: 600; color: var(--color-ink); }
+/* Verdict pill: tinted capsule, bold text, no glyph — the color is the verdict (good / bad / same). */
+.pill { display: inline-flex; align-items: center; height: 20px; padding: 0 8px; border-radius: 999px; font-size: 11px; line-height: 20px; font-weight: 600; white-space: nowrap; letter-spacing: 0.01em; }
+.pill-better { background: #dcfae6; color: #085d3a; }
+.pill-worse  { background: var(--color-rust-soft); color: #912018; }
+.pill-same   { background: var(--color-well); color: var(--color-ink-2); }
+.pill-danger { background: var(--color-rust-soft); color: #912018; }
 .panel-pad { padding: 16px; }
 @media (min-width: 768px) { .panel-pad { padding: 20px 24px; } }
 .section-title { font-size: 16px; line-height: 24px; font-weight: 600; color: var(--color-ink); letter-spacing: -0.01em; }

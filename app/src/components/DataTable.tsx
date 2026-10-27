@@ -5,6 +5,7 @@ import { fmt, titleCase } from '../lib/format'
 import type { TableCol } from '../lib/measures'
 import { useCompare, compareStore } from '../lib/compare'
 import { Fn, QualityStrip, STRIP_HEADER, StripHeader } from './ui'
+import { verdict, verdictColor } from '../lib/verdict'
 import type { Reference } from '../lib/reference'
 
 export interface Sort { key: string; dir: 'asc' | 'desc' }
@@ -41,6 +42,8 @@ export default function DataTable({ rows, cols, sort, onSort, ref, showDistance,
       </div>
     )
   }
+  /** National benchmark per measure column (QRP national file, VBP aggregate, or the NATION row of the state averages); numeric cells are tinted by the verdict against it. */
+  const bench = new Map(cols.map(c => [c.key, c.unit === 'text' || !c.direction || c.direction === 'none' ? null : c.national ? ref?.national[c.national] ?? null : c.state ? ref?.stateAvg['NATION']?.[c.state] ?? null : null]))
   const width = 36 + 300 + 172 + (showDistance ? 72 : 0) + (showShare ? 96 : 0) + cols.reduce((a, c) => a + (c.width ?? 96), 0)
   return (
     <div ref={parent} className="h-full overflow-auto bg-surface" role="table" aria-rowcount={rows.length}>
@@ -71,8 +74,9 @@ export default function DataTable({ rows, cols, sort, onSort, ref, showDistance,
                 {cols.map(c => {
                   const val = r[c.key]; const fn = c.fn ? r[c.fn] : null
                   const text = c.unit === 'text' ? displayText(c.key, val) : fmt(val, c.unit)
+                  const b = bench.get(c.key); const vd = b != null && val != null && val !== '' ? verdict(Number(val), b, { unit: c.unit, direction: c.direction ?? 'none', decimals: c.decimals }, 'nation') : null
                   return (
-                    <div key={c.key} role="cell" className={`shrink-0 px-2 text-sm tabular-nums truncate ${c.unit !== 'text' ? 'text-right' : ''}`} style={{ width: c.width ?? 96 }} title={c.unit === 'text' ? text : undefined}>
+                    <div key={c.key} role="cell" className={`shrink-0 px-2 text-sm tabular-nums truncate ${c.unit !== 'text' ? 'text-right' : ''} ${vd && vd.kind !== 'same' ? 'font-semibold' : ''}`} style={{ width: c.width ?? 96, color: verdictColor(vd?.kind) }} title={c.unit === 'text' ? text : vd ? vd.text : undefined}>
                       {text}{!text && fn ? <Fn code={fn} ref={ref} compact /> : null}{!text && !fn ? <span className="text-ink-3">—</span> : null}
                     </div>
                   )
