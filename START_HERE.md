@@ -29,9 +29,17 @@ Rebuild from scratch: `python3 scripts/01_profile.py && python3 scripts/02_load.
 - Long/detail: `health_citations`, `fire_citations`, `penalties`, `ownership`, `survey_dates`, `survey_summary`, `mds_qm_long`, `claims_qm_long`, `qrp_long`, `swing_bed_long`, `vbp_facility`.
 - Reference: `measure_catalog`, `collection_intervals`, `citation_descriptions`, `inspection_cutpoints`, `state_averages`, `qrp_national`, `vbp_aggregate`.
 
+## Web app (app/)
+Vite + React + TypeScript; DuckDB runs in the browser over `app/public/data/*.arrow` (exported by scripts/04_export_app_data.py).
+Pages: Explore (filters in the URL, virtualized table, column picker, CSV export), Facility profile (every measure with footnote,
+vs state/nation), Map (radius/catchment), Compare (≤6), Discharge flows (the plug-in: upload hospital→SNF counts; schema in D-013),
+Methodology & trust. Tests: `cd app && npm run build && npx playwright test` (9 end-to-end tests asserting values read from the DB).
+Design rules: two meaning-carrying hues only (teal ramp = star rating; rust = enforcement/harm), Public Sans, text-first rows.
+
 ## Status (2026-10-26)
-- DONE: load, join, reconcile, workbook v1, data-dictionary digest, external-source research, red-team validation round 1 (see report).
+- DONE: load, join, reconcile, workbook v2.1 (validation rounds 1–2 passed), data-dictionary digest, external-source research,
+  web app v1 built and e2e-tested, git repo initialised (push pending GitHub connection), Vercel config ready (deploy pending).
 - OPEN: 162 unexplained rating-cycle vs inspection-cycle count differences (T-009); severity grid A–L confirmation from the
   Five-Star Technical Users' Guide; Matt's answers on commercial use / client discharge data / permanent home for the project.
-- NOT STARTED: hospital catchment layer (needs Post-Acute Care PUF + Hospital Service Area File + Hospital Spending by Claim),
-  composite `x_` scores (need Quality Expert + Validator sign-off per D-005), queryable app (UX design first).
+- NOT STARTED: modeled hospital catchment layer (needs Post-Acute Care PUF + Hospital Service Area File + Hospital Spending by Claim),
+  composite `x_` scores (need Quality Expert + Validator sign-off per D-005), independent red-team of the live app once deployed.
