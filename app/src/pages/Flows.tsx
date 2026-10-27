@@ -154,7 +154,7 @@ export default function Flows() {
   return (
     <div className="page stack">
       <div><h1>Discharge flows</h1>
-      <p className="t-body text-ink-2 mt-2 max-w-3xl">Where a hospital's patients go after discharge, and how much of that volume lands in high- versus low-rated facilities. CMS publishes no hospital-to-SNF flows, so this page runs on counts a hospital provides; the schema is fixed so real data drops in without any rework. Until a hospital shares its data, the <Link to="/hospitals" className="underline">Hospitals</Link> pages give a modeled view of the same question, built from CMS's public service-area and utilization files and labelled “Modeled” everywhere it appears.</p></div>
+      <p className="t-body text-ink-2 mt-2 max-w-3xl">Where a hospital's patients go after discharge, and how much of that volume lands in high- versus low-rated SNFs. CMS publishes no hospital-to-SNF flows, so this page runs on counts a hospital provides; the schema is fixed so real data drops in without any rework. Until a hospital shares its data, the <Link to="/hospitals" className="underline">Hospitals</Link> pages give a modeled view of the same question, built from CMS's public service-area and utilization files and labelled “Modeled” everywhere it appears.</p></div>
 
       <div className="panel panel-pad">
         <div className="flex flex-wrap items-center gap-3">
@@ -184,8 +184,8 @@ export default function Flows() {
             {hospRow && <span className="text-xs text-ink-3">{String(hospRow.p0)} to {String(hospRow.p1)} · hospital-reported</span>}
           </div>
 
-          <StatRow source="Hospital-reported" cols={5} note="quality mix of the uploaded discharges">
-            <Stat label="Discharges to nursing homes" value={fmtInt(Number(summary.total))} note={<>{fmtInt(Number(summary.n_snf_matched))} nursing homes in the CMS file{Number(summary.n_snf) > Number(summary.n_snf_matched) ? ` · ${fmtInt(Number(summary.n_snf) - Number(summary.n_snf_matched))} CCNs not found` : ''}</>} />
+          <StatRow source="Hospital-reported" cols={5} note="quality mix of the uploaded discharges to SNFs">
+            <Stat label="Discharges to SNFs" value={fmtInt(Number(summary.total))} note={<>{fmtInt(Number(summary.n_snf_matched))} SNFs in the CMS file{Number(summary.n_snf) > Number(summary.n_snf_matched) ? ` · ${fmtInt(Number(summary.n_snf) - Number(summary.n_snf_matched))} CCNs not found` : ''}</>} />
             <Stat label="To 4–5★ (good)" value={`${shares?.high ?? 0}%`} note={`${fmtInt(Number(summary.high))} discharges`} />
             <Stat label="To 3★ (average)" value={`${shares?.mid ?? 0}%`} note={`${fmtInt(Number(summary.mid))} discharges`} />
             <Stat label="To 1–2★ (poor)" value={`${shares?.low ?? 0}%`} note={`${fmtInt(Number(summary.low))} discharges`} />
@@ -197,13 +197,13 @@ export default function Flows() {
             {summary.w521 != null && <span>short-stay rehospitalization <span className="text-ink font-medium tabular-nums">{fmtPct(Number(summary.w521))}</span></span>}
             {summary.w004 != null && <span>30-day preventable readmission after SNF discharge <span className="text-ink font-medium tabular-nums">{fmtPct(Number(summary.w004))}</span></span>}
             {summary.w005 != null && <span>discharge to community <span className="text-ink font-medium tabular-nums">{fmtPct(Number(summary.w005))}</span></span>}
-            <span className="t-caption w-full">Weighted by discharges; facilities with a suppressed value are left out of that average. These are facility-level CMS rates, not this hospital's own patients' outcomes.</span>
+            <span className="t-caption w-full">Weighted by discharges; SNFs with a suppressed value are left out of that average. These are SNF-level CMS rates, not this hospital's own patients' outcomes.</span>
           </div>
 
           <section className="panel panel-pad">
             <h2 className="section-title">Destinations <span className="text-ink-3 font-normal">· {dest.length}</span></h2>
             <div className="overflow-x-auto"><table className="tbl tbl-compact mt-2">
-              <thead><tr><th>Nursing home</th><th className="num">Discharges</th><th className="num">Share</th><th><StripHeader /></th>{summary.hasLoc ? <th className="num">Miles</th> : null}<th className="num">Rehospitalized</th><th className="num">Readmitted after SNF</th><th className="num">To community</th><th className="num">Fines, 3 yr</th><th className="num">Harm deficiencies</th></tr></thead>
+              <thead><tr><th>SNF</th><th className="num">Discharges</th><th className="num">Share</th><th><StripHeader /></th>{summary.hasLoc ? <th className="num">Miles</th> : null}<th className="num">Rehospitalized</th><th className="num">Readmitted after SNF</th><th className="num">To community</th><th className="num">Fines, 3 yr</th><th className="num">Harm deficiencies</th></tr></thead>
               <tbody>
                 {dest.map(d => (
                   <tr key={String(d.snf_ccn)}>
@@ -224,18 +224,18 @@ export default function Flows() {
 
           <section className="panel panel-pad">
             <div className="flex flex-wrap items-center gap-3">
-              <h2 className="section-title">4–5★ nursing homes near this hospital</h2>
+              <h2 className="section-title">4–5★ SNFs near this hospital</h2>
               {Boolean(summary.hasLoc) ? <><label className="text-sm text-ink-2 ml-2">within</label><input type="range" min={3} max={40} value={radius} onChange={e => setRadius(Number(e.target.value))} aria-label="Radius in miles" /><span className="text-sm tabular-nums">{radius} mi</span></> : <span className="text-xs text-ink-3">Add hospital_lat and hospital_lng to the CSV to see nearby alternatives and distances.</span>}
             </div>
             {Boolean(summary.hasLoc) && (
               <>
                 <div className="text-sm text-ink-2 mt-2">
-                  {altStats.n} facilities rated 4–5★ overall (excluding special-focus and abuse-icon facilities) with {fmtInt(altStats.beds)} certified beds in total{altStats.avg521 != null ? <>; their simple average short-stay rehospitalization is <span className="text-ink font-medium">{fmtPct(altStats.avg521)}</span>{summary.w521 != null ? <> versus <span className="text-ink font-medium">{fmtPct(Number(summary.w521))}</span> weighted across current destinations</> : null}</> : null}.
-                  {Number(summary.low) > 0 && <> This hospital sent <span className="text-ink font-medium">{fmtInt(Number(summary.low))}</span> discharges ({share(summary.low)}) to 1–2★ facilities in the period.</>}
+                  {altStats.n} SNFs rated 4–5★ overall (excluding special-focus and abuse-icon SNFs) with {fmtInt(altStats.beds)} certified beds in total{altStats.avg521 != null ? <>; their simple average short-stay rehospitalization is <span className="text-ink font-medium">{fmtPct(altStats.avg521)}</span>{summary.w521 != null ? <> versus <span className="text-ink font-medium">{fmtPct(Number(summary.w521))}</span> weighted across current destinations</> : null}</> : null}.
+                  {Number(summary.low) > 0 && <> This hospital sent <span className="text-ink font-medium">{fmtInt(Number(summary.low))}</span> discharges ({share(summary.low)}) to 1–2★ SNFs in the period.</>}
                 </div>
-                <div className="text-xs text-ink-3 mt-1">Arithmetic on CMS facility averages, for sizing the conversation. It does not say these facilities have capacity or are clinically right for the patients, and it is not an estimate of readmissions avoided.</div>
+                <div className="text-xs text-ink-3 mt-1">Arithmetic on CMS facility averages, for sizing the conversation. It does not say these SNFs have capacity or are clinically right for the patients, and it is not an estimate of readmissions avoided.</div>
                 <div className="overflow-x-auto"><table className="tbl tbl-compact mt-3">
-                  <thead><tr><th>Nursing home</th><th className="num">Miles</th><th><StripHeader /></th><th className="num">Beds</th><th className="num">Residents per day</th><th className="num">Rehospitalized</th><th className="num">Readmitted after SNF</th><th className="num">To community</th><th className="num">Fines, 3 yr</th><th>Already a destination</th></tr></thead>
+                  <thead><tr><th>SNF</th><th className="num">Miles</th><th><StripHeader /></th><th className="num">Beds</th><th className="num">Residents per day</th><th className="num">Rehospitalized</th><th className="num">Readmitted after SNF</th><th className="num">To community</th><th className="num">Fines, 3 yr</th><th>Already a destination</th></tr></thead>
                   <tbody>
                     {alts.map(a => (
                       <tr key={String(a.ccn)}>
@@ -250,13 +250,13 @@ export default function Flows() {
                         <td className="text-ink-2">{a.already_used ? 'yes' : <span className="empty">—</span>}</td>
                       </tr>
                     ))}
-                    {alts.length === 0 && <tr><td colSpan={10} className="py-3 text-ink-3 text-sm">No 4–5★ facilities within {radius} miles. Widen the radius.</td></tr>}
+                    {alts.length === 0 && <tr><td colSpan={10} className="py-3 text-ink-3 text-sm">No 4–5★ SNFs within {radius} miles. Widen the radius.</td></tr>}
                   </tbody>
                 </table></div>
               </>
             )}
           </section>
-          <div className="text-xs text-ink-3 mt-4 mb-8">Source labels: every row above is “hospital-reported” (your upload). CMS facility data as of {ref?.meta.data_vintage}.</div>
+          <div className="text-xs text-ink-3 mt-4 mb-8">Source labels: every row above is “hospital-reported” (your upload). CMS data as of {ref?.meta.data_vintage}.</div>
         </>
       )}
     </div>

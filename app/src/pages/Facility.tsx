@@ -161,7 +161,7 @@ export default function Facility() {
           <div className="text-sm text-ink-2 mt-1">
             {String(row.ownership_type)} · {row.number_of_certified_beds != null ? `${Number(row.number_of_certified_beds)} certified beds` : 'beds not reported'}
             {row.average_number_of_residents_per_day != null ? ` · ${Number(row.average_number_of_residents_per_day).toFixed(1)} residents per day` : ''}
-            {row.chain_name ? ` · ${titleCase(String(row.chain_name))} (${Number(row.number_of_facilities_in_chain)} facilities)` : ''}
+            {row.chain_name ? ` · ${titleCase(String(row.chain_name))} (${Number(row.number_of_facilities_in_chain)} nursing homes)` : ''}
             {row.provider_resides_in_hospital === 'Y' ? ' · located in a hospital' : ''} · {String(row.provider_type)}
             {row.date_first_approved_to_provide_medicare_and_medicaid_services ? ` · certified since ${String(row.date_first_approved_to_provide_medicare_and_medicaid_services).slice(0, 4)}` : ''}
           </div>

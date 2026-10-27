@@ -18,7 +18,7 @@ export default function Compare() {
     q(`SELECT * FROM facility_master WHERE ccn IN (${ccns.map(sqlStr).join(',')})`).then(r => { if (live) setRows(ccns.map(c => r.find(x => x.ccn === c)).filter(Boolean) as Row[]) })
     return () => { live = false }
   }, [ccns])
-  if (!ccns.length) return <Empty title="Nothing to compare yet."><p>Tick facilities in Explore or on a facility page. Up to {MAX_COMPARE} at a time.</p><Link to="/explore" className="underline">Go to Explore</Link></Empty>
+  if (!ccns.length) return <Empty title="Nothing to compare yet."><p>Tick nursing homes in Explore or on a profile page. Up to {MAX_COMPARE} at a time.</p><Link to="/explore" className="underline">Go to Explore</Link></Empty>
   const colW = `minmax(176px, 1fr)`
   return (
     <div className="page">

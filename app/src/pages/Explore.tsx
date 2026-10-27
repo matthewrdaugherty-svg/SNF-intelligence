@@ -76,7 +76,7 @@ export default function Explore() {
       <section className="flex-1 min-w-0 flex flex-col relative">
         <div className="flex items-center gap-3 px-4 h-14 shrink-0 min-w-0">
           <button className="press btn btn-surface md:hidden shrink-0" onClick={() => setFiltersOpen(o => !o)} aria-expanded={filtersOpen}>Filters</button>
-          <div className="text-sm text-ink-2 min-w-0 truncate">{rows ? <><span className="text-ink font-medium tabular-nums" data-testid="result-count">{rows.length.toLocaleString()}</span> facilities</> : 'Loading…'}{hasDist && f.place ? <span className="text-ink-3"> · within {f.miles} mi of {f.place}</span> : null}{hasHosp ? <span className="text-ink-3"> · in the service area of {f.hospitals.length} hospital{f.hospitals.length > 1 ? 's' : ''} (modeled)</span> : null}</div>
+          <div className="text-sm text-ink-2 min-w-0 truncate">{rows ? <><span className="text-ink font-medium tabular-nums" data-testid="result-count">{rows.length.toLocaleString()}</span> nursing homes</> : 'Loading…'}{hasDist && f.place ? <span className="text-ink-3"> · within {f.miles} mi of {f.place}</span> : null}{hasHosp ? <span className="text-ink-3"> · in the service area of {f.hospitals.length} hospital{f.hospitals.length > 1 ? 's' : ''} (modeled)</span> : null}</div>
           <div className="ml-auto flex items-center gap-2 relative shrink-0">
             <button className="press btn btn-surface" onClick={() => setPicker(p => !p)} aria-expanded={picker}><span className="hidden sm:inline">Columns · {cols.length}</span><span className="sm:hidden">Cols</span></button>
             <button className="press btn btn-primary" onClick={exportCsv} disabled={!rows?.length}><span className="hidden sm:inline">Export CSV</span><span className="sm:hidden">CSV</span></button>
@@ -98,7 +98,7 @@ export default function Explore() {
         </div>
         <div className="flex-1 min-h-0 border-t border-hairline">
           {error ? <Empty title="These filters could not be applied."><button className="underline" onClick={onClear}>Clear all filters</button> and try again. <span className="text-ink-3 block mt-1 text-xs">{error}</span></Empty>
-            : rows && rows.length === 0 ? <Empty title="No facilities match these filters.">Clear a filter or widen the radius.</Empty>
+            : rows && rows.length === 0 ? <Empty title="No nursing homes match these filters.">Clear a filter or widen the radius.</Empty>
             : rows ? <DataTable rows={rows} cols={cols} sort={sort} onSort={onSort} ref={ref} showDistance={hasDist} showShare={hasHosp} /> : null}
         </div>
         {rows && rows.length > 0 && <Footer rows={rows} cols={cols} />}
@@ -118,7 +118,7 @@ function Footer({ rows, cols }: { rows: Record<string, unknown>[]; cols: TableCo
     <div className="shrink-0 border-t border-hairline bg-surface px-4 py-2 text-xs text-ink-2 flex flex-wrap gap-x-5 gap-y-1">
       <span>Averages of this set:</span>
       {starAvg != null && <span>overall stars <span className="text-ink tabular-nums">{starAvg.toFixed(2)}</span></span>}
-      {stats.map(s => s.mean != null && <span key={s.c.key} title={`${s.c.label} · ${s.n.toLocaleString()} facilities with a value`}>{(s.c.short ?? s.c.label).replace(/\s*\(.*\)$/, '')} <span className="text-ink tabular-nums">{fmt(s.mean, s.c.unit, s.c.unit === 'count' ? undefined : 1)}</span></span>)}
+      {stats.map(s => s.mean != null && <span key={s.c.key} title={`${s.c.label} · ${s.n.toLocaleString()} nursing homes with a value`}>{(s.c.short ?? s.c.label).replace(/\s*\(.*\)$/, '')} <span className="text-ink tabular-nums">{fmt(s.mean, s.c.unit, s.c.unit === 'count' ? undefined : 1)}</span></span>)}
     </div>
   )
 }

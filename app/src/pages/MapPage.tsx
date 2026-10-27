@@ -140,7 +140,7 @@ export default function MapPage() {
           <button className="press btn btn-surface text-sm md:hidden here" onClick={() => setFiltersOpen(o => !o)} aria-expanded={filtersOpen}>Filters</button>
           <button className={`press btn text-sm ${pinMode ? 'btn-primary' : 'btn-surface here'}`} aria-pressed={pinMode} onClick={() => setPinMode(p => !p)}>{pinMode ? 'Click the map to set the center' : hasDist ? 'Move pin' : 'Drop a pin for a radius'}</button>
           {hasDist && <div className="bg-surface here rounded-[6px] px-3 py-1.5 text-sm text-ink-2">{f.miles} mi around {f.place || 'pin'}</div>}
-          {noBasemap && <div className="bg-surface here rounded-[6px] px-3 py-1.5 text-xs text-ink-2">The street basemap could not be reached; facilities are still shown.</div>}
+          {noBasemap && <div className="bg-surface here rounded-[6px] px-3 py-1.5 text-xs text-ink-2">The street basemap could not be reached; nursing homes are still shown.</div>}
         </div>
         <div className="absolute bottom-3 left-3 right-3 md:right-auto bg-surface here rounded-[6px] px-3 py-2 t-caption text-ink-2 flex flex-wrap items-center gap-x-3 gap-y-1 z-10">
           <span>Overall stars</span>{RAMP.map((c, i) => <span key={i} className="inline-flex items-center gap-1"><span className="inline-block w-3 h-3 rounded-full" style={{ background: c, border: '0.6px solid #111827' }} />{i + 1}{i === 0 ? ' poor' : i === 2 ? ' average' : i === 4 ? ' good' : ''}</span>)}
@@ -149,7 +149,7 @@ export default function MapPage() {
         </div>
       </section>
       <aside className="hidden lg:block w-80 shrink-0 border-l border-hairline bg-surface overflow-y-auto" aria-label="Facilities on the map">
-        <div className="px-4 py-3 text-sm text-ink-2 border-b border-hairline">{rows ? <><span className="text-ink font-medium tabular-nums" data-testid="result-count">{rows.length.toLocaleString()}</span> facilities{hasDist ? ', nearest first' : ''}<span className="block text-[11px] text-ink-3 mt-0.5">{STRIP_HEADER}</span></> : 'Loading…'}</div>
+        <div className="px-4 py-3 text-sm text-ink-2 border-b border-hairline">{rows ? <><span className="text-ink font-medium tabular-nums" data-testid="result-count">{rows.length.toLocaleString()}</span> nursing homes{hasDist ? ', nearest first' : ''}<span className="block text-[11px] text-ink-3 mt-0.5">{STRIP_HEADER}</span></> : 'Loading…'}</div>
         {rows && rows.length === 0 && <Empty title="Nothing here.">Widen the radius or clear a filter.</Empty>}
         {list.slice(0, 400).map(r => {
           const ccn = String(r.ccn)

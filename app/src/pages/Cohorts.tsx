@@ -31,7 +31,7 @@ function ConditionRow({ c, onChange, onRemove }: { c: Condition; onChange: (c: C
   )
 }
 
-/** Histogram of one measure for the cohort, with all facilities as a quiet outline and p10/p50/p90 marks. */
+/** Histogram of one measure for the cohort, with all nursing homes as a quiet outline and p10/p50/p90 marks. */
 function Histogram({ cohort, all, p, unit, label }: { cohort: number[]; all: number[]; p: { p10: number; p50: number; p90: number } | null; unit: TableCol['unit']; label: string }) {
   if (!cohort.length) return null
   const W = 640, H = 160, PAD = 24
@@ -43,7 +43,7 @@ function Histogram({ cohort, all, p, unit, label }: { cohort: number[]; all: num
   const x = (v: number) => PAD + ((v - lo) / (hi - lo || 1)) * (W - 2 * PAD)
   const bw = (W - 2 * PAD) / bins
   return (
-    <svg viewBox={`0 0 ${W} ${H + 44}`} className="w-full max-w-3xl" role="img" aria-label={`Distribution of ${label}: cohort (filled) versus all facilities (outline)`}>
+    <svg viewBox={`0 0 ${W} ${H + 44}`} className="w-full max-w-3xl" role="img" aria-label={`Distribution of ${label}: cohort (filled) versus all nursing homes (outline)`}>
       {ca.map((n, i) => <rect key={'a' + i} x={PAD + i * bw} y={H - (n / maxA) * (H - 10)} width={bw - 1} height={(n / maxA) * (H - 10)} fill="none" stroke="var(--color-hairline)" />)}
       {cc.map((n, i) => <rect key={'c' + i} x={PAD + i * bw} y={H - (n / maxC) * (H - 10)} width={bw - 1} height={(n / maxC) * (H - 10)} fill="var(--color-accent)" opacity={0.75} />)}
       {p && [['p10', p.p10, 0], ['p50', p.p50, 1], ['p90', p.p90, 0]].map(([k, v, rowI]) => { const px = Math.min(W - PAD, Math.max(PAD, x(Number(v)))); return <g key={String(k)}><line x1={px} x2={px} y1={6} y2={H} stroke="var(--color-ink)" strokeDasharray="3 3" /><text x={px} y={H + 24 + Number(rowI) * 13} textAnchor={px < PAD + 40 ? 'start' : px > W - PAD - 40 ? 'end' : 'middle'} fontSize="11" fill="var(--color-ink-2)">{String(k)} {fmt(Number(v), unit, 1)}</text></g> })}
@@ -102,14 +102,14 @@ export default function Cohorts() {
   return (
     <div className="page stack">
       <div><h1>Cohorts</h1>
-      <p className="t-body text-ink-2 mt-2 max-w-3xl">Pull every facility that meets a set of conditions, then summarize the group, compare it to all 14,690 facilities, and break it down by state, chain, ownership or size. The address bar holds the cohort, so copy the link to share it.</p></div>
+      <p className="t-body text-ink-2 mt-2 max-w-3xl">Pull every nursing home that meets a set of conditions, then summarize the group, compare it to all 14,690 nursing homes, and break it down by state, chain, ownership or size. The address bar holds the cohort, so copy the link to share it.</p></div>
 
       <section className="panel panel-pad">
         <div className="flex items-center gap-3"><h2 className="section-title">Conditions</h2><span className="t-caption">all must be true</span>
           <button className="press btn btn-surface ml-auto" disabled={conds.length >= MAX_CONDITIONS} title={conds.length >= MAX_CONDITIONS ? `Up to ${MAX_CONDITIONS} conditions` : undefined} onClick={() => setConds([...conds, { field: 'overall_rating', op: 'in', a: '4,5' }])}>Add condition</button>
           {conds.length > 0 && <button className="press btn btn-quiet" onClick={() => setConds([])}>Clear</button>}
         </div>
-        {conds.length === 0 && <div className="text-sm text-ink-2 mt-2">No conditions yet — the cohort is every facility. Try: overall rating is any of 4,5 · short-stay rehospitalization at most 18 · fines last 12 months equals 0.</div>}
+        {conds.length === 0 && <div className="text-sm text-ink-2 mt-2">No conditions yet — the cohort is every nursing home. Try: overall rating is any of 4,5 · short-stay rehospitalization at most 18 · fines last 12 months equals 0.</div>}
         {conds.map((c, i) => <ConditionRow key={i} c={c} onChange={nc => setConds(conds.map((x, j) => j === i ? nc : x))} onRemove={() => setConds(conds.filter((_, j) => j !== i))} />)}
         {conds.length > 0 && <div className="text-xs text-ink-3 mt-2">{conds.map(describe).join(' · ')}</div>}
         {dropped && <div className="text-xs mt-2" style={{ color: 'var(--color-rust)' }} role="alert">This link carried more than {MAX_CONDITIONS} conditions; only the first {MAX_CONDITIONS} are used.</div>}
@@ -126,16 +126,16 @@ export default function Cohorts() {
             <select className="control text-sm" value={groupBy} onChange={e => setParam('g', e.target.value)} aria-label="Break down by">{GROUPS_BY.map(g => <option key={g.key} value={g.key}>{g.label}</option>)}</select>
           </div>
 
-          <StatRow source="Derived" note="counts and statistics computed from the CMS values of the facilities in the cohort">
-            <Stat label="Facilities in cohort" value={n == null ? '…' : fmtInt(n)} note={n != null ? `${(100 * n / 14690).toFixed(1)}% of all nursing homes` : undefined} source="CMS" />
-            <Stat label={`${m.short ?? m.label} — cohort median`} value={summary?.med != null ? fmt(summary.med, m.unit, 1) : '–'} note={summary ? <>mean {summary.mean != null ? fmt(summary.mean, m.unit, 1) : '–'} · p25 {summary.p25 != null ? fmt(summary.p25, m.unit, 1) : '–'} · p75 {summary.p75 != null ? fmt(summary.p75, m.unit, 1) : '–'} · {fmtInt(Number(summary.n_val))} with a value</> : undefined} source="Derived" how="Median and quartiles of the CMS value across the facilities in the cohort; suppressed values excluded." />
-            <Stat label="All facilities — median" value={summary?.med_all != null ? fmt(summary.med_all, m.unit, 1) : '–'} note={summary?.mean_all != null ? `mean ${fmt(summary.mean_all, m.unit, 1)}` : undefined} source="Derived" how="Same statistic across all 14,690 nursing homes, for comparison." />
-            <Stat label="Rating mix in cohort" value={summary ? `${share(summary.share_good)} good` : '–'} note={summary ? <><span style={{ color: Number(summary.share_poor) > 0 ? 'var(--color-rust)' : undefined }}>{share(summary.share_poor)} poor (1–2★)</span> · avg {summary.stars != null ? Number(summary.stars).toFixed(2) : '–'}★</> : undefined} source="Derived" tone={summary && Number(summary.share_poor) > 0.3 ? 'bad' : summary && Number(summary.share_good) > 0.5 ? 'good' : 'mid'} how="Share of cohort facilities rated 4–5★ (good) and 1–2★ (poor) overall." />
+          <StatRow source="Derived" note="counts and statistics computed from the CMS values of the nursing homes in the cohort">
+            <Stat label="Nursing homes in cohort" value={n == null ? '…' : fmtInt(n)} note={n != null ? `${(100 * n / 14690).toFixed(1)}% of all nursing homes` : undefined} source="CMS" />
+            <Stat label={`${m.short ?? m.label} — cohort median`} value={summary?.med != null ? fmt(summary.med, m.unit, 1) : '–'} note={summary ? <>mean {summary.mean != null ? fmt(summary.mean, m.unit, 1) : '–'} · p25 {summary.p25 != null ? fmt(summary.p25, m.unit, 1) : '–'} · p75 {summary.p75 != null ? fmt(summary.p75, m.unit, 1) : '–'} · {fmtInt(Number(summary.n_val))} with a value</> : undefined} source="Derived" how="Median and quartiles of the CMS value across the nursing homes in the cohort; suppressed values excluded." />
+            <Stat label="All nursing homes — median" value={summary?.med_all != null ? fmt(summary.med_all, m.unit, 1) : '–'} note={summary?.mean_all != null ? `mean ${fmt(summary.mean_all, m.unit, 1)}` : undefined} source="Derived" how="Same statistic across all 14,690 nursing homes, for comparison." />
+            <Stat label="Rating mix in cohort" value={summary ? `${share(summary.share_good)} good` : '–'} note={summary ? <><span style={{ color: Number(summary.share_poor) > 0 ? 'var(--color-rust)' : undefined }}>{share(summary.share_poor)} poor (1–2★)</span> · avg {summary.stars != null ? Number(summary.stars).toFixed(2) : '–'}★</> : undefined} source="Derived" tone={summary && Number(summary.share_poor) > 0.3 ? 'bad' : summary && Number(summary.share_good) > 0.5 ? 'good' : 'mid'} how="Share of nursing homes in the cohort rated 4–5★ (good) and 1–2★ (poor) overall." />
           </StatRow>
 
           {dist && dist.cohort.length > 0 && (
             <section className="panel panel-pad">
-              <div className="flex items-baseline gap-3"><h2 className="section-title">Distribution of {m.label}</h2><span className="t-caption">cohort filled · all facilities outlined · dashed = cohort 10th / median / 90th percentile</span></div>
+              <div className="flex items-baseline gap-3"><h2 className="section-title">Distribution of {m.label}</h2><span className="t-caption">cohort filled · all nursing homes outlined · dashed = cohort 10th / median / 90th percentile</span></div>
               <div className="mt-2"><Histogram cohort={dist.cohort} all={dist.all} p={dist.p} unit={m.unit} label={m.label} /></div>
             </section>
           )}
@@ -143,7 +143,7 @@ export default function Cohorts() {
           <section className="panel panel-pad">
             <h2 className="section-title">By {GROUPS_BY.find(g => g.key === groupBy)!.label.toLowerCase()} <span className="t-caption font-normal">· largest groups first, up to 60</span></h2>
             <div className="overflow-x-auto"><table className="tbl tbl-compact mt-2">
-              <thead><tr><th>Group</th><th className="num">Facilities</th><th className="num">{m.short ?? m.label}, mean</th><th className="num">With a value</th><th className="num">4–5★</th><th className="num">1–2★</th><th className="num">Average fines, 3 yr</th></tr></thead>
+              <thead><tr><th>Group</th><th className="num">Nursing homes</th><th className="num">{m.short ?? m.label}, mean</th><th className="num">With a value</th><th className="num">4–5★</th><th className="num">1–2★</th><th className="num">Average fines, 3 yr</th></tr></thead>
               <tbody>{groups.map(g => (
                 <tr key={String(g.grp)}>
                   <td>{String(g.grp)}</td><td className="num">{fmtInt(Number(g.n))}</td>
@@ -155,7 +155,7 @@ export default function Cohorts() {
           </section>
 
           <section className="panel overflow-hidden">
-            <div className="px-4 md:px-6 py-3 flex items-center gap-3 border-b border-hairline"><h2 className="section-title">Facilities</h2><span className="t-caption">{rows ? `${fmtInt(rows.length)} rows · sorted by ${colByKey(sort.key)?.label ?? sort.key}` : ''}</span>
+            <div className="px-4 md:px-6 py-3 flex items-center gap-3 border-b border-hairline"><h2 className="section-title">Nursing homes</h2><span className="t-caption">{rows ? `${fmtInt(rows.length)} rows · sorted by ${colByKey(sort.key)?.label ?? sort.key}` : ''}</span>
               <button className="press btn btn-primary ml-auto" disabled={!rows?.length} onClick={() => {
                 if (!rows) return
                 const keys = ['ccn', 'provider_name', 'city_town', 'state', 'overall_rating', 'overall_rating_footnote', 'health_inspection_rating', 'health_inspection_rating_footnote', 'qm_rating', 'qm_rating_footnote', 'staffing_rating', 'staffing_rating_footnote', ...cols.flatMap(c => c.fn ? [c.key, c.fn] : [c.key])]
@@ -165,7 +165,7 @@ export default function Cohorts() {
                 const blob = new Blob(['﻿' + [...head, labels.map(esc).join(','), ...rows.map(r => keys.map(k => esc(r[k])).join(','))].join('\n')], { type: 'text/csv;charset=utf-8' })
                 const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `snf-cohort-${new Date().toISOString().slice(0, 10)}.csv`; a.click(); URL.revokeObjectURL(a.href)
               }}>Export CSV</button></div>
-            <div className="h-[520px]">{rows && rows.length === 0 ? <Empty title="No facilities meet these conditions.">Loosen a condition.</Empty> : rows ? <DataTable rows={rows} cols={cols} sort={sort} onSort={setSort} ref={ref} /> : null}</div>
+            <div className="h-[520px]">{rows && rows.length === 0 ? <Empty title="No nursing homes meet these conditions.">Loosen a condition.</Empty> : rows ? <DataTable rows={rows} cols={cols} sort={sort} onSort={setSort} ref={ref} /> : null}</div>
           </section>
         </>
       )}
