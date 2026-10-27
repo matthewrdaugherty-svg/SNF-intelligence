@@ -46,8 +46,22 @@ export const weightExpr = (ccns: string[]) => `(SELECT sum(modeled_weight) FROM 
 export const snfsServing = (ccn: string) => q(`
   SELECT f.ccn, f.provider_name, f.city_town, f.state, f.zip_code, f.overall_rating, f.health_inspection_rating, f.qm_rating, f.staffing_rating, f.special_focus_status, f.abuse_icon,
          f.number_of_certified_beds, f.qm_521_adj, f.qm_521_fn, f.qrp_004_ppr_pd_rsrr, f.qrp_004_ppr_pd_rsrr_fn, f.qrp_005_dtc_rs_rate, f.qrp_005_dtc_rs_rate_fn, f.pen_total_fines_usd, f.hc_n_severity_G_or_worse,
-         a.zip_share, a.hospital_cases_from_zip, a.snf_medicare_stays_2024, a.zip_snfs, a.modeled_weight
-  FROM snf_hospital_area a JOIN facility_master f USING (ccn) WHERE a.hospital_ccn = ${sqlStr(ccn)} ORDER BY a.modeled_weight DESC`)
+         a.zip_share, a.hospital_cases_from_zip, a.snf_medicare_stays_2024, a.zip_snfs, a.modeled_weight, o.casemix_overlap, o.casemix_known,
+         f.beds_ventilator, f.beds_dialysis, f.beds_alzheimers, f.beds_hospice, f.beds_head_trauma, f.beds_rehab
+  FROM snf_hospital_area a JOIN facility_master f USING (ccn)
+  LEFT JOIN (${overlapSql(ccn)}) o USING (ccn)
+  WHERE a.hospital_ccn = ${sqlStr(ccn)} ORDER BY a.modeled_weight DESC`)
+
+/** Case-mix overlap (MODELED): how much of the hospital's Medicare discharge mix, by ICD-10 chapter group, is matched by the SNF's own
+ *  admitted-patient diagnosis mix — the histogram intersection Σ min(hospital share, SNF share), 0–1. Hospital side: 2024 Medicare
+ *  discharges by MS-DRG mapped to chapter groups (DRGs under 11 cases are suppressed by CMS); SNF side: 2024 PAC PUF primary-diagnosis shares. */
+export const overlapSql = (ccn: string) => `SELECT s.ccn, CASE WHEN k.known >= 0.6 THEN sum(least(h.share, s.share)) END AS casemix_overlap, k.known AS casemix_known
+  FROM hospital_chapter_mix h JOIN snf_chapter_mix s USING (chapter) JOIN (SELECT ccn, sum(share) AS known FROM snf_chapter_mix GROUP BY 1) k ON k.ccn = s.ccn
+  WHERE h.hospital_ccn = ${sqlStr(ccn)} GROUP BY s.ccn, k.known`
+// Overlap is only reported when the SNF's published diagnosis shares cover at least 60% of its stays; CMS suppresses chapters with few stays ('*'), so a
+// small home's mix is mostly unknown and an overlap computed from it would be meaningless.
+/** The hospital's 2024 Medicare discharges by plain-English family, largest first. */
+export const dischargeMix = (ccn: string) => q(`SELECT family, discharges, share_of_visible, avg_medicare_payment FROM hospital_drg_mix WHERE hospital_ccn = ${sqlStr(ccn)} ORDER BY discharges DESC`)
 
 export interface Mix { total_weight: number; covered_share: number; low: number; mid: number; high: number; unrated: number; n_snf: number; n_low: number; n_mid: number; n_high: number; w521: number | null; w004: number | null; w005: number | null; wstars: number | null }
 /** Quality mix of the modeled SNF volume. Shares are of the weight that lands on rated/unrated SNFs (= visible volume from ZIPs that contain a SNF). */

@@ -394,3 +394,22 @@ test('services filter and panel come from the CMS-671 file', async ({ page }) =>
   await page.goto('/guide')
   await expect(page.getByRole('heading', { level: 2, name: 'Where a patient can go after a hospital stay' })).toBeVisible()
 })
+
+test('hospital discharge mix and SNF patient mix come from the CMS DRG and PAC files; overlap is withheld when the SNF mix is mostly suppressed', async ({ page }) => {
+  await page.goto('/hospital/210009')
+  const dm = page.getByTestId('discharge-mix')
+  await expect(dm).toContainText('8,680 visible of 10,157 total', { timeout: 120_000 })
+  await expect(dm.locator('li').first()).toContainText('Cardiac surgery and procedures')
+  await expect(dm.locator('li').first()).toContainText('912')
+  const rows = page.locator('section').filter({ hasText: 'SNFs in the service area' }).locator('tbody tr')
+  await expect(rows.filter({ hasText: 'Future Care Pineview' }).first()).toContainText('47%')      // overlap computed: 91% of its stays published
+  await expect(rows.filter({ hasText: 'Future Care Pineview' }).first()).toContainText('Vent')
+  await expect(rows.filter({ hasText: 'Carroll Park Healthcare' }).first().locator('td').nth(3)).toContainText('—')   // 0% published → withheld
+  await page.goto('/facility/215328')
+  const pt = page.getByTestId('patients')
+  await expect(pt).toContainText('published shares cover 91% of stays', { timeout: 120_000 })
+  await expect(pt).toContainText("Alzheimer's or dementia")
+  await expect(pt).toContainText('47%')
+  await expect(pt).toContainText('Heart failure')
+  await expect(pt).toContainText('60%')
+})

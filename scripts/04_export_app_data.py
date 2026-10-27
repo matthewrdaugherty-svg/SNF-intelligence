@@ -67,6 +67,17 @@ pq("SELECT * FROM snf_utilization", "snf_utilization")
 pq("""SELECT ccn, certification_detail, hospital_based, multi_facility, ccrc, ltc671_certification_date, beds_ventilator, beds_dialysis, beds_alzheimers, beds_hospice, beds_head_trauma, beds_rehab,
        beds_aids, beds_huntingtons, beds_pediatric, census_medicare, census_medicaid, census_other, census_total, census_unreliable, census_medicare_share, census_medicaid_share, resident_council, family_council
        FROM snf_services WHERE in_facility_master""", "snf_services")
+# ZIP centroids (scripts/12_load_zip_centroids.py; Census 2024 ZCTA Gazetteer)
+pq("SELECT zip, lat, lng FROM zip_centroids WHERE zip IN (SELECT zip FROM hospital_service_area) OR zip IN (SELECT zip_code FROM facility_master)", "zip_centroids")
+# Discharge mix layer (scripts/11_load_drg.py)
+pq("SELECT hospital_ccn, family, discharges, share_of_visible, avg_medicare_payment FROM hospital_drg_mix", "hospital_drg_mix")
+pq("SELECT hospital_ccn, chapter, discharges, share FROM hospital_chapter_mix", "hospital_chapter_mix")
+pq("SELECT ccn, chapter, share FROM snf_chapter_mix WHERE ccn IN (SELECT ccn FROM facility_master)", "snf_chapter_mix")
+pq("""SELECT p.prvdr_id AS ccn, TRY_CAST(p.bene_avg_risk_scre AS DOUBLE) AS avg_risk_score, TRY_CAST(p.bene_avg_age AS DOUBLE) AS avg_age, TRY_CAST(p.bene_dual_pct AS DOUBLE) AS dual_pct,
+       TRY_CAST(p.bene_cc_bh_alz_nonalzdem_v2_pct AS DOUBLE) AS cc_dementia_pct, TRY_CAST(p.bene_cc_ph_hf_nonihd_v2_pct AS DOUBLE) AS cc_heart_failure_pct, TRY_CAST(p.bene_cc_ph_copd_v2_pct AS DOUBLE) AS cc_copd_pct,
+       TRY_CAST(p.bene_cc_ph_ckd_v2_pct AS DOUBLE) AS cc_ckd_pct, TRY_CAST(p.bene_cc_ph_diabetes_v2_pct AS DOUBLE) AS cc_diabetes_pct, TRY_CAST(p.bene_cc_ph_stroke_tia_v2_pct AS DOUBLE) AS cc_stroke_pct,
+       TRY_CAST(p.bene_cc_bh_depress_v1_pct AS DOUBLE) AS cc_depression_pct, TRY_CAST(p.bene_cc_bh_schizo_othpsy_v1_pct AS DOUBLE) AS cc_psychosis_pct
+       FROM pacpuf_snf p WHERE p.smry_ctgry='PROVIDER' AND p.srvc_ctgry='SNF' AND p.prvdr_id IN (SELECT ccn FROM facility_master)""", "snf_patient_mix")
 # PECOS ownership layer (scripts/07_load_pecos.py)
 pq("SELECT owner_id, system_name, n_hospitals_enrolled, n_hospitals_in_care_compare, n_hospitals_with_service_area, n_state_codes FROM hospital_system WHERE n_hospitals_in_care_compare > 0", "hospital_system")
 pq("SELECT family_id, label, n_member_orgs, aliases, n_hospitals, n_with_service_area, n_states, n_minority_stakes FROM hospital_family WHERE n_hospitals > 0", "hospital_family")
@@ -76,7 +87,7 @@ pq("""SELECT ccn, legal_entity, dba, affiliation_entity_name, affiliation_entity
        n_org_owners, n_individual_owners, n_managing_control, any_private_equity_owner, any_reit_owner, n_chow_since_2016, last_chow_date, last_buyer, last_seller
        FROM snf_pecos WHERE in_facility_master""", "snf_pecos")
 hm=json.load(open(f"{OUT}/meta.json")); hm.update({"hospital_layer": {"service_area_year": 2025, "inpatient_year": 2024, "pacpuf_year": 2024, "care_compare_hospitals_release": "2026-07-22 (general info), 2026-09-10 (unplanned visits), 2026-01-26 (spending by claim)",
-  "ltc671_release": "Q2 2026 (CMS-671 Long-Term Care Facility Characteristics, data.cms.gov, published 2026-07-29)", "pecos_release": "2026-09-29 (Hospital/SNF All Owners, Enrollments, Change of Ownership; data.cms.gov)", "hwr_note": "The hospital-wide readmission measure (Hybrid HWR) is 'Not Available' for every hospital in this release (CMS footnote 4); condition-specific 30-day readmission rates are shown instead."}})
+  "zip_centroids": "U.S. Census Bureau 2024 ZCTA Gazetteer (www2.census.gov); 99.3% of service-area cases have a centroid", "drg_release": "Medicare Inpatient Hospitals by Provider and Service, calendar 2024 (published 2026-04-23); MS-DRG v42.1 reference", "ltc671_release": "Q2 2026 (CMS-671 Long-Term Care Facility Characteristics, data.cms.gov, published 2026-07-29)", "pecos_release": "2026-09-29 (Hospital/SNF All Owners, Enrollments, Change of Ownership; data.cms.gov)", "hwr_note": "The hospital-wide readmission measure (Hybrid HWR) is 'Not Available' for every hospital in this release (CMS footnote 4); condition-specific 30-day readmission rates are shown instead."}})
 json.dump(hm, open(f"{OUT}/meta.json","w"), indent=1)
 open(f"{OUT}/discharge_flows_template.csv","w").write("hospital_ccn,hospital_name,snf_ccn,period_start,period_end,n_discharges\n210009,Johns Hopkins Hospital (example row - delete),215001,2025-01-01,2025-12-31,0\n")
 print("footnotes:", len(fn), "| lineage rows:", len(lin), "| done")

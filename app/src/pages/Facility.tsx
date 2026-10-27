@@ -127,6 +127,39 @@ function ServicesPanel({ row, ref }: { row: Row; ref: Reference | null }) {
   )
 }
 
+const CHAPTER_LABEL: Record<string, string> = { infctn: 'Infections (incl. sepsis)', neobld: 'Cancer and blood', endonutrmet: 'Diabetes, nutrition, metabolism', mntbehneudis: 'Mental health and dementia', nervsystm: 'Stroke, brain and nerves', entsys: 'Eye, ear, nose and throat', circsystm: 'Heart and circulation', rspsystm: 'Lung and breathing', digsystm: 'Digestive and liver', sknmussystm: 'Bones, joints, muscles and skin', gusystm: 'Kidney, urinary and reproductive', prgpericong: 'Pregnancy and congenital', sxilldef: 'Symptoms and ill-defined', injpois: 'Injuries, fractures and poisoning', hlthsrv: 'Aftercare and rehabilitation' }
+/** Who this home actually treats: Medicare fee-for-service SNF stays in 2024 (CMS Post-Acute Care PUF): primary diagnosis mix, chronic conditions, acuity. */
+function PatientsPanel({ pmix, cmix }: { pmix: Row | null; cmix: Row[] }) {
+  const cc: [string, string][] = [['cc_dementia_pct', "Alzheimer's or dementia"], ['cc_heart_failure_pct', 'Heart failure'], ['cc_copd_pct', 'COPD'], ['cc_ckd_pct', 'Chronic kidney disease'], ['cc_diabetes_pct', 'Diabetes'], ['cc_stroke_pct', 'Stroke or TIA'], ['cc_depression_pct', 'Depression'], ['cc_psychosis_pct', 'Schizophrenia or other psychosis']]
+  return (
+    <section className="panel panel-pad" data-testid="patients">
+      <div className="flex flex-wrap items-baseline gap-x-3"><h2 className="section-title">Patients this home treats</h2><span className="t-caption">Medicare fee-for-service SNF stays, calendar 2024 (CMS Post-Acute Care PUF) · shares under CMS's small-count threshold are omitted</span></div>
+      {!pmix ? <p className="t-body text-ink-2 mt-2">No 2024 Medicare SNF utilization published for this home (fewer than 11 stays, or not in the file).</p> : (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-3">
+          <div className="md:col-span-1">
+            <div className="t-label">Primary diagnosis of admitted patients <span className="t-caption">· published shares cover {Math.round(100 * cmix.reduce((a, r) => a + Number(r.share), 0))}% of stays</span></div>
+            {cmix.reduce((a, r) => a + Number(r.share), 0) < 0.6 && <div className="t-caption mt-1">Most categories are too small for CMS to publish for this home, so the picture is incomplete.</div>}
+            <ul className="mt-1 space-y-1">{cmix.filter(r => Number(r.share) > 0).slice(0, 8).map(r => <li key={String(r.chapter)} className="grid grid-cols-[1fr_auto] items-center gap-x-3"><div className="min-w-0"><div className="t-body truncate">{CHAPTER_LABEL[String(r.chapter)] ?? String(r.chapter)}</div><div className="h-1.5 rounded bg-well mt-0.5"><div className="h-full rounded bg-ink-3" style={{ width: `${Math.min(100, 100 * Number(r.share))}%` }} /></div></div><div className="t-body tabular-nums w-12 text-right">{(100 * Number(r.share)).toFixed(0)}%</div></li>)}</ul>
+          </div>
+          <div>
+            <div className="t-label">Chronic conditions among those patients</div>
+            <ul className="mt-1 space-y-0.5">{cc.filter(([k]) => pmix[k] != null).map(([k, l]) => <li key={k} className="flex justify-between gap-3 t-body"><span>{l}</span><span className="tabular-nums">{Number(pmix[k]).toFixed(0)}%</span></li>)}</ul>
+          </div>
+          <div>
+            <div className="t-label">Acuity and population</div>
+            <ul className="mt-1 space-y-0.5 t-body">
+              {pmix.avg_risk_score != null && <li className="flex justify-between gap-3"><span>Average risk score <span className="t-caption">(1.0 = average Medicare beneficiary)</span></span><span className="tabular-nums">{Number(pmix.avg_risk_score).toFixed(2)}</span></li>}
+              {pmix.avg_age != null && <li className="flex justify-between gap-3"><span>Average age</span><span className="tabular-nums">{Number(pmix.avg_age).toFixed(0)}</span></li>}
+              {pmix.dual_pct != null && <li className="flex justify-between gap-3"><span>Also on Medicaid (dual eligible)</span><span className="tabular-nums">{Number(pmix.dual_pct).toFixed(0)}%</span></li>}
+            </ul>
+            <div className="t-caption mt-2">The best public evidence of what a home routinely handles. It covers Medicare fee-for-service stays only; Medicare Advantage and Medicaid patients are not in the file.</div>
+          </div>
+        </div>
+      )}
+    </section>
+  )
+}
+
 /** Averages are shown to one decimal for stars and counts so the same number never appears two ways. */
 const avg = (v: number, m: Measure) => m.unit === 'stars' || m.unit === 'count' ? v.toFixed(1) : fmt(v, m.unit, m.decimals)
 function MeasureRow({ m, row, ref, state }: { m: Measure; row: Row; ref: Reference | null; state: string }) {
@@ -163,12 +196,14 @@ export default function Facility() {
   const [cit, setCit] = useState<Row[]>([])
   const [own, setOwn] = useState<Row[]>([])
   const [pecos, setPecos] = useState<Row | null>(null)
+  const [pmix, setPmix] = useState<Row | null>(null)
+  const [cmix, setCmix] = useState<Row[]>([])
   const ref = useReference()
   const compare = useCompare()
   const [loadError, setLoadError] = useState<string | null>(null)
   useEffect(() => {
     let live = true
-    setRow(undefined); setPen([]); setCit([]); setOwn([]); setPecos(null); setLoadError(null)
+    setRow(undefined); setPen([]); setCit([]); setOwn([]); setPecos(null); setPmix(null); setCmix([]); setLoadError(null)
     const c = sqlStr(ccn)
     Promise.all([
       q(`SELECT * FROM facility_master WHERE ccn = ${c}`),
@@ -176,7 +211,9 @@ export default function Facility() {
       q(`SELECT * FROM citations_gl WHERE ccn = ${c} ORDER BY survey_date DESC`),
       q(`SELECT * FROM ownership WHERE ccn = ${c} ORDER BY role, owner_name`),
       q(`SELECT * FROM snf_pecos WHERE ccn = ${c}`),
-    ]).then(([f, p, ci, o, pe]) => { if (!live) return; setRow(f[0] ?? null); setPen(p); setCit(ci); setOwn(o); setPecos(pe[0] ?? null) }).catch(e => { if (live) { setLoadError(String(e?.message ?? e)); setRow(null) } })
+      q(`SELECT * FROM snf_patient_mix WHERE ccn = ${c}`),
+      q(`SELECT chapter, share FROM snf_chapter_mix WHERE ccn = ${c} ORDER BY share DESC`),
+    ]).then(([f, p, ci, o, pe, pm, cm]) => { if (!live) return; setRow(f[0] ?? null); setPen(p); setCit(ci); setOwn(o); setPecos(pe[0] ?? null); setPmix(pm[0] ?? null); setCmix(cm) }).catch(e => { if (live) { setLoadError(String(e?.message ?? e)); setRow(null) } })
     return () => { live = false }
   }, [ccn])
   const state = String(row?.state ?? '')
@@ -247,6 +284,7 @@ export default function Facility() {
       </StatRow>
 
       <ServicesPanel row={row} ref={ref} />
+      <PatientsPanel pmix={pmix} cmix={cmix} />
 
       <div className="t-label flex flex-wrap items-center gap-x-5 gap-y-1" aria-hidden>
         <span className="t-label text-ink">How to read the measure tables</span>

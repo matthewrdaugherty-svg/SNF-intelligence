@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router'
 import { q, type Row } from '../lib/db'
-import { familyMembers, hospitalDetail, hospitalFamilies, hospitalOwners, qualityMix, serviceArea, snfsServing, searchHospitals, type HospitalLite, type Mix } from '../lib/hospitals'
+import { dischargeMix, familyMembers, hospitalDetail, hospitalFamilies, hospitalOwners, qualityMix, serviceArea, snfsServing, searchHospitals, type HospitalLite, type Mix } from '../lib/hospitals'
 import { fmtInt, fmtPct, fmtUsd, titleCase, countyLabel } from '../lib/format'
 import { Empty, Fn, QualityStrip, StripHeader, Stars, Stat, StatRow, useReference } from '../components/ui'
 
@@ -49,15 +49,17 @@ export default function Hospital() {
   const [snfs, setSnfs] = useState<Row[]>([])
   const [mix, setMix] = useState<Mix | null>(null)
   const [owners, setOwners] = useState<Row[]>([])
+  const [dmix, setDmix] = useState<Row[]>([])
+  const [showAllFam, setShowAllFam] = useState(false)
   const [sysLinks, setSysLinks] = useState<{ name: string; ccns: string[]; stateCcns: string[]; n: number }[]>([])
   const [showAllZips, setShowAllZips] = useState(false)
   const [tier, setTier] = useState<'all' | 'high' | 'mid' | 'low'>('all')
   const ref = useReference()
   useEffect(() => {
     let live = true
-    setH(undefined); setArea([]); setSnfs([]); setMix(null); setOwners([]); setSysLinks([])
-    Promise.all([hospitalDetail(ccn), serviceArea(ccn), snfsServing(ccn), qualityMix(ccn), hospitalOwners(ccn)]).then(async ([d, a, s, m, o]) => {
-      if (!live) return; setH(d); setArea(a); setSnfs(s); setMix(m); setOwners(o)
+    setH(undefined); setArea([]); setSnfs([]); setMix(null); setOwners([]); setSysLinks([]); setDmix([])
+    Promise.all([hospitalDetail(ccn), serviceArea(ccn), snfsServing(ccn), qualityMix(ccn), hospitalOwners(ccn), dischargeMix(ccn)]).then(async ([d, a, s, m, o, dm]) => {
+      if (!live) return; setH(d); setArea(a); setSnfs(s); setMix(m); setOwners(o); setDmix(dm)
       const fams = (await hospitalFamilies(ccn)).filter(f => Number(f.n_hospitals) > 1)
       const links = await Promise.all(fams.map(async f => { const mem = await familyMembers(Number(f.family_id)); const usable = mem.filter(m => m.has_service_area)
         return { name: titleCase(String(f.label)), n: mem.length, ccns: usable.map(m => m.hospital_ccn), stateCcns: usable.filter(m => m.state === String(d?.state)).map(m => m.hospital_ccn) } }))
@@ -129,6 +131,27 @@ export default function Hospital() {
         </StatRow>
       )}
 
+      {/* discharge mix */}
+      <section className="panel panel-pad" data-testid="discharge-mix">
+        <div className="flex flex-wrap items-baseline gap-3">
+          <h2 className="section-title">What this hospital discharges</h2>
+          <span className="t-caption">Medicare fee-for-service inpatient discharges, calendar 2024, grouped from MS-DRGs · {dmix.length ? `${fmtInt(dmix.reduce((a, r) => a + Number(r.discharges), 0))} visible of ${h.medicare_discharges_2024 != null ? fmtInt(Number(h.medicare_discharges_2024)) : '–'} total` : ''}</span>
+          {dmix.length > 12 && <button className="press btn btn-quiet btn-sm ml-auto" onClick={() => setShowAllFam(v => !v)}>{showAllFam ? 'Show the top 12' : `Show all ${dmix.length}`}</button>}
+        </div>
+        {dmix.length === 0 ? <p className="t-body text-ink-2 mt-2">CMS publishes no DRG-level discharges for this hospital (it is not paid under the inpatient prospective payment system, or every DRG had fewer than 11 cases).</p> : (
+          <>
+            <ul className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-1.5 max-w-5xl">
+              {(showAllFam ? dmix : dmix.slice(0, 12)).map(r => { const pct = 100 * Number(r.share_of_visible); return (
+                <li key={String(r.family)} className="grid grid-cols-[1fr_auto] items-center gap-x-3">
+                  <div className="min-w-0"><div className="t-body truncate" title={String(r.family)}>{String(r.family)}</div><div className="h-1.5 rounded bg-well mt-1"><div className="h-full rounded bg-ink-3" style={{ width: `${Math.min(100, pct)}%` }} /></div></div>
+                  <div className="t-body tabular-nums text-right w-28"><span className="font-medium">{fmtInt(Number(r.discharges))}</span> <span className="text-ink-3">· {pct.toFixed(1)}%</span></div>
+                </li>) })}
+            </ul>
+            <div className="t-caption mt-3 max-w-[68ch]">Shares are of the visible discharges: CMS suppresses any DRG with fewer than 11 cases at a hospital, so small service lines are missing and the visible total is below the hospital's full Medicare count. Families are plain-English groups of MS-DRGs (CMS v42.1 list; mapping in Methods). Medicare Advantage and non-Medicare discharges are not in this file.</div>
+          </>
+        )}
+      </section>
+
       {/* service area */}
       <section className="panel panel-pad">
         <div className="flex flex-wrap items-baseline gap-3">
@@ -157,12 +180,14 @@ export default function Hospital() {
           </div>
         </div>
         <div className="overflow-x-auto"><table className="tbl tbl-compact mt-2">
-          <thead><tr><th>SNF</th><th><StripHeader /></th><th className="num">Modeled share</th><th className="num">ZIP share</th><th className="num">Medicare stays 2024</th><th className="num">Beds</th><th className="num">Rehospitalized</th><th className="num">Readmitted after SNF</th><th className="num">To community</th><th className="num">Fines, 3 yr</th><th className="num">Harm deficiencies</th></tr></thead>
+          <thead><tr><th>SNF</th><th><StripHeader /></th><th className="num">Modeled share</th><th className="num" title="Modeled: how much of this hospital's 2024 Medicare discharge mix (by diagnosis chapter) the SNF's own admitted-patient mix covers, 0–100%">Case-mix overlap</th><th>Units</th><th className="num">ZIP share</th><th className="num">Medicare stays 2024</th><th className="num">Beds</th><th className="num">Rehospitalized</th><th className="num">Readmitted after SNF</th><th className="num">To community</th><th className="num">Fines, 3 yr</th><th className="num">Harm deficiencies</th></tr></thead>
           <tbody>{filtered.map(s => (
             <tr key={String(s.ccn)}>
               <td><Link to={`/facility/${s.ccn}`} className="hover:text-accent hover:underline underline-offset-2">{titleCase(String(s.provider_name))}</Link><span className="sub">{titleCase(String(s.city_town))} {String(s.zip_code)}{s.special_focus_status ? <span className="text-rust"> · {String(s.special_focus_status)}</span> : ''}{s.abuse_icon === 'Y' ? <span className="text-rust"> · abuse icon</span> : ''}</span></td>
               <td><QualityStrip row={s} /></td>
               <td className="num font-medium">{(100 * Number(s.modeled_weight)).toFixed(2)}%</td>
+              <td className="num">{s.casemix_overlap != null ? `${Math.round(100 * Number(s.casemix_overlap))}%` : <span className="empty" title={s.casemix_known != null ? `Only ${Math.round(100 * Number(s.casemix_known))}% of this SNF's 2024 stays fall in diagnosis categories large enough for CMS to publish, so the overlap is not computed` : 'No 2024 Medicare diagnosis mix published for this SNF'}>—</span>}</td>
+              <td className="t-caption whitespace-nowrap">{[['beds_ventilator', 'Vent'], ['beds_dialysis', 'Dialysis'], ['beds_alzheimers', 'Dementia'], ['beds_hospice', 'Hospice'], ['beds_head_trauma', 'Head trauma'], ['beds_rehab', 'Rehab']].filter(([k]) => Number(s[k]) > 0).map(([, l]) => l).join(' · ') || <span className="empty">—</span>}</td>
               <td className="num text-ink-2" title={`${fmtInt(Number(s.hospital_cases_from_zip))} of the hospital's cases came from ${String(s.zip_code)}; ${String(s.zip_snfs)} nursing home(s) there`}>{pct(s.zip_share)}</td>
               <td className="num">{s.snf_medicare_stays_2024 != null && Number(s.snf_medicare_stays_2024) > 0 ? fmtInt(Number(s.snf_medicare_stays_2024)) : <span className="empty" title="No Medicare stays reported in the 2024 PAC PUF (suppressed or none)">—</span>}</td>
               <td className="num">{s.number_of_certified_beds != null ? fmtInt(Number(s.number_of_certified_beds)) : <span className="empty">—</span>}</td>
