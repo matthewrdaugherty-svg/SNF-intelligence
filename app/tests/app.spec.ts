@@ -249,3 +249,56 @@ test('hospital search finds Hopkins and the service-area filter works in Explore
   await expect(page.getByRole('columnheader', { name: /Modeled share/ })).toHaveAttribute('aria-sort', 'descending')
   await expect(page.getByRole('row').nth(1)).toContainText('Complete Care at Heritage')
 })
+
+test('cohorts: conditions from the URL produce the counts in the database and the link is shareable', async ({ page }) => {
+  const errors: string[] = []
+  page.on('pageerror', e => errors.push(e.message))
+  // MD · 4–5★ · short-stay rehospitalization ≤ 18 → 31 facilities, median 15.0 (db: 14.985)
+  await page.goto('/cohorts?c=overall_rating.in.4,5&c=qm_521_adj.le.18&c=state.eq.MD')
+  await expect(page.getByText('Facilities in cohort')).toBeVisible({ timeout: 120_000 })
+  await expect(page.getByText('31', { exact: true }).first()).toBeVisible({ timeout: 60_000 })
+  await expect(page.getByText('15.0%').first()).toBeVisible()
+  await expect(page.getByText('100% good')).toBeVisible()
+  await expect(page.getByText('Overall star rating is any of 4,5 · Short-stay residents rehospitalized (QM 521) at most 18 · State equals MD')).toBeVisible()
+  // all-facility median for the same measure
+  await expect(page.getByText('23.8%').first()).toBeVisible()
+  await shot(page, '18-cohort-md')
+  expect(errors).toEqual([])
+})
+
+test('cohorts: builder adds a condition, breaks down by ownership, and exports', async ({ page }) => {
+  await page.goto('/cohorts')
+  await expect(page.getByText('14,690', { exact: true }).first()).toBeVisible({ timeout: 120_000 })
+  await page.getByRole('button', { name: 'Add condition' }).click()   // default: overall rating is any of 4,5
+  await page.getByLabel('Value').fill('1,2')
+  await expect(page.getByText('5,912', { exact: true }).first()).toBeVisible({ timeout: 60_000 })
+  await expect(page).toHaveURL(/c=overall_rating\.in\.1%2C2/)
+  await page.getByLabel('Break down by').selectOption('ownership')
+  const first = page.locator('table').first().locator('tbody tr').first()
+  await expect(first).toContainText('For profit - Limited Liability company')
+  await expect(first).toContainText('2,532')
+  // hospital-area condition: Hopkins service area ∩ 1–2★ … switch to 4–5★ to check 94
+  await page.getByLabel('Value').fill('4,5')
+  await page.getByRole('button', { name: 'Add condition' }).click()
+  await page.getByLabel('Measure', { exact: true }).nth(1).selectOption('hospital_area')
+  await page.getByLabel('Value').nth(1).fill('210009')
+  await expect(page.getByText('94', { exact: true }).first()).toBeVisible({ timeout: 60_000 })
+  const dl = page.waitForEvent('download')
+  await page.getByRole('button', { name: 'Export CSV' }).click()
+  const text = fs.readFileSync(await (await dl).path(), 'utf8')
+  expect(text.split('\n').length).toBe(95)
+  expect(text.split('\n')[0]).toContain('CMS footnote')
+})
+
+test('cohorts: hostile URL values are ignored, never executed', async ({ page }) => {
+  const errors: string[] = []
+  page.on('pageerror', e => errors.push(e.message))
+  await page.goto("/cohorts?c=provider_name.contains.%27%3B%20DROP%20TABLE%20facility_master%3B--&c=qm_521_adj.ge.abc&c=nope.ge.1&c=garbage&m=ccn%3B&g=zzz")
+  await expect(page.getByText('Facilities in cohort')).toBeVisible({ timeout: 120_000 })
+  // the contains-condition is kept (as a literal string → 0 rows); the junk ones are dropped
+  await expect(page.getByText('No facilities meet these conditions.')).toBeVisible({ timeout: 60_000 })
+  await page.goto('/cohorts?c=overall_rating.in.4,5')
+  await expect(page.getByText('Facilities in cohort')).toBeVisible({ timeout: 120_000 })
+  await expect(page.getByText('No facilities meet these conditions.')).toHaveCount(0)
+  expect(errors).toEqual([])
+})

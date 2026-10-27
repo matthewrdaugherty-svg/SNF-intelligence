@@ -16,7 +16,7 @@ const safeSort = (key: string | null, dir: string | null): Sort => ({ key: key &
 const COLS_KEY = 'snf.explore.cols'
 function loadCols(): string[] { try { const v = localStorage.getItem(COLS_KEY); if (v) return (JSON.parse(v) as string[]).filter(colByKey) } catch { /* ignore */ } return TABLE_COLS.filter(c => c.default).map(c => c.key) }
 
-export function buildSql(f: Filters, cols: TableCol[], sortIn: Sort): string {
+export function buildSql(f: Filters, cols: TableCol[], sortIn: Sort, extraWhere?: string): string {
   const sort = safeSort(sortIn.key, sortIn.dir)
   const sel = [...BASE_COLS, ...cols.map(c => c.key), ...cols.map(c => c.fn).filter(Boolean) as string[]]
   const hasDist = f.lat != null && f.lng != null
@@ -24,7 +24,7 @@ export function buildSql(f: Filters, cols: TableCol[], sortIn: Sort): string {
   if (f.hospitals.length) sel.push(`${weightExpr(f.hospitals)} AS modeled_share`)
   const sortCol = (sort.key === 'distance_mi' && !hasDist) || (sort.key === 'modeled_share' && !f.hospitals.length) ? 'provider_name' : sort.key
   const dir = sort.dir === 'asc' ? 'ASC' : 'DESC'
-  return `SELECT ${[...new Set(sel)].join(', ')} FROM facility_master ${whereClause(f)} ORDER BY ${sortCol} ${dir} NULLS LAST, provider_name ASC`
+  return `SELECT ${[...new Set(sel)].join(', ')} FROM facility_master ${extraWhere ? (whereClause(f) ? whereClause(f) + ' AND (' + extraWhere + ')' : 'WHERE ' + extraWhere) : whereClause(f)} ORDER BY ${sortCol} ${dir} NULLS LAST, provider_name ASC`
 }
 
 export default function Explore() {
