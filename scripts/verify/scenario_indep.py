@@ -8,12 +8,26 @@ def hav(a, b):
     h = math.sin((la2 - la1) / 2) ** 2 + math.cos(la1) * math.cos(la2) * math.sin((lo2 - lo1) / 2) ** 2
     return 3958.8 * 2 * math.asin(math.sqrt(h))
 
-def run(h, minStars=4, excludeFlags=True, snfOnly=True, units=(), minOverlap=None, maxMiles=10, k=3, shift=1.0, verbose=True, optimal=False):
-    """optimal=True: shift=1, k=1, candidates ranked by best fit (rating desc, QRP 004 asc nulls last, overlap desc nulls last, miles asc) — the app's BEST_FIT_ORDER."""
-    if optimal: shift, k = 1.0, 1
-    cols = ['ccn', 'overall_rating', 'special_focus_status', 'abuse_icon', 'provider_type', 'beds_ventilator', 'beds_dialysis', 'beds_alzheimers', 'beds_hospice', 'beds_head_trauma', 'beds_rehab', 'latitude', 'longitude', 'qm_521_adj', 'qrp_004_ppr_pd_rsrr', 'qrp_005_dtc_rs_rate', 'provider_name']
+def run(h, minStars=4, excludeFlags=True, snfOnly=True, units=(), minOverlap=None, maxMiles=10, k=3, shift=1.0, verbose=True, optimal=False, objective='readmit', n=None):
+    """optimal=True: shift=1, candidates ranked by the objective (nulls last), then rating desc, then QRP 004 asc, then miles; fill the best with room, spill to the next.
+    Capacity (both modes): empty beds × 365 ÷ the facility's Medicare ALOS (national median when missing), in stays/yr, against n = annual SNF discharges
+    (given, else hospital 2024 Medicare discharges × 0.187 per MedPAC)."""
+    if optimal: shift = 1.0
+    cols = ['ccn', 'overall_rating', 'special_focus_status', 'abuse_icon', 'provider_type', 'beds_ventilator', 'beds_dialysis', 'beds_alzheimers', 'beds_hospice', 'beds_head_trauma', 'beds_rehab', 'latitude', 'longitude', 'qm_521_adj', 'qrp_004_ppr_pd_rsrr', 'qrp_005_dtc_rs_rate', 'provider_name', 'number_of_certified_beds', 'average_number_of_residents_per_day']
     F = {r[0]: dict(zip(cols, r)) for r in con.execute(f"select {','.join(cols)} from facility_master").fetchall()}
     U = {r[0]: (r[1], r[2]) for r in con.execute("select ccn, medicare_payment_2024, medicare_stays_2024 from snf_utilization").fetchall()}
+    DAYS = {r[0]: (r[1], r[2]) for r in con.execute("select ccn, medicare_days_2024, medicare_stays_2024 from snf_utilization").fetchall()}
+    med_alos = con.execute("select quantile_cont(medicare_days_2024*1.0/medicare_stays_2024, 0.5) from snf_utilization where medicare_stays_2024 > 0").fetchone()[0]
+    if n is None:
+        r = con.execute("select medicare_discharges_2024 from hospital_master where hospital_ccn = ?", [h]).fetchone()
+        n = round(r[0] * 0.187) if r and r[0] is not None else None
+    def capacity_stays(c):
+        f = F[c]; d, st = DAYS.get(c, (None, None))
+        alos = (d / st) if (st and st > 0 and d is not None) else med_alos
+        empty = max((f['number_of_certified_beds'] or 0) - (f['average_number_of_residents_per_day'] or 0), 0) if f['number_of_certified_beds'] is not None and f['average_number_of_residents_per_day'] is not None else 0
+        return empty * 365.0 / alos
+    def pay_of(c):
+        p, st = U.get(c, (None, None)); return (p / st) if (st and st > 0 and p is not None) else None
     # baseline
     base = defaultdict(float)
     for ccn, w in con.execute("select ccn, modeled_weight from snf_hospital_area where hospital_ccn = ?", [h]).fetchall():
@@ -42,29 +56,43 @@ def run(h, minStars=4, excludeFlags=True, snfOnly=True, units=(), minOverlap=Non
         return True
     V = [f for f in F.values() if viable(f)]
     Vset = {f['ccn'] for f in V}
-    # moves
-    after = dict(base); moves = []; unplaced = 0.0
-    for ccn, w in base.items():
+    # moves (largest sources first), with capacity
+    after = dict(base); moves = []; unplaced = 0.0; full = 0.0
+    cap = {}
+    OBJ = {'readmit': (lambda f: f['qrp_004_ppr_pd_rsrr'], True), 'rehosp': (lambda f: f['qm_521_adj'], True), 'community': (lambda f: f['qrp_005_dtc_rs_rate'], False), 'cost': (lambda f: pay_of(f['ccn']), True), 'stars': (lambda f: f['overall_rating'], False)}
+    ofn, lower = OBJ[objective]
+    for ccn, w in sorted(base.items(), key=lambda x: -x[1]):
         if ccn in Vset: continue
         f = F[ccn]
         if f['latitude'] is None: unplaced += w * shift; continue
         cands = []
         for v in V:
-            if v['latitude'] is None: continue
+            if v['latitude'] is None or v['ccn'] == ccn: continue
             d = hav((f['latitude'], f['longitude']), (v['latitude'], v['longitude']))
             if d <= maxMiles: cands.append((d, v['ccn']))
+        if not cands: unplaced += w * shift; continue
         if optimal:
             def key(c):
-                v = F[c[1]]; o = overlap(c[1])
-                return (-(v['overall_rating'] or 0), v['qrp_004_ppr_pd_rsrr'] is None, v['qrp_004_ppr_pd_rsrr'] or 0, o is None, -(o or 0), c[0])
+                v = F[c[1]]; o = ofn(v)
+                return (o is None, (o if lower else -o) if o is not None else 0, -(v['overall_rating'] or 0), v['qrp_004_ppr_pd_rsrr'] is None, v['qrp_004_ppr_pd_rsrr'] or 0, c[0])
             cands.sort(key=key)
         else:
             cands.sort()
-        cands = cands[:k]
-        if not cands: unplaced += w * shift; continue
-        per = w * shift / len(cands)
-        for d, to in cands:
-            moves.append((ccn, to, d, per)); after[ccn] -= per; after[to] = after.get(to, 0) + per
+        left = w * shift
+        def give(c, amt):
+            nonlocal left
+            to = c[1]
+            if to not in cap: cap[to] = (capacity_stays(to) / n) if n else float('inf')
+            x = min(amt, cap[to])
+            if x <= 0: return
+            cap[to] -= x; left -= x; moves.append((ccn, to, c[0], x)); after[ccn] -= x; after[to] = after.get(to, 0) + x
+        if not optimal:
+            first = cands[:k]; each = left / len(first)
+            for c in first: give(c, each)
+        for c in cands:
+            if left <= 1e-12: break
+            give(c, left)
+        if left > 1e-12: full += left
     after = {c: w for c, w in after.items() if w > 1e-12}
     def metrics(vol):
         def wavg(key):
@@ -82,11 +110,13 @@ def run(h, minStars=4, excludeFlags=True, snfOnly=True, units=(), minOverlap=Non
                     pay=(pnum / pden if pden else None, pden / total if total else None))
     b, a = metrics(base), metrics(after)
     moved = sum(m[3] for m in moves); miles = sum(m[2] * m[3] for m in moves) / moved if moved else None
-    out = dict(before=b, after=a, moved=moved, unplaced=unplaced, miles=miles, nViable=len(V), nBaseline=len(base), nReceiving=len({m[1] for m in moves}), nLosing=len({m[0] for m in moves}), nonviable_share=sum(w for c, w in base.items() if c not in Vset))
+    out = dict(before=b, after=a, moved=moved, unplaced=unplaced, full=full, n=n, miles=miles, nViable=len(V), nBaseline=len(base), nReceiving=len({m[1] for m in moves}), nLosing=len({m[0] for m in moves}), nonviable_share=sum(w for c, w in base.items() if c not in Vset))
     if verbose:
         for k_, v in out.items(): print(k_, v)
     return out, moves, base, after, F
 
 if __name__ == '__main__':
-    print('== optimal'); run('210009', optimal=True)
-    run(sys.argv[1] if len(sys.argv) > 1 else '210009')
+    h = sys.argv[1] if len(sys.argv) > 1 else '210009'
+    print('== nearest'); run(h)
+    print('== optimal (readmit)'); run(h, optimal=True)
+    print('== optimal (cost)'); run(h, optimal=True, objective='cost')
