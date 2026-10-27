@@ -369,7 +369,7 @@ test('certification filter separates Medicare-certified SNFs from Medicaid-only 
   await page.goto('/explore?cert=nf')
   await ready(page)
   await expect(count(page)).toHaveText('247')
-  await page.getByRole('radio', { name: 'SNF (Medicare)' }).click()
+  await page.getByRole('radio', { name: 'SNF', exact: true }).click()
   await expect(count(page)).toHaveText('14,443')
   await expect(page).toHaveURL(/cert=snf/)
   await page.goto('/explore?cert=bogus')

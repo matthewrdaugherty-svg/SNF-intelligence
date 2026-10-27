@@ -121,10 +121,10 @@ export default function FilterPanel({ f, onPatch, onClear, resultCount, open, on
         <Check checked={f.ownership.includes('non_profit')} onChange={() => toggleIn('ownership', 'non_profit' as never)}>Non profit</Check>
         <Check checked={f.ownership.includes('government')} onChange={() => toggleIn('ownership', 'government' as never)}>Government</Check>
         <div className="flabel mt-3">Certification</div>
-        <div role="radiogroup" aria-label="Certification" className="inline-flex rounded-[6px] bg-well p-0.5">
-          {([['', 'All'], ['snf', 'SNF (Medicare)'], ['nf', 'Medicaid-only']] as const).map(([v, l]) => <button key={v} role="radio" aria-checked={f.cert === v} onClick={() => onPatch({ cert: v })} className={`press h-8 md:h-7 px-2.5 text-xs rounded-[5px] ${f.cert === v ? 'bg-surface text-ink here' : 'text-ink-2 hover:text-ink'}`}>{l}</button>)}
+        <div role="radiogroup" aria-label="Certification" className="seg">
+          {([['', 'All'], ['snf', 'SNF'], ['nf', 'Medicaid-only']] as const).map(([v, l]) => <button key={v} role="radio" aria-checked={f.cert === v} onClick={() => onPatch({ cert: v })} className="press seg-btn" title={v === 'snf' ? 'Medicare-certified skilled nursing facilities (14,443)' : v === 'nf' ? 'Medicaid-only nursing facilities (247), not SNFs' : 'All certified nursing homes'}>{l}</button>)}
         </div>
-        <div className="fhelp">SNF = Medicare-certified skilled nursing facility (14,443). Medicaid-only nursing facilities (247) are not SNFs.</div>
+        <div className="fhelp">SNF = Medicare-certified (14,443). Medicaid-only nursing facilities (247) are not SNFs.</div>
         <div className="flabel mt-3">Setting and programs</div>
         <Check checked={f.hospital} onChange={v => onPatch({ hospital: v })}>Located in a hospital</Check>
         <Check checked={f.vbp} onChange={v => onPatch({ vbp: v })}>In SNF Value-Based Purchasing</Check>

@@ -97,6 +97,12 @@ textarea.control { height: auto; padding: 8px 10px; }
 .section-title { font-size: 16px; line-height: 24px; font-weight: 600; color: var(--color-ink); letter-spacing: -0.01em; }
 .caption { font-size: 11px; line-height: 16px; color: var(--color-ink-3); }
 .lead { font-size: 16px; line-height: 26px; max-width: 46rem; }
+/* Segmented control: one spec everywhere (filters, pickers, tier toggles). Labels never wrap; segments share the width. */
+.seg { display: inline-flex; width: 100%; background: var(--color-well); border-radius: 6px; padding: 2px; gap: 2px; }
+.seg-btn { flex: 1 1 0; height: 32px; padding: 0 10px; border-radius: 5px; font-size: 13px; line-height: 20px; white-space: nowrap; color: var(--color-ink-2); display: inline-flex; align-items: center; justify-content: center; }
+.seg-btn:hover { color: var(--color-ink); }
+.seg-btn[aria-checked="true"], .seg-btn[aria-pressed="true"] { background: var(--color-surface); color: var(--color-ink); font-weight: 500; box-shadow: var(--shadow-here); }
+@media (max-width: 767px) { .seg-btn { height: 40px; font-size: 15px; } }
 /* Filter groups */
 .fgroup { background: var(--color-surface); border-radius: var(--radius-panel); padding: 12px 14px; }
 .fgroup + .fgroup { margin-top: 10px; }

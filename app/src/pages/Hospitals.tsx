@@ -175,8 +175,8 @@ export default function Hospital() {
       <section className="panel panel-pad">
         <div className="flex flex-wrap items-center gap-3">
           <h2 className="section-title">SNFs in the service area <span className="text-ink-3 font-normal">· {filtered.length}</span></h2>
-          <div role="radiogroup" aria-label="Rating tier" className="inline-flex rounded-[6px] bg-well p-0.5 ml-auto">
-            {([['all', 'All'], ['high', '4–5★'], ['mid', '3★'], ['low', '1–2★']] as const).map(([v, l]) => <button key={v} role="radio" aria-checked={tier === v} onClick={() => setTier(v)} className={`press px-3 py-1 text-sm rounded-[5px] ${tier === v ? 'bg-surface text-ink here' : 'text-ink-2 hover:text-ink'}`}>{l}</button>)}
+          <div role="radiogroup" aria-label="Rating tier" className="seg ml-auto !w-auto">
+            {([['all', 'All'], ['high', '4–5★'], ['mid', '3★'], ['low', '1–2★']] as const).map(([v, l]) => <button key={v} role="radio" aria-checked={tier === v} onClick={() => setTier(v)} className="press seg-btn !flex-none">{l}</button>)}
           </div>
         </div>
         <div className="overflow-x-auto"><table className="tbl tbl-compact mt-2">

@@ -101,11 +101,8 @@ export function Empty({ title, children }: { title: string; children?: ReactNode
 
 export function Segmented<T extends string>({ value, options, onChange, ariaLabel }: { value: T; options: { value: T; label: string }[]; onChange: (v: T) => void; ariaLabel: string }) {
   return (
-    <div role="radiogroup" aria-label={ariaLabel} className="inline-flex rounded-[6px] bg-well p-0.5">
-      {options.map(o => (
-        <button key={o.value} role="radio" aria-checked={value === o.value} onClick={() => onChange(o.value)}
-          className={`press px-3 py-1 text-sm rounded-[5px] ${value === o.value ? 'bg-surface text-ink here' : 'text-ink-2 hover:text-ink'}`}>{o.label}</button>
-      ))}
+    <div role="radiogroup" aria-label={ariaLabel} className="seg">
+      {options.map(o => <button key={o.value} role="radio" aria-checked={value === o.value} onClick={() => onChange(o.value)} className="press seg-btn">{o.label}</button>)}
     </div>
   )
 }
