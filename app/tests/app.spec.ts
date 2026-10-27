@@ -395,7 +395,9 @@ test('services filter and panel come from the CMS-671 file', async ({ page }) =>
   const svc = page.getByTestId('services')
   await expect(svc).toContainText('None reported', { timeout: 120_000 })
   await expect(svc).toContainText('SNF/NF, Medicare & Medicaid')
-  await expect(svc).toContainText('90 residents · Medicare 9% · Medicaid 58% · other 33%')
+  await expect(svc).toContainText('90 residents')
+  await expect(svc).toContainText('Medicare 9%'); await expect(svc).toContainText('Medicaid 58%'); await expect(svc).toContainText('Other 33%')   // stacked bar legend
+  await expect(svc.getByRole('img', { name: 'Medicare 9%, Medicaid 58%, other 33%' })).toBeVisible()
   await page.goto('/guide')
   await expect(page.getByRole('heading', { level: 2, name: 'Where a patient can go after a hospital stay' })).toBeVisible()
 })
@@ -423,23 +425,39 @@ test('placement scenario for Johns Hopkins matches the arithmetic replicated out
   // The figures below were produced independently by scripts/verify/scenario_replica.py (pure Python over the same Arrow files, written without reading the app's SQL).
   await page.goto('/scenarios?h=210009')
   const sum = page.getByTestId('scenario-summary')
-  await expect(sum).toContainText('57% goes to homes that do not meet the bar', { timeout: 120_000 })   // 55.3% moved + 1.8% unreachable
-  await expect(sum).toContainText('reaches 99 homes')
-  await expect(sum).toContainText('2% of the volume has no acceptable home within reach')
+  await expect(sum).toContainText('57% goes to SNFs that do not meet the bar', { timeout: 120_000 })   // 55.3% moved + 1.8% unreachable
+  await expect(sum).toContainText('reaches 99 SNFs')
+  await expect(sum).toContainText('2% of the volume has no acceptable SNF within reach')
   await expect(sum).toContainText('on average 3.0 miles')
   await expect(sum).toContainText('11.6%')          // QRP 004 after (11.58)
   await expect(sum).toContainText('before 11.7%')   // (11.66)
   await expect(sum).toContainText('$13,981')        // payment per stay after
   await expect(sum).toContainText('before $15,638')
   await expect(sum).toContainText('before 38%')     // 1–2★ share before (37.6)
-  await expect(page.getByText('Homes that would receive patients · 99, largest 40 shown')).toBeVisible()
-  const first = page.locator('section').filter({ hasText: 'Homes that would receive patients' }).locator('tbody tr').first()
+  await expect(page.getByText('SNFs that would receive patients · 99, largest 40 shown')).toBeVisible()
+  const first = page.locator('section').filter({ hasText: 'SNFs that would receive patients' }).locator('tbody tr').first()
   await expect(first).toContainText('Future Care Northpoint')
   await expect(first.locator('td').nth(1)).toContainText('5453')   // full strip 5 / 4 / 5 / 3, not just the overall rating
   // the shift slider changes what moves, not what is below the bar
   await page.goto('/scenarios?h=210009&shift=50')
-  await expect(sum).toContainText('57% goes to homes that do not meet the bar', { timeout: 120_000 })
+  await expect(sum).toContainText('57% goes to SNFs that do not meet the bar', { timeout: 120_000 })
   await expect(sum).toContainText('Moving 50% of it')
+  // realization against the optimal allocation (replica, optimal=True: QRP 004 10.40%, payment $12,318): default scenario captures 7% of the readmission room and 50% of the payment room
+  await page.goto('/scenarios?h=210009')
+  const real = page.getByTestId('realization')
+  await expect(real).toContainText('optimal 10.4%', { timeout: 120_000 })
+  await expect(real).toContainText('optimal $12,318')
+  await expect(real.locator('.card').first()).toContainText('7%')
+  await expect(real.locator('.card').nth(3)).toContainText('50%')
+  // Optimize shows the ceiling itself
+  await page.getByRole('button', { name: 'Optimize' }).click()
+  await expect(page).toHaveURL(/mode=optimal/)
+  await expect(sum).toContainText('Optimal scenario', { timeout: 120_000 })
+  await expect(sum).toContainText('reaches 30 SNFs')
+  await expect(sum).toContainText('10.4%')
+  await expect(sum).toContainText('$12,318')
+  await expect(sum).toContainText('on average 6.4 miles')
+  await expect(real).toHaveCount(0)
   // with an annual count the rates become counts
   await page.getByLabel('Annual SNF discharges').fill('1800')
   await expect(sum).toContainText('per year', { timeout: 60_000 })

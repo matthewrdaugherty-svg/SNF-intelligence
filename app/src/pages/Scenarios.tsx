@@ -24,6 +24,7 @@ export default function Scenarios() {
   const [text, setText] = useState('')
   const [results, setResults] = useState<HospitalLite[]>([])
   const [out, setOut] = useState<Outcome | null>(null)
+  const [opt, setOpt] = useState<Outcome | null>(null)   // the same constraints, optimal allocation — the ceiling the user's scenario is measured against
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const set = (patch: Partial<ScenarioParams>) => { if (!s) return; setParams(toParams({ ...s, ...patch }), { replace: true }) }
@@ -35,10 +36,15 @@ export default function Scenarios() {
   useEffect(() => {
     if (!s) { setOut(null); return }
     let live = true; setBusy(true); setError(null)
-    runScenario(s).then(o => { if (live) { setOut(o); setBusy(false) } }).catch(e => { if (live) { setError(String((e as Error)?.message ?? e)); setBusy(false) } })
+    runScenario(s).then(async o => {
+      const best = s.mode === 'optimal' ? o : await runScenario({ ...s, mode: 'optimal' }, 'opt')
+      if (live) { setOut(o); setOpt(best); setBusy(false) }
+    }).catch(e => { if (live) { setError(String((e as Error)?.message ?? e)); setBusy(false) } })
     return () => { live = false }
   }, [s])
 
+  /** 'SNF(s)' when the acceptable set is Medicare-certified SNFs only, else 'facility / facilities' — never a bare 'home', which reads as the patient's home. */
+  const F = s?.snfOnly ? 'SNFs' : 'facilities', F1 = s?.snfOnly ? 'SNF' : 'facility'
   /** Shares as whole percentages; anything that would round to 0% but is not zero reads "<1%". */
 const sharePct = (x: number) => x > 0 && x < 0.005 ? '<1%' : fmtPct(100 * x, 0)
 const miles = (m: number) => `${Number.isInteger(m) ? m : m.toFixed(1)} ${m === 1 ? 'mile' : 'miles'}`
@@ -55,7 +61,7 @@ const miles = (m: number) => `${Number.isInteger(m) ? m : m.toFixed(1)} ${m === 
   return (
     <div className="page stack">
       <div><h1>Placement scenarios</h1>
-        <p className="t-body text-ink-2 mt-2 max-w-3xl">Pick a hospital, define which SNFs count as acceptable, and see what happens if the patients who would have gone to the other homes went to the nearest acceptable ones instead: readmissions, discharge to community, Medicare cost per stay and extra travel. Modeled from CMS facility rates; when the hospital's own discharge counts are loaded on the Flows page the same arithmetic runs on them.</p></div>
+        <p className="t-body text-ink-2 mt-2 max-w-3xl">Pick a hospital, define which SNFs count as acceptable, and see what happens if the patients who would have gone to the other facilities went to the nearest acceptable ones instead — or, with Optimize, to the best-fit acceptable facility: readmissions, discharge to community, Medicare cost per stay and extra travel. Modeled from CMS facility rates; when the hospital's own discharge counts are loaded on the Flows page the same arithmetic runs on them.</p></div>
 
       <section className="panel panel-pad">
         <h2 className="section-title">Hospital</h2>
@@ -78,7 +84,7 @@ const miles = (m: number) => `${Number.isInteger(m) ? m : m.toFixed(1)} ${m === 
             <div>
               <div className="flabel">Minimum overall rating</div>
               <div role="radiogroup" aria-label="Minimum overall rating" className="seg">{[3, 4, 5].map(v => <button key={v} role="radio" aria-checked={s.minStars === v} className="press seg-btn" onClick={() => set({ minStars: v })}>{v}★{v < 5 ? '+' : ''}</button>)}</div>
-              <label className="flex items-center gap-2 t-body mt-3 cursor-pointer"><input type="checkbox" className="accent-accent w-4 h-4" checked={s.excludeFlags} onChange={e => set({ excludeFlags: e.target.checked })} />Exclude special-focus and abuse-icon homes</label>
+              <label className="flex items-center gap-2 t-body mt-3 cursor-pointer"><input type="checkbox" className="accent-accent w-4 h-4" checked={s.excludeFlags} onChange={e => set({ excludeFlags: e.target.checked })} />Exclude special-focus and abuse-icon facilities</label>
               <label className="flex items-center gap-2 t-body mt-1 cursor-pointer"><input type="checkbox" className="accent-accent w-4 h-4" checked={s.snfOnly} onChange={e => set({ snfOnly: e.target.checked })} />Medicare-certified SNFs only</label>
             </div>
             <div>
@@ -86,14 +92,14 @@ const miles = (m: number) => `${Number.isInteger(m) ? m : m.toFixed(1)} ${m === 
               {Object.entries(UNIT_LABEL).map(([k, l]) => <label key={k} className="flex items-center gap-2 t-body mt-1 cursor-pointer"><input type="checkbox" className="accent-accent w-4 h-4" checked={s.units.includes(k)} onChange={e => set({ units: e.target.checked ? [...s.units, k] : s.units.filter(u => u !== k) })} />{l}</label>)}
               <div className="flabel mt-3">Minimum case-mix overlap</div>
               <div className="flex items-center gap-2"><input type="range" min={0} max={70} step={5} value={s.minOverlap == null ? 0 : Math.round(100 * s.minOverlap)} onChange={e => set({ minOverlap: Number(e.target.value) === 0 ? null : Number(e.target.value) / 100 })} className="w-full" aria-label="Minimum case-mix overlap" /><span className="t-body tabular-nums w-14 text-right">{s.minOverlap == null ? 'off' : `${Math.round(100 * s.minOverlap)}%`}</span></div>
-              <div className="fhelp">Homes whose published diagnosis mix is too thin to score are excluded when this is on. Overlap compares hospital admitting diagnoses with SNF-stay diagnoses, which differ by nature (aftercare, rehabilitation), so even a well-matched home rarely scores above about 70%.</div>
+              <div className="fhelp">Facilities whose published diagnosis mix is too thin to score are excluded when this is on. Overlap compares hospital admitting diagnoses with SNF-stay diagnoses, which differ by nature (aftercare, rehabilitation), so even a well-matched facility rarely scores above about 70%.</div>
             </div>
             <div>
               <div className="flabel">How far a patient can be moved</div>
               <div className="flex items-center gap-2"><input type="range" min={1} max={60} step={1} value={s.maxMiles} onChange={e => set({ maxMiles: Number(e.target.value) })} className="w-full" aria-label="Maximum miles" /><span className="t-body tabular-nums w-14 text-right">{s.maxMiles} mi</span></div>
-              <div className="fhelp">From the SNF they would otherwise have used. Moved volume is split equally across the nearest acceptable homes.</div>
+              <div className="fhelp">From the facility they would otherwise have used. Moved volume is split equally across the nearest acceptable facilities (Optimize sends it to the single best fit instead).</div>
               <div className="flabel mt-3">Spread across the nearest</div>
-              <div role="radiogroup" aria-label="Number of receiving SNFs" className="seg">{[1, 3, 5].map(v => <button key={v} role="radio" aria-checked={s.k === v} className="press seg-btn" onClick={() => set({ k: v })}>{v} home{v > 1 ? 's' : ''}</button>)}</div>
+              <div role="radiogroup" aria-label="Number of receiving SNFs" className="seg">{[1, 3, 5].map(v => <button key={v} role="radio" aria-checked={s.k === v} className="press seg-btn" onClick={() => set({ k: v })}>{v} {v > 1 ? 'facilities' : 'facility'}</button>)}</div>
               <div className="flabel mt-3">Share of those patients actually moved</div>
               <div className="flex items-center gap-2"><input type="range" min={10} max={100} step={10} value={Math.round(100 * s.shift)} onChange={e => set({ shift: Number(e.target.value) / 100 })} className="w-full" aria-label="Share moved" /><span className="t-body tabular-nums w-14 text-right">{Math.round(100 * s.shift)}%</span></div>
               <div className="flabel mt-3">Annual SNF discharges <span className="t-caption">(optional — turns rates into counts)</span></div>
@@ -108,37 +114,59 @@ const miles = (m: number) => `${Number.isInteger(m) ? m : m.toFixed(1)} ${m === 
       {s && !error && out && (
         <>
           <section className="panel panel-pad" data-testid="scenario-summary">
-            <h2 className="section-title">Result <span className="t-caption font-normal ml-2">{out.source === 'reported' ? 'on the hospital\'s reported discharge counts' : 'Modeled baseline (service-area model)'}{busy ? ' · recalculating…' : ''}</span></h2>
+            <div className="flex flex-wrap items-center gap-3">
+              <h2 className="section-title">{s.mode === 'optimal' ? 'Optimal scenario' : 'Result'} <span className="t-caption font-normal ml-2">{out.source === 'reported' ? 'on the hospital\'s reported discharge counts' : 'Modeled baseline (service-area model)'}{busy ? ' · recalculating…' : ''}</span></h2>
+              {s.mode === 'optimal'
+                ? <button className="press btn btn-surface ml-auto" onClick={() => set({ mode: 'nearest' })}>Back to my scenario</button>
+                : <button className="press btn btn-primary ml-auto" onClick={() => set({ mode: 'optimal' })} title="Every patient below the bar goes to the best-fit acceptable facility within reach: the total opportunity">Optimize</button>}
+            </div>
             <p className="t-lead mt-2">
-              Of this hospital's SNF volume, <b>{sharePct(out.belowBar)}</b> goes to homes that do not meet the bar.
-              {out.belowBar > 0 ? <> {s.shift < 1 ? <>Moving <b>{Math.round(100 * s.shift)}%</b> of it</> : 'Moving it'} to the nearest acceptable homes within {miles(s.maxMiles)} reaches <b>{fmtInt(out.nReceiving)}</b> {out.nReceiving === 1 ? 'home' : 'homes'}{out.unreachable > 0.00005 ? <>; <b>{sharePct(out.unreachable)}</b> of the volume has no acceptable home within reach and stays where it is</> : null}.</> : null}
+              Of this hospital's SNF volume, <b>{sharePct(out.belowBar)}</b> goes to {F} that do not meet the bar{out.source === 'modeled' ? <> when allocated pro rata by each {F1}'s Medicare volume in the patient's ZIP code</> : null}.
+              {out.belowBar > 0 && s.mode === 'optimal' ? <> Sending all of it to the best-fit acceptable {F1} within {miles(s.maxMiles)} (highest rating, then lowest readmission after SNF discharge, then closest case mix, then nearest) reaches <b>{fmtInt(out.nReceiving)}</b> {out.nReceiving === 1 ? F1 : F}{out.unreachable > 0.00005 ? <>; <b>{sharePct(out.unreachable)}</b> of the volume has no acceptable {F1} within reach and stays where it is</> : null}.</> : null}
+              {out.belowBar > 0 && s.mode !== 'optimal' ? <> {s.shift < 1 ? <>Moving <b>{Math.round(100 * s.shift)}%</b> of it</> : 'Moving it'} to the nearest acceptable {F} within {miles(s.maxMiles)} reaches <b>{fmtInt(out.nReceiving)}</b> {out.nReceiving === 1 ? F1 : F}{out.unreachable > 0.00005 ? <>; <b>{sharePct(out.unreachable)}</b> of the volume has no acceptable {F1} within reach and stays where it is</> : null}.</> : null}
               {d004 && d004.kind !== 'same' ? <> Readmissions within 30 days of SNF discharge would be <span style={verdictStyle(d004.kind)}>{d004.text}</span> ({pct(out.before.r004)} → {pct(out.after.r004)}){avoided(out.before.r004, out.after.r004) != null ? <>, {Math.abs(avoided(out.before.r004, out.after.r004)!) < 0.5 ? <>fewer than <b>1</b></> : <>about <b>{fmtInt(Math.round(Math.abs(avoided(out.before.r004, out.after.r004)!)))}</b></>} {Number(out.after.r004) < Number(out.before.r004) ? 'fewer' : 'more'} {Math.abs(avoided(out.before.r004, out.after.r004)!) < 1.5 ? 'readmission' : 'readmissions'} {unitWord}</> : null}.</> : null}
               {dpay && dpay.kind !== 'same' ? <> Medicare's payment per SNF stay would be <span style={verdictStyle(dpay.kind)}>{dpay.text}</span>.</> : null}
-              {out.addedMiles != null && out.moved > 0 ? <> The receiving home is on average <b>{miles(out.addedMiles)}</b> from the home the patient would otherwise have used — an upper bound on the extra travel from the patient's own home.</> : null}
+              {out.addedMiles != null && out.moved > 0 ? <> The receiving {F1} is on average <b>{miles(out.addedMiles)}</b> from the {F1} the patient would otherwise have used — an upper bound on the extra travel from the patient's own address.</> : null}
               {out.unknownShare > 0.00005 ? <> <b>{sharePct(out.unknownShare)}</b> of the uploaded discharges went to CCNs that are not in Care Compare and are left out.</> : null}
             </p>
             <div className="mt-4">
-              <StatRow source="Modeled" cols={5} note={`before → after, volume-weighted across the SNFs in the baseline (${out.nBaseline}) and after the move; a home without a published rate is left out of that rate`}>
+              <StatRow source="Modeled" cols={5} note={`before → after, volume-weighted across the SNFs in the baseline (${out.nBaseline}) and after the move; a facility without a published rate is left out of that rate`}>
                 <Stat label="Readmitted within 30 days of SNF discharge" value={pct(out.after.r004)} note={`before ${pct(out.before.r004)} · rates cover ${fmtPct(100 * Number(out.after.c004), 0)} of volume`} verdict={d004} how="CMS QRP 004 (potentially preventable 30-day readmissions after SNF discharge), weighted by each SNF's share of the hospital's SNF volume before and after the move." />
                 <Stat label="Short-stay residents rehospitalized" value={pct(out.after.r521)} note={`before ${pct(out.before.r521)}`} verdict={d521} how="CMS QM 521 (risk-adjusted), volume-weighted." />
                 <Stat label="Successful discharge to community" value={pct(out.after.r005)} note={`before ${pct(out.before.r005)}`} verdict={d005} how="CMS QRP 005, volume-weighted." />
                 <Stat label="Medicare payment per SNF stay" value={out.after.pay_per_stay != null ? fmtUsd(Number(out.after.pay_per_stay)) : '–'} note={`before ${out.before.pay_per_stay != null ? fmtUsd(Number(out.before.pay_per_stay)) : '–'}${s.n && dpay && dpay.kind !== 'same' ? ` · ${fmtUsd(Math.abs((Number(out.after.pay_per_stay) - Number(out.before.pay_per_stay)) * s.n))} per year` : ''}`} verdict={dpay} how="Each SNF's 2024 Medicare fee-for-service payment divided by its stays (CMS Post-Acute Care PUF), volume-weighted. A cost proxy for the SNF stay only; it does not include the hospital stay, readmissions or care after the SNF." />
-                <Stat label="Volume in 1–2★ homes" value={fmtPct(100 * Number(out.after.low_share), 0)} note={`before ${fmtPct(100 * Number(out.before.low_share), 0)} · average rating ${Number(out.before.stars).toFixed(2)} → ${Number(out.after.stars).toFixed(2)}`} verdict={dlow} how="Share of the hospital's SNF volume landing in homes rated 1 or 2 stars overall." />
+                <Stat label="Volume in 1–2★ facilities" value={fmtPct(100 * Number(out.after.low_share), 0)} note={`before ${fmtPct(100 * Number(out.before.low_share), 0)} · average rating ${Number(out.before.stars).toFixed(2)} → ${Number(out.after.stars).toFixed(2)}`} verdict={dlow} how="Share of the hospital's SNF volume landing in facilities rated 1 or 2 stars overall." />
               </StatRow>
             </div>
-            <div className="t-caption mt-3 max-w-[68ch]">{out.nViable.toLocaleString()} homes nationwide meet the bar; only those within {miles(s.maxMiles)} of the home a displaced patient would otherwise have used receive volume. Distances are straight lines between the two homes' Care Compare coordinates. This is arithmetic on CMS's published facility rates, not a prediction for any patient: it assumes a moved patient experiences the receiving home's average rate, that the receiving homes have beds, and that the patient and family agree. Use it to size the opportunity, not to promise it.</div>
+            {opt && s.mode !== 'optimal' && (
+              <div className="mt-5" data-testid="realization">
+                <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 mb-2"><h3 className="t-title font-semibold whitespace-nowrap">Realization against the optimal scenario</h3><span className="t-caption">the share of the optimal improvement your scenario captures (optimal = every patient below the bar to the best-fit acceptable {F1} within {miles(s.maxMiles)})</span></div>
+                <StatRow source="Modeled" cols={4} note="a P&L and clinical-leadership metric: track it as real placements come in">
+                  {([['Readmitted within 30 days of SNF discharge', 'r004', true, (v: unknown) => pct(v)], ['Short-stay residents rehospitalized', 'r521', true, (v: unknown) => pct(v)], ['Successful discharge to community', 'r005', false, (v: unknown) => pct(v)], ['Medicare payment per SNF stay', 'pay_per_stay', true, (v: unknown) => v == null ? '–' : fmtUsd(Number(v))]] as const).map(([label, key, lowerBetter, f]) => {
+                    const b = out.before[key], a = out.after[key], o = opt.after[key]
+                    const room = b == null || o == null ? null : (lowerBetter ? Number(b) - Number(o) : Number(o) - Number(b))
+                    const got = b == null || a == null ? null : (lowerBetter ? Number(b) - Number(a) : Number(a) - Number(b))
+                    const r = room == null || got == null || room <= 0 ? null : Math.max(0, got / room)   // may exceed 1: the best-fit ranking optimizes rating and QRP 004 first, so a nearest split can beat it on another measure
+                    const yr = key === 'pay_per_stay' && s.n && room != null ? ` · ${fmtUsd(room * s.n)} per year at the optimum` : ''
+                    return <Stat key={key} label={`Realization: ${label}`} value={r == null ? '–' : r > 1 ? 'over 100%' : fmtPct(100 * r, 0)} verdict={r == null ? null : { kind: r >= 0.8 ? 'better' : r >= 0.4 ? 'same' : 'worse', text: r > 1 ? 'beats the optimal' : r >= 0.8 ? 'most of it' : r >= 0.4 ? 'part of it' : 'little of it' }}
+                      note={room == null ? 'no room to improve under these constraints' : `yours ${f(a)} · optimal ${f(o)}${yr}`} how={`(before − yours) ÷ (before − optimal) on ${label.toLowerCase()}, volume-weighted; before is ${f(b)}. 100% means your scenario captures the whole modeled opportunity. The optimal allocation ranks facilities by overall rating, then readmission after SNF discharge, then case-mix overlap, then distance — so on the other measures a nearest-facility split can beat it, shown as "over 100%". It ignores bed capacity: treat it as the ceiling.`} />
+                  })}
+                </StatRow>
+              </div>
+            )}
+            <div className="t-caption mt-3 max-w-[68ch]">{out.nViable.toLocaleString()} {F} nationwide meet the bar; only those within {miles(s.maxMiles)} of the {F1} a displaced patient would otherwise have used receive volume. Distances are straight lines between the two facilities' Care Compare coordinates. This is arithmetic on CMS's published facility rates, not a prediction for any patient: it assumes a moved patient experiences the receiving facility's average rate, that the receiving facilities have beds, and that the patient and family agree. Use it to size the opportunity, not to promise it.</div>
           </section>
 
           <div className="stack">
             <section className="panel panel-pad">
-              <h2 className="section-title">Homes that would receive patients <span className="t-caption font-normal">· {out.nReceiving}{out.nReceiving > out.gains.length ? `, largest ${out.gains.length} shown` : ''}</span></h2>
+              <h2 className="section-title">{F.charAt(0).toUpperCase() + F.slice(1)} that would receive patients <span className="t-caption font-normal">· {out.nReceiving}{out.nReceiving > out.gains.length ? `, largest ${out.gains.length} shown` : ''}</span></h2>
               <div className="overflow-x-auto"><table className="tbl tbl-compact mt-2">
                 <thead><tr><th>SNF</th><th><StripHeader /></th><th>Abuse icon</th><th className="num">Share gained</th><th className="num">Miles from original</th><th className="num">Rehosp.</th><th className="num">Readmit after SNF</th></tr></thead>
                 <tbody>{out.gains.map(g => <tr key={String(g.ccn)}><td><Link to={`/facility/${g.ccn}`} className="hover:underline">{titleCase(String(g.provider_name))}</Link><span className="sub">{titleCase(String(g.city_town))}, {String(g.state)}</span></td><td><QualityStrip row={g} /></td><td><FlagCell row={g} /></td><td className="num font-medium">+{fmtPct(100 * Number(g.gained), 1)}</td><td className="num">{Number(g.miles).toFixed(1)}</td><td className="num">{pct(g.qm_521_adj)}</td><td className="num">{pct(g.qrp_004_ppr_pd_rsrr)}</td></tr>)}</tbody>
               </table></div>
             </section>
             <section className="panel panel-pad">
-              <h2 className="section-title">Homes that would lose patients <span className="t-caption font-normal">· {out.nLosing}{out.nLosing > out.losses.length ? `, largest ${out.losses.length} shown` : ''}</span></h2>
+              <h2 className="section-title">{F.charAt(0).toUpperCase() + F.slice(1)} that would lose patients <span className="t-caption font-normal">· {out.nLosing}{out.nLosing > out.losses.length ? `, largest ${out.losses.length} shown` : ''}</span></h2>
               <div className="overflow-x-auto"><table className="tbl tbl-compact mt-2">
                 <thead><tr><th>SNF</th><th><StripHeader /></th><th>Abuse icon</th><th className="num">Share today</th><th className="num">Moved out</th><th className="num">Rehosp.</th><th className="num">Readmit after SNF</th></tr></thead>
                 <tbody>{out.losses.map(g => <tr key={String(g.ccn)}><td><Link to={`/facility/${g.ccn}`} className="hover:underline">{titleCase(String(g.provider_name))}</Link><span className="sub">{titleCase(String(g.city_town))}, {String(g.state)}</span></td><td><QualityStrip row={g} /></td><td><FlagCell row={g} /></td><td className="num">{fmtPct(100 * Number(g.before_w), 1)}</td><td className="num font-medium">−{fmtPct(100 * Number(g.lost), 1)}</td><td className="num">{pct(g.qm_521_adj)}</td><td className="num">{pct(g.qrp_004_ppr_pd_rsrr)}</td></tr>)}</tbody>

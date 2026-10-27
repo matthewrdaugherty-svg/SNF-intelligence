@@ -11,6 +11,8 @@ export { verdict, verdictStyle }
 import type { Reference } from '../lib/reference'
 
 type Row = Record<string, unknown>
+/** Payer colors for the census bar: categorical, used nowhere else. */
+const PAYER = { medicare: 'var(--color-accent)', medicaid: '#475467', other: '#98a2b3' }
 
 /** Facility value vs state and national averages on one quiet track. */
 function Track({ value, state, nation, m, color }: { value: number | null; state: number | null; nation: number | null; m: Measure; color?: string }) {
@@ -73,7 +75,7 @@ function ServicesPanel({ row, ref }: { row: Row; ref: Reference | null }) {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-3">
           <div>
             <div className="t-label">Dedicated special-care units</div>
-            {units.length === 0 ? <div className="t-body text-ink-2 mt-1">None reported. The home may still accept such patients; the form only records dedicated units.</div> : (
+            {units.length === 0 ? <div className="t-body text-ink-2 mt-1">None reported. The facility may still accept such patients; the form only records dedicated units.</div> : (
               <ul className="mt-1 flex flex-wrap gap-1.5">{units.map(([l, n]) => <li key={l} className="inline-flex items-baseline gap-1 rounded-[6px] bg-well px-2 py-1 t-body"><span>{l}</span><span className="t-caption tabular-nums">{n} beds</span></li>)}</ul>
             )}
           </div>
@@ -86,10 +88,13 @@ function ServicesPanel({ row, ref }: { row: Row; ref: Reference | null }) {
             <div className="t-label">Residents by payer at the last survey</div>
             {total == null || total === 0 ? <div className="t-body text-ink-2 mt-1">{row.census_unreliable ? 'The reported census failed a sanity check (above 2,000, or more than 1.2 times the certified beds), so it is not shown.' : 'Not reported.'}</div> : (
               <>
-                <div className="flex h-2.5 rounded overflow-hidden mt-2" aria-hidden>
-                  <div style={{ width: `${100 * (mc ?? 0) / total}%`, background: 'var(--color-accent)' }} /><div style={{ width: `${100 * (md ?? 0) / total}%`, background: 'var(--color-ink-3)' }} /><div style={{ width: `${100 * (ot ?? 0) / total}%`, background: 'var(--color-hairline)' }} />
+                {/* one bar, three payer segments that add to 100%; the legend dots carry the same colors */}
+                <div className="flex h-3 rounded overflow-hidden mt-2 bg-well" role="img" aria-label={`Medicare ${Math.round(100 * (mc ?? 0) / total)}%, Medicaid ${Math.round(100 * (md ?? 0) / total)}%, other ${Math.round(100 * (ot ?? 0) / total)}%`}>
+                  {([[mc, PAYER.medicare], [md, PAYER.medicaid], [ot, PAYER.other]] as const).map(([v, c], i) => <div key={i} style={{ width: `${100 * (v ?? 0) / total}%`, background: c }} />)}
                 </div>
-                <div className="t-label mt-1.5 tabular-nums"><span className="text-ink">{total.toLocaleString()} residents</span> · Medicare {Math.round(100 * (mc ?? 0) / total)}% · Medicaid {Math.round(100 * (md ?? 0) / total)}% · other {Math.round(100 * (ot ?? 0) / total)}%</div>
+                <div className="t-label mt-1.5 tabular-nums flex flex-wrap items-center gap-x-3 gap-y-1"><span className="text-ink font-medium">{total.toLocaleString()} residents</span>
+                  {([['Medicare', mc, PAYER.medicare], ['Medicaid', md, PAYER.medicaid], ['Other', ot, PAYER.other]] as const).map(([l, v, c]) => <span key={l} className="inline-flex items-center gap-1.5"><span className="inline-block w-2.5 h-2.5 rounded-sm" style={{ background: c }} aria-hidden />{l} {Math.round(100 * (v ?? 0) / total)}%</span>)}
+                </div>
                 <div className="t-caption mt-1">Who is paying on the day of the survey — a snapshot, not the year's admissions. Medicare residents are mostly short-stay rehab patients after a hospital stay; Medicaid residents are mostly long-stay.</div>
               </>
             )}

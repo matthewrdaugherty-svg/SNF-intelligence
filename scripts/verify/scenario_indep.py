@@ -8,7 +8,9 @@ def hav(a, b):
     h = math.sin((la2 - la1) / 2) ** 2 + math.cos(la1) * math.cos(la2) * math.sin((lo2 - lo1) / 2) ** 2
     return 3958.8 * 2 * math.asin(math.sqrt(h))
 
-def run(h, minStars=4, excludeFlags=True, snfOnly=True, units=(), minOverlap=None, maxMiles=10, k=3, shift=1.0, verbose=True):
+def run(h, minStars=4, excludeFlags=True, snfOnly=True, units=(), minOverlap=None, maxMiles=10, k=3, shift=1.0, verbose=True, optimal=False):
+    """optimal=True: shift=1, k=1, candidates ranked by best fit (rating desc, QRP 004 asc nulls last, overlap desc nulls last, miles asc) — the app's BEST_FIT_ORDER."""
+    if optimal: shift, k = 1.0, 1
     cols = ['ccn', 'overall_rating', 'special_focus_status', 'abuse_icon', 'provider_type', 'beds_ventilator', 'beds_dialysis', 'beds_alzheimers', 'beds_hospice', 'beds_head_trauma', 'beds_rehab', 'latitude', 'longitude', 'qm_521_adj', 'qrp_004_ppr_pd_rsrr', 'qrp_005_dtc_rs_rate', 'provider_name']
     F = {r[0]: dict(zip(cols, r)) for r in con.execute(f"select {','.join(cols)} from facility_master").fetchall()}
     U = {r[0]: (r[1], r[2]) for r in con.execute("select ccn, medicare_payment_2024, medicare_stays_2024 from snf_utilization").fetchall()}
@@ -51,7 +53,13 @@ def run(h, minStars=4, excludeFlags=True, snfOnly=True, units=(), minOverlap=Non
             if v['latitude'] is None: continue
             d = hav((f['latitude'], f['longitude']), (v['latitude'], v['longitude']))
             if d <= maxMiles: cands.append((d, v['ccn']))
-        cands.sort()
+        if optimal:
+            def key(c):
+                v = F[c[1]]; o = overlap(c[1])
+                return (-(v['overall_rating'] or 0), v['qrp_004_ppr_pd_rsrr'] is None, v['qrp_004_ppr_pd_rsrr'] or 0, o is None, -(o or 0), c[0])
+            cands.sort(key=key)
+        else:
+            cands.sort()
         cands = cands[:k]
         if not cands: unplaced += w * shift; continue
         per = w * shift / len(cands)
@@ -80,4 +88,5 @@ def run(h, minStars=4, excludeFlags=True, snfOnly=True, units=(), minOverlap=Non
     return out, moves, base, after, F
 
 if __name__ == '__main__':
+    print('== optimal'); run('210009', optimal=True)
     run(sys.argv[1] if len(sys.argv) > 1 else '210009')
