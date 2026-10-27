@@ -100,3 +100,18 @@ All 18 files in manifest.json arrived; byte sizes match the manifest exactly.
 - Data correctness: 8 facilities × every displayed value (1,673 values) vs db/snf.duckdb → 0 mismatches. 28/28 Explore filter combinations match DuckDB counts; haversine distances match Python; CSV keeps leading zeros. Flows quality mix, weighted averages, unmatched bucket and nearby alternatives match a Python recompute.
 - Verdict FAIL on packaging: 16 defects, led by a SQL-injection path through the `sort` URL parameter (DuckDB-wasm executes multi-statement strings; a crafted link could alter the in-browser tables for that session — never the source files or other users). All 16 fixed in app v1.1 (commit c99296a); 5 regression tests added. Re-verification requested (report 04).
 - Correction to the report: the count for "baltimore" within Maryland is 40 (DuckDB), not 41.
+
+## T-019 Hospital layer (scripts/06_load_hospital.py, 2026-10-26; sources in scripts/05_download_hospital.sh)
+- Hospital Service Area file 2025 (dataset 8708ca8b…): 1,175,708 rows = the API's found_rows; 7,452 provider numbers; 1,024,470 rows (87%) suppressed ('*', fewer than 11 cases); 151,238 visible rows; minimum visible cases = 11. Values are zero-padded strings in the CSV.
+- Care Compare Hospital General Information (Jul 2026): 5,419 hospitals (3,107 acute care, 1,382 critical access, 624 psychiatric, 132 VA, 94 children's, 43 rural emergency, 32 DoD, 5 long-term). 2,368 HSAF provider numbers are not in this list (kept in `hsaf`, not in `hospital_master`).
+- Medicare Inpatient Hospitals by Provider 2024: 3,044 hospitals; 2,982 match the Care Compare list. Johns Hopkins Hospital (210009): 10,157 discharges, 7,404 beneficiaries, $428,579,020 Medicare payment.
+- Hybrid hospital-wide readmission (Hybrid_HWR) is 'Not Available' for ALL 4,790 hospitals in the Sep 2026 Unplanned Hospital Visits file (footnote 4). Condition-specific READM_30 rates are populated (HF 3,253; PN 3,758; COPD 3,086; AMI 1,971; hip/knee 1,695).
+- Hospital Spending by Claim (2024): 2,877 hospitals have a SNF 1–30-days-after-discharge row. Maryland hospitals (e.g. 210009) have none [industry context: Maryland hospitals are exempt from the MSPB measure under the state's all-payer model — not verified from a CMS page in this project].
+- PAC PUF SNF 2024: 13,784 provider rows (+52 state, 1 nation); 13,511 match the 14,690 nursing-home universe. National: 1,586,658 stays, $25,451,696,743 Medicare payment, 1,171,990 beneficiaries. Sentinels '*' and '+'.
+- 93 casts, all lossless (db/cast_log_hospital.csv).
+
+## T-020 Service-area model (MODELED — decision D-013)
+- hospital_service_area: 151,222 hospital-ZIP rows for 6,405 hospitals (visible rows with a ZIP); shares of visible cases sum to 1.000000 per hospital (asserted).
+- snf_hospital_area: 138,281 hospital-SNF pairs; a SNF is "in" a hospital's service area when its ZIP is one of the hospital's visible ZIPs. modeled_weight = ZIP share × SNF's share of Medicare stays among SNFs in that ZIP (equal split if none report stays).
+- Johns Hopkins Hospital: 10,834 visible cases from 200 ZIPs; 209 SNFs in those ZIPs; 65.6% of visible volume comes from ZIPs that contain ≥1 SNF (the rest is unassigned — patients from ZIPs with no SNF use SNFs elsewhere; a distance-based assignment needs ZIP centroids, blocked until www2.census.gov is allowed). Modeled quality mix: 42.9% in 4–5★ (94 SNFs), 19.1% in 3★ (42), 37.6% in 1–2★ (71), 0.4% unrated.
+- Known limitation: no hospital *system* grouping exists in CMS data; users select a system's hospitals individually. PECOS hospital ownership/affiliation files are the candidate source for a system field.

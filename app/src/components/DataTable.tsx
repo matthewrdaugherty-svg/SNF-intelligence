@@ -8,7 +8,7 @@ import { Fn, QualityStrip } from './ui'
 import type { Reference } from '../lib/reference'
 
 export interface Sort { key: string; dir: 'asc' | 'desc' }
-interface Props { rows: Record<string, unknown>[]; cols: TableCol[]; sort: Sort; onSort: (s: Sort) => void; ref: Reference | null; showDistance?: boolean }
+interface Props { rows: Record<string, unknown>[]; cols: TableCol[]; sort: Sort; onSort: (s: Sort) => void; ref: Reference | null; showDistance?: boolean; showShare?: boolean }
 
 const ROW = 40
 const OWN_SHORT: Record<string, string> = { 'For profit - Limited Liability company': 'For profit · LLC', 'For profit - Corporation': 'For profit · corporation', 'For profit - Individual': 'For profit · individual', 'For profit - Partnership': 'For profit · partnership',
@@ -23,7 +23,7 @@ function displayText(key: string, val: unknown): string {
   return s
 }
 
-export default function DataTable({ rows, cols, sort, onSort, ref, showDistance }: Props) {
+export default function DataTable({ rows, cols, sort, onSort, ref, showDistance, showShare }: Props) {
   const parent = useRef<HTMLDivElement>(null)
   const v = useVirtualizer({ count: rows.length, getScrollElement: () => parent.current, estimateSize: () => ROW, overscan: 12 })
   const compare = useCompare()
@@ -38,7 +38,7 @@ export default function DataTable({ rows, cols, sort, onSort, ref, showDistance 
       </div>
     )
   }
-  const width = 36 + 300 + 150 + (showDistance ? 72 : 0) + cols.reduce((a, c) => a + (c.width ?? 96), 0)
+  const width = 36 + 300 + 150 + (showDistance ? 72 : 0) + (showShare ? 96 : 0) + cols.reduce((a, c) => a + (c.width ?? 96), 0)
   return (
     <div ref={parent} className="h-full overflow-auto bg-surface" role="table" aria-rowcount={rows.length}>
       <div style={{ minWidth: width }}>
@@ -47,6 +47,7 @@ export default function DataTable({ rows, cols, sort, onSort, ref, showDistance 
           {head('provider_name', 'Facility', false, 300)}
           {head('overall_rating', 'Star ratings (1–2 poor · 3 average · 4–5 good)', false, 150)}
           {showDistance && head('distance_mi', 'Miles', true, 72)}
+          {showShare && head('modeled_share', 'Modeled share of hospital SNF volume', true, 96)}
           {cols.map(c => head(c.key, c.short ?? c.label, c.unit !== 'text', c.width ?? 96))}
         </div>
         <div style={{ height: v.getTotalSize(), position: 'relative' }}>
@@ -63,6 +64,7 @@ export default function DataTable({ rows, cols, sort, onSort, ref, showDistance 
                 </div>
                 <div role="cell" className="shrink-0 px-2" style={{ width: 150 }}><QualityStrip row={r} /></div>
                 {showDistance && <div role="cell" className="shrink-0 px-2 text-right text-sm tabular-nums" style={{ width: 72 }}>{r.distance_mi == null ? '' : Number(r.distance_mi).toFixed(1)}</div>}
+                {showShare && <div role="cell" className="shrink-0 px-2 text-right text-sm tabular-nums" style={{ width: 96 }} title="Modeled: ZIP share of the hospital's visible volume × this SNF's share of Medicare stays in that ZIP">{r.modeled_share == null ? '' : (100 * Number(r.modeled_share)).toFixed(2) + '%'}</div>}
                 {cols.map(c => {
                   const val = r[c.key]; const fn = c.fn ? r[c.fn] : null
                   const text = c.unit === 'text' ? displayText(c.key, val) : fmt(val, c.unit)

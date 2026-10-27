@@ -4,6 +4,7 @@ import { useReference } from './ui'
 
 const NAV = [
   { to: '/explore', label: 'Explore' },
+  { to: '/hospitals', label: 'Hospitals' },
   { to: '/map', label: 'Map' },
   { to: '/compare', label: 'Compare' },
   { to: '/flows', label: 'Discharge flows' },

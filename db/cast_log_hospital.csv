@@ -1,0 +1,94 @@
+table,column,type,raw_nonblank_nonsentinel,typed_nonnull,sentinels
+hosp_info,hospital_overall_rating,DOUBLE,3174,3174,Not Available
+hosp_info,mort_group_measure_count,DOUBLE,4569,4569,Not Available
+hosp_info,count_of_facility_mort_measures,DOUBLE,4096,4096,Not Available
+hosp_info,count_of_mort_measures_better,DOUBLE,4096,4096,Not Available
+hosp_info,count_of_mort_measures_no_different,DOUBLE,4096,4096,Not Available
+hosp_info,count_of_mort_measures_worse,DOUBLE,4096,4096,Not Available
+hosp_info,safety_group_measure_count,DOUBLE,4569,4569,Not Available
+hosp_info,count_of_facility_safety_measures,DOUBLE,3344,3344,Not Available
+hosp_info,count_of_safety_measures_better,DOUBLE,3344,3344,Not Available
+hosp_info,count_of_safety_measures_no_different,DOUBLE,3344,3344,Not Available
+hosp_info,count_of_safety_measures_worse,DOUBLE,3344,3344,Not Available
+hosp_info,readm_group_measure_count,DOUBLE,4569,4569,Not Available
+hosp_info,count_of_facility_readm_measures,DOUBLE,4264,4264,Not Available
+hosp_info,count_of_readm_measures_better,DOUBLE,4264,4264,Not Available
+hosp_info,count_of_readm_measures_no_different,DOUBLE,4264,4264,Not Available
+hosp_info,count_of_readm_measures_worse,DOUBLE,4264,4264,Not Available
+hosp_info,pt_exp_group_measure_count,DOUBLE,4569,4569,Not Available
+hosp_info,count_of_facility_pt_exp_measures,DOUBLE,3464,3464,Not Available
+hosp_info,te_group_measure_count,DOUBLE,4569,4569,Not Available
+hosp_info,count_of_facility_te_measures,DOUBLE,4500,4500,Not Available
+hosp_inpatient,tot_benes,DOUBLE,3044,3044,
+hosp_inpatient,tot_submtd_cvrd_chrg,DOUBLE,3044,3044,
+hosp_inpatient,tot_pymt_amt,DOUBLE,3044,3044,
+hosp_inpatient,tot_mdcr_pymt_amt,DOUBLE,3044,3044,
+hosp_inpatient,tot_dschrgs,DOUBLE,3044,3044,
+hosp_inpatient,tot_cvrd_days,DOUBLE,3044,3044,
+hosp_inpatient,tot_days,DOUBLE,3044,3044,
+hosp_inpatient,bene_age_lt_65_cnt,DOUBLE,2761,2761,
+hosp_inpatient,bene_age_65_74_cnt,DOUBLE,2998,2998,
+hosp_inpatient,bene_age_75_84_cnt,DOUBLE,2981,2981,
+hosp_inpatient,bene_age_gt_84_cnt,DOUBLE,2753,2753,
+hosp_inpatient,bene_feml_cnt,DOUBLE,2998,2998,
+hosp_inpatient,bene_male_cnt,DOUBLE,2998,2998,
+hosp_inpatient,bene_race_wht_cnt,DOUBLE,3013,3013,
+hosp_inpatient,bene_race_black_cnt,DOUBLE,2163,2163,
+hosp_inpatient,bene_race_api_cnt,DOUBLE,1356,1356,
+hosp_inpatient,bene_race_hspnc_cnt,DOUBLE,2003,2003,
+hosp_inpatient,bene_race_natind_cnt,DOUBLE,354,354,
+hosp_inpatient,bene_race_othr_cnt,DOUBLE,978,978,
+hosp_inpatient,bene_dual_cnt,DOUBLE,2899,2899,
+hosp_inpatient,bene_ndual_cnt,DOUBLE,2899,2899,
+hosp_inpatient,bene_cc_bh_adhd_othcd_v1_pct,DOUBLE,3044,3044,
+hosp_inpatient,bene_cc_bh_alcohol_drug_v1_pct,DOUBLE,3044,3044,
+hosp_inpatient,bene_cc_bh_tobacco_v1_pct,DOUBLE,3044,3044,
+hosp_inpatient,bene_cc_bh_alz_nonalzdem_v2_pct,DOUBLE,3044,3044,
+hosp_inpatient,bene_cc_bh_anxiety_v1_pct,DOUBLE,3044,3044,
+hosp_inpatient,bene_cc_bh_bipolar_v1_pct,DOUBLE,3044,3044,
+hosp_inpatient,bene_cc_bh_mood_v2_pct,DOUBLE,3044,3044,
+hosp_inpatient,bene_cc_bh_depress_v1_pct,DOUBLE,3044,3044,
+hosp_inpatient,bene_cc_bh_pd_v1_pct,DOUBLE,3044,3044,
+hosp_inpatient,bene_cc_bh_ptsd_v1_pct,DOUBLE,3044,3044,
+hosp_inpatient,bene_cc_bh_schizo_othpsy_v1_pct,DOUBLE,3044,3044,
+hosp_inpatient,bene_cc_ph_asthma_v2_pct,DOUBLE,3044,3044,
+hosp_inpatient,bene_cc_ph_afib_v2_pct,DOUBLE,3044,3044,
+hosp_inpatient,bene_cc_ph_cancer6_v2_pct,DOUBLE,3044,3044,
+hosp_inpatient,bene_cc_ph_ckd_v2_pct,DOUBLE,3044,3044,
+hosp_inpatient,bene_cc_ph_copd_v2_pct,DOUBLE,3044,3044,
+hosp_inpatient,bene_cc_ph_diabetes_v2_pct,DOUBLE,3044,3044,
+hosp_inpatient,bene_cc_ph_hf_nonihd_v2_pct,DOUBLE,3044,3044,
+hosp_inpatient,bene_cc_ph_hyperlipidemia_v2_pct,DOUBLE,3044,3044,
+hosp_inpatient,bene_cc_ph_hypertension_v2_pct,DOUBLE,3044,3044,
+hosp_inpatient,bene_cc_ph_ischemicheart_v2_pct,DOUBLE,3044,3044,
+hosp_inpatient,bene_cc_ph_osteoporosis_v2_pct,DOUBLE,3044,3044,
+hosp_inpatient,bene_cc_ph_parkinson_v2_pct,DOUBLE,3044,3044,
+hosp_inpatient,bene_cc_ph_arthritis_v2_pct,DOUBLE,3044,3044,
+hosp_inpatient,bene_cc_ph_stroke_tia_v2_pct,DOUBLE,3044,3044,
+hosp_inpatient,bene_avg_risk_scre,DOUBLE,3044,3044,
+hosp_inpatient,bene_avg_age,DOUBLE,3044,3044,
+hosp_spending_by_claim,avg_spndg_per_ep_hospital,DOUBLE,63646,63646,Not Available
+hosp_spending_by_claim,avg_spndg_per_ep_state,DOUBLE,63646,63646,Not Available
+hosp_spending_by_claim,avg_spndg_per_ep_national,DOUBLE,63646,63646,Not Available
+hosp_spending_by_claim,percent_of_spndg_hospital,DOUBLE,63646,63646,Not Available
+hosp_spending_by_claim,percent_of_spndg_state,DOUBLE,63646,63646,Not Available
+hosp_spending_by_claim,percent_of_spndg_national,DOUBLE,63646,63646,Not Available
+hosp_unplanned_visits,score,DOUBLE,31854,31854,"Not Available,Too Few to Report,Not Applicable"
+hosp_unplanned_visits,denominator,DOUBLE,31854,31854,"Not Available,Too Few to Report,Not Applicable"
+hosp_unplanned_visits,number_of_patients,DOUBLE,8292,8292,"Not Available,Too Few to Report,Not Applicable"
+hosp_unplanned_visits,number_of_patients_returned,DOUBLE,0,0,"Not Available,Too Few to Report,Not Applicable"
+hosp_hrrp,excess_readmission_ratio,DOUBLE,11720,11720,"N/A,Too Few to Report"
+hosp_hrrp,predicted_readmission_rate,DOUBLE,11720,11720,"N/A,Too Few to Report"
+hosp_hrrp,expected_readmission_rate,DOUBLE,11720,11720,"N/A,Too Few to Report"
+hosp_hrrp,number_of_discharges,DOUBLE,8242,8242,"N/A,Too Few to Report"
+hosp_hrrp,number_of_readmissions,DOUBLE,8037,8037,"N/A,Too Few to Report"
+pacpuf_snf,bene_dstnct_cnt,DOUBLE,13837,13837,"*,+"
+pacpuf_snf,tot_epsd_stay_cnt,DOUBLE,13837,13837,"*,+"
+pacpuf_snf,tot_srvc_days,DOUBLE,13837,13837,"*,+"
+pacpuf_snf,tot_chrg_amt,DOUBLE,13837,13837,"*,+"
+pacpuf_snf,tot_alowd_amt,DOUBLE,13837,13837,"*,+"
+pacpuf_snf,tot_mdcr_pymt_amt,DOUBLE,13837,13837,"*,+"
+pacpuf_snf,tot_mdcr_stdzd_pymt_amt,DOUBLE,13837,13837,"*,+"
+pacpuf_snf,bene_dual_pct,DOUBLE,9625,9625,"*,+"
+pacpuf_snf,bene_avg_age,DOUBLE,13837,13837,"*,+"
+pacpuf_snf,bene_avg_risk_scre,DOUBLE,13837,13837,"*,+"

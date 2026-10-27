@@ -55,5 +55,16 @@ json.dump(meta, open(f"{OUT}/meta.json","w"), indent=1)
 # discharge_flows plug-in: schema + empty parquet + sample CSV
 con.execute("""CREATE TEMP TABLE df_schema (hospital_ccn VARCHAR, hospital_name VARCHAR, snf_ccn VARCHAR, period_start DATE, period_end DATE, n_discharges INTEGER, source VARCHAR, method VARCHAR, loaded_at DATE)""")
 # (user_flows is created in the app from the same schema; no empty file shipped)
+# ---- hospital layer (scripts/06_load_hospital.py) ----
+pq("""SELECT hospital_ccn, hospital_name, address, city, state, zip, county, hospital_type, hospital_ownership, emergency_services, hospital_overall_rating, hospital_overall_rating_footnote,
+       count_of_facility_readm_measures, count_of_readm_measures_better, count_of_readm_measures_no_different, count_of_readm_measures_worse,
+       medicare_discharges_2024, medicare_beneficiaries_2024, medicare_payment_2024, medicare_days_2024, bene_avg_age, dual_eligible_share, ruca,
+       snf_spend_30d_per_episode, snf_spend_30d_per_episode_national, snf_spend_30d_pct_of_episode, snf_spend_30d_pct_of_episode_national, total_spend_per_episode, total_spend_per_episode_national,
+       readm_hf, readm_pn, readm_ami, readm_copd, readm_hip_knee, n_zips_visible, cases_visible, n_zips_total FROM hospital_master""", "hospital_master")
+pq("SELECT hospital_ccn, zip, cases, days, charges, share_of_visible_cases, cumulative_share, zip_rank FROM hospital_service_area", "hospital_service_area")
+pq("SELECT * FROM snf_utilization", "snf_utilization")
+hm=json.load(open(f"{OUT}/meta.json")); hm.update({"hospital_layer": {"service_area_year": 2025, "inpatient_year": 2024, "pacpuf_year": 2024, "care_compare_hospitals_release": "2026-07-22 (general info), 2026-09-10 (unplanned visits), 2026-01-26 (spending by claim)",
+  "hwr_note": "The hospital-wide readmission measure (Hybrid HWR) is 'Not Available' for every hospital in this release (CMS footnote 4); condition-specific 30-day readmission rates are shown instead."}})
+json.dump(hm, open(f"{OUT}/meta.json","w"), indent=1)
 open(f"{OUT}/discharge_flows_template.csv","w").write("hospital_ccn,hospital_name,snf_ccn,period_start,period_end,n_discharges\n210009,Johns Hopkins Hospital (example row - delete),215001,2025-01-01,2025-12-31,0\n")
 print("footnotes:", len(fn), "| lineage rows:", len(lin), "| done")

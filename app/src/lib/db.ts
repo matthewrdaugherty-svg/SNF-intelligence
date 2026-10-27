@@ -8,7 +8,7 @@ import ehWorker from '@duckdb/duckdb-wasm/dist/duckdb-browser-eh.worker.js?url'
 
 export type Row = Record<string, unknown>
 
-const FILES = ['facility_master', 'penalties', 'citations_gl', 'state_averages', 'inspection_cutpoints', 'ownership'] as const
+const FILES = ['facility_master', 'penalties', 'citations_gl', 'state_averages', 'inspection_cutpoints', 'ownership', 'hospital_master', 'hospital_service_area', 'snf_utilization'] as const
 
 let dbPromise: Promise<duckdb.AsyncDuckDBConnection> | null = null
 let progressListeners: ((msg: string) => void)[] = []
@@ -37,6 +37,16 @@ async function init(): Promise<duckdb.AsyncDuckDBConnection> {
   // Discharge flows the user uploads live here for the session. Fixed schema = the plug-in contract (see Flows page and docs/DECISION_LOG.md D-013).
   await conn.query(`CREATE TABLE user_flows (hospital_ccn VARCHAR, hospital_name VARCHAR, snf_ccn VARCHAR, period_start DATE, period_end DATE, n_discharges INTEGER, source VARCHAR, method VARCHAR, loaded_at DATE)`)
   await conn.query(`CREATE TABLE user_hospitals (hospital_ccn VARCHAR, hospital_name VARCHAR, lat DOUBLE, lng DOUBLE)`)
+  // MODELED layer (decision D-013): which SNFs serve a hospital's service area. Observed inputs: the hospital's visible
+  // patient-ZIP volumes (CMS Hospital Service Area file) and each SNF's Medicare stays (PAC PUF). Model: a hospital's volume
+  // from a ZIP is split among the SNFs located in that ZIP in proportion to their Medicare stays (equal split if none report volume).
+  report('Building service-area model')
+  await conn.query(`CREATE TABLE snf_hospital_area AS
+    WITH s AS (SELECT f.ccn, f.zip_code AS zip, coalesce(u.medicare_stays_2024, 0) AS stays FROM facility_master f LEFT JOIN snf_utilization u USING (ccn)),
+    z AS (SELECT zip, sum(stays) AS zip_stays, count(*) AS zip_snfs FROM s GROUP BY zip)
+    SELECT a.hospital_ccn, s.ccn, a.zip, a.cases AS hospital_cases_from_zip, a.share_of_visible_cases AS zip_share, a.zip_rank, a.cumulative_share, s.stays AS snf_medicare_stays_2024, z.zip_snfs,
+           a.share_of_visible_cases * (CASE WHEN z.zip_stays > 0 THEN s.stays / z.zip_stays ELSE 1.0 / z.zip_snfs END) AS modeled_weight
+    FROM hospital_service_area a JOIN s ON s.zip = a.zip JOIN z ON z.zip = a.zip`)
   report('Ready')
   return conn
 }

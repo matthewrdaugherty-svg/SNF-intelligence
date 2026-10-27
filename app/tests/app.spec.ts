@@ -215,3 +215,37 @@ test('search box accepts spaces mid-phrase and commits the whole phrase', async 
   await expect(page).toHaveURL(/q=glen\+burnie|q=glen%20burnie/)
   await expect(count(page)).not.toHaveText('221', { timeout: 15_000 })
 })
+
+// ---- hospital layer ----
+test('hospital page: Johns Hopkins service area and modeled quality mix match the database', async ({ page }) => {
+  await page.goto('/hospital/210009')
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('The Johns Hopkins Hospital', { timeout: 120_000 })
+  const sentence = page.locator('p.text-lg')
+  await expect(sentence).toContainText('10,834')
+  await expect(sentence).toContainText('200')
+  await expect(sentence).toContainText('209')
+  await expect(sentence).toContainText('43%')   // 4-5★ share of modeled volume (db: 42.9)
+  await expect(sentence).toContainText('19%')
+  await expect(sentence).toContainText('38%')
+  await expect(page.getByText('10,157').first()).toBeVisible()  // 2024 Medicare discharges
+  // top ZIP row
+  const firstZip = page.locator('section').filter({ hasText: 'Service area' }).locator('tbody tr').first()
+  await expect(firstZip).toContainText('21213')
+  await expect(firstZip).toContainText('529')
+  // top modeled SNF
+  const firstSnf = page.locator('section').filter({ hasText: 'Nursing homes in the service area' }).locator('tbody tr').first()
+  await expect(firstSnf).toContainText('Complete Care at Heritage')
+  await expect(firstSnf).toContainText('2.92%')
+})
+
+test('hospital search finds Hopkins and the service-area filter works in Explore', async ({ page }) => {
+  await page.goto('/hospitals')
+  const box = page.getByLabel('Find a hospital')
+  await box.fill('johns hopkins')
+  await expect(page.getByRole('link', { name: /The Johns Hopkins Hospital/ })).toBeVisible({ timeout: 120_000 })
+  await page.goto('/explore?h=210009')
+  await ready(page)
+  await expect(count(page)).toHaveText('209')
+  await expect(page.getByRole('columnheader', { name: /Modeled share/ })).toHaveAttribute('aria-sort', 'descending')
+  await expect(page.getByRole('row').nth(1)).toContainText('Complete Care at Heritage')
+})

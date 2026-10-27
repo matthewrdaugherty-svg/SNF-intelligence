@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router'
 import { q } from '../lib/db'
 import { EMPTY, fromParams, toParams, whereClause, distExpr, type Filters } from '../lib/filters'
+import { weightExpr } from '../lib/hospitals'
 import { TABLE_COLS, colByKey, type TableCol } from '../lib/measures'
 import FilterPanel from '../components/FilterPanel'
 import DataTable, { type Sort } from '../components/DataTable'
@@ -10,7 +11,7 @@ import { fmt } from '../lib/format'
 
 const BASE_COLS = ['ccn', 'provider_name', 'overall_rating', 'overall_rating_footnote', 'health_inspection_rating', 'health_inspection_rating_footnote', 'qm_rating', 'qm_rating_footnote', 'staffing_rating', 'staffing_rating_footnote', 'special_focus_status', 'abuse_icon']
 /** Only these keys may appear in ORDER BY; anything else from the URL is ignored. */
-const SORT_KEYS = new Set<string>(['provider_name', 'overall_rating', 'distance_mi', ...TABLE_COLS.map(c => c.key)])
+const SORT_KEYS = new Set<string>(['provider_name', 'overall_rating', 'distance_mi', 'modeled_share', ...TABLE_COLS.map(c => c.key)])
 const safeSort = (key: string | null, dir: string | null): Sort => ({ key: key && SORT_KEYS.has(key) ? key : 'provider_name', dir: dir === 'desc' ? 'desc' : 'asc' })
 const COLS_KEY = 'snf.explore.cols'
 function loadCols(): string[] { try { const v = localStorage.getItem(COLS_KEY); if (v) return (JSON.parse(v) as string[]).filter(colByKey) } catch { /* ignore */ } return TABLE_COLS.filter(c => c.default).map(c => c.key) }
@@ -20,7 +21,8 @@ export function buildSql(f: Filters, cols: TableCol[], sortIn: Sort): string {
   const sel = [...BASE_COLS, ...cols.map(c => c.key), ...cols.map(c => c.fn).filter(Boolean) as string[]]
   const hasDist = f.lat != null && f.lng != null
   if (hasDist) sel.push(`${distExpr(f.lat!, f.lng!)} AS distance_mi`)
-  const sortCol = sort.key === 'distance_mi' && !hasDist ? 'provider_name' : sort.key
+  if (f.hospitals.length) sel.push(`${weightExpr(f.hospitals)} AS modeled_share`)
+  const sortCol = (sort.key === 'distance_mi' && !hasDist) || (sort.key === 'modeled_share' && !f.hospitals.length) ? 'provider_name' : sort.key
   const dir = sort.dir === 'asc' ? 'ASC' : 'DESC'
   return `SELECT ${[...new Set(sel)].join(', ')} FROM facility_master ${whereClause(f)} ORDER BY ${sortCol} ${dir} NULLS LAST, provider_name ASC`
 }
@@ -37,15 +39,17 @@ export default function Explore() {
   const [picker, setPicker] = useState(false)
   const ref = useReference()
   const hasDist = f.lat != null && f.lng != null
+  const hasHosp = f.hospitals.length > 0
 
   useEffect(() => {
     let live = true
-    const effSort = sort.key === 'distance_mi' && !hasDist ? { key: 'provider_name', dir: 'asc' as const } : sort
+    const effSort = (sort.key === 'distance_mi' && !hasDist) || (sort.key === 'modeled_share' && !hasHosp) ? { key: 'provider_name', dir: 'asc' as const } : sort
     q(buildSql(f, cols, effSort)).then(r => { if (live) { setRows(r); setError(null) } }).catch(e => { if (live) setError(String(e)) })
     return () => { live = false }
-  }, [f, cols, sort, hasDist])
+  }, [f, cols, sort, hasDist, hasHosp])
   useEffect(() => { try { localStorage.setItem(COLS_KEY, JSON.stringify(colKeys)) } catch { /* ignore */ } }, [colKeys])
   useEffect(() => { if (hasDist && sort.key === 'provider_name' && !params.get('sort')) setSort({ key: 'distance_mi', dir: 'asc' }) }, [hasDist]) // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { if (hasHosp && sort.key === 'provider_name' && !params.get('sort')) setSort({ key: 'modeled_share', dir: 'desc' }) }, [hasHosp]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // functional updates: always build from the latest URL, never from a stale closure
   const onPatch = (patch: Partial<Filters>) => setParams(prev => toParams({ ...fromParams(prev), ...patch }, prev), { replace: true })
@@ -55,10 +59,10 @@ export default function Explore() {
   function exportCsv() {
     if (!rows) return
     // every value with a CMS footnote exports its footnote in the next column (Operating Rule 1.3)
-    const keys = ['ccn', 'provider_name', 'overall_rating', 'overall_rating_footnote', 'health_inspection_rating', 'health_inspection_rating_footnote', 'qm_rating', 'qm_rating_footnote', 'staffing_rating', 'staffing_rating_footnote', ...(hasDist ? ['distance_mi'] : []), ...cols.flatMap(c => c.fn ? [c.key, c.fn] : [c.key])]
-    const labels = ['CCN', 'Facility', 'Overall stars', 'Overall stars — CMS footnote', 'Health inspection stars', 'Health inspection stars — CMS footnote', 'Quality measure stars', 'Quality measure stars — CMS footnote', 'Staffing stars', 'Staffing stars — CMS footnote', ...(hasDist ? ['Miles'] : []), ...cols.flatMap(c => c.fn ? [c.label, `${c.label} — CMS footnote`] : [c.label])]
+    const keys = ['ccn', 'provider_name', 'overall_rating', 'overall_rating_footnote', 'health_inspection_rating', 'health_inspection_rating_footnote', 'qm_rating', 'qm_rating_footnote', 'staffing_rating', 'staffing_rating_footnote', ...(hasDist ? ['distance_mi'] : []), ...(hasHosp ? ['modeled_share'] : []), ...cols.flatMap(c => c.fn ? [c.key, c.fn] : [c.key])]
+    const labels = ['CCN', 'Facility', 'Overall stars', 'Overall stars — CMS footnote', 'Health inspection stars', 'Health inspection stars — CMS footnote', 'Quality measure stars', 'Quality measure stars — CMS footnote', 'Staffing stars', 'Staffing stars — CMS footnote', ...(hasDist ? ['Miles'] : []), ...(hasHosp ? ['Modeled share of hospital service-area SNF volume'] : []), ...cols.flatMap(c => c.fn ? [c.label, `${c.label} — CMS footnote`] : [c.label])]
     const esc = (v: unknown) => { const s = v == null ? '' : String(v); return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s }
-    const lines = [labels.map(esc).join(','), ...rows.map(r => keys.map(k => esc(k === 'distance_mi' && r[k] != null ? Number(r[k]).toFixed(1) : r[k])).join(','))]
+    const lines = [labels.map(esc).join(','), ...rows.map(r => keys.map(k => esc(k === 'distance_mi' && r[k] != null ? Number(r[k]).toFixed(1) : k === 'modeled_share' && r[k] != null ? (100 * Number(r[k])).toFixed(3) + '%' : r[k])).join(','))]
     const blob = new Blob(['﻿' + lines.join('\n')], { type: 'text/csv;charset=utf-8' })
     const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `snf-explore-${new Date().toISOString().slice(0, 10)}.csv`; a.click(); URL.revokeObjectURL(a.href)
   }
@@ -71,7 +75,7 @@ export default function Explore() {
       <section className="flex-1 min-w-0 flex flex-col relative">
         <div className="flex items-center gap-3 px-4 h-12 shrink-0">
           <button className="press btn btn-surface text-sm md:hidden" onClick={() => setFiltersOpen(o => !o)} aria-expanded={filtersOpen}>Filters</button>
-          <div className="text-sm text-ink-2">{rows ? <><span className="text-ink font-medium tabular-nums" data-testid="result-count">{rows.length.toLocaleString()}</span> facilities</> : 'Loading…'}{hasDist && f.place ? <span className="text-ink-3"> · within {f.miles} mi of {f.place}</span> : null}</div>
+          <div className="text-sm text-ink-2">{rows ? <><span className="text-ink font-medium tabular-nums" data-testid="result-count">{rows.length.toLocaleString()}</span> facilities</> : 'Loading…'}{hasDist && f.place ? <span className="text-ink-3"> · within {f.miles} mi of {f.place}</span> : null}{hasHosp ? <span className="text-ink-3"> · in the service area of {f.hospitals.length} hospital{f.hospitals.length > 1 ? 's' : ''} (modeled)</span> : null}</div>
           <div className="ml-auto flex items-center gap-2 relative shrink-0">
             <button className="press btn btn-surface text-sm" onClick={() => setPicker(p => !p)} aria-expanded={picker}>Columns · {cols.length}</button>
             <button className="press btn btn-primary text-sm" onClick={exportCsv} disabled={!rows?.length}>Export CSV</button>
@@ -94,7 +98,7 @@ export default function Explore() {
         <div className="flex-1 min-h-0 border-t border-hairline">
           {error ? <Empty title="These filters could not be applied."><button className="underline" onClick={onClear}>Clear all filters</button> and try again. <span className="text-ink-3 block mt-1 text-xs">{error}</span></Empty>
             : rows && rows.length === 0 ? <Empty title="No facilities match these filters.">Clear a filter or widen the radius.</Empty>
-            : rows ? <DataTable rows={rows} cols={cols} sort={sort} onSort={onSort} ref={ref} showDistance={hasDist} /> : null}
+            : rows ? <DataTable rows={rows} cols={cols} sort={sort} onSort={onSort} ref={ref} showDistance={hasDist} showShare={hasHosp} /> : null}
         </div>
         {rows && rows.length > 0 && <Footer rows={rows} cols={cols} />}
       </section>

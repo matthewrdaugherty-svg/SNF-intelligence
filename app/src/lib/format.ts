@@ -26,7 +26,8 @@ export const fmtInt = (n: number) => nf(0).format(n)
 export const fmtPct = (n: number, d = 1) => nf(d).format(n) + '%'
 export const fmtUsd = (n: number) => usd.format(n)
 export function titleCase(s: string) {
-  return s.toLowerCase().replace(/(^|[^a-z0-9'’])([a-z])/g, (_, pre, c) => pre + c.toUpperCase()).replace(/\bLlc\b/g, 'LLC').replace(/\bInc\b/g, 'Inc').replace(/\bOf\b/g, 'of').replace(/\bAnd\b/g, 'and').replace(/\bThe\b/g, 'the').replace(/^the\b/, 'The')
+  s = s.replace(/,\s*THE\s*$/i, '').replace(/^(.*)$/, m => /,\s*THE\s*$/i.test(s) ? 'THE ' + m : m)   // 'JOHNS HOPKINS HOSPITAL, THE' -> 'The Johns Hopkins Hospital'
+  return s.toLowerCase().replace(/(^|[^a-z0-9'’])([a-z])/g, (_, pre, c) => pre + c.toUpperCase()).replace(/\bLlc\b/g, 'LLC').replace(/\bSnf\b/g, 'SNF').replace(/\b(Of|And|The|At|For|In|On)\b/g, m => m.toLowerCase()).replace(/^(of|and|the|at|for|in|on)\b/, m => m[0].toUpperCase() + m.slice(1))
 }
 /** 'Baltimore City' and Louisiana parishes are not 'X County'. */
 export function countyLabel(county: string, state: string) {

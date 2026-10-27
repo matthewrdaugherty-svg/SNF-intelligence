@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { EMPTY, STATES, countActive, type Filters } from '../lib/filters'
 import { starFg, tierWord } from './ui'
+import HospitalPicker from './HospitalPicker'
 
 export async function geocode(query: string): Promise<{ lat: number; lng: number; label: string } | null> {
   const r = await fetch(`https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=us&q=${encodeURIComponent(query)}`, { headers: { Accept: 'application/json' } })
@@ -63,6 +64,10 @@ export default function FilterPanel({ f, onPatch, onClear, resultCount, open, on
       </div>
       <label className="block text-xs text-ink-2 mb-1" htmlFor="flt-q">Name, city, chain or CCN</label>
       <Debounced id="flt-q" className="control w-full mb-4" value={f.q} onCommit={v => onPatch({ q: v })} placeholder="e.g. Genesis, Baltimore, 215…" />
+
+      <div className="text-xs text-ink-2 mb-1">In a hospital's service area</div>
+      <div className="mb-1"><HospitalPicker selected={f.hospitals} onChange={h => onPatch({ hospitals: h })} /></div>
+      <div className="text-xs text-ink-3 mb-4">Keeps SNFs located in the ZIP codes the hospital's Medicare patients come from (modeled layer; see Hospitals).</div>
 
       <div className="text-xs text-ink-2 mb-1">Near a place</div>
       <div className="flex gap-1 mb-1">

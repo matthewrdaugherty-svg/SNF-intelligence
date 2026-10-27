@@ -91,3 +91,25 @@ export function Segmented<T extends string>({ value, options, onChange, ariaLabe
     </div>
   )
 }
+
+/** Big-number card: value, unit, a one-line note, and a provenance tag with an expandable "how this is calculated". */
+export function Stat({ label, value, unit, note, source, how, tone }: { label: string; value: ReactNode; unit?: string; note?: ReactNode; source: 'CMS' | 'Modeled' | 'Derived' | 'Hospital-reported'; how?: ReactNode; tone?: 'good' | 'mid' | 'bad' }) {
+  const [open, setOpen] = useState(false)
+  const bar = tone === 'good' ? 'var(--color-q5)' : tone === 'mid' ? '#dc6803' : tone === 'bad' ? 'var(--color-q2)' : 'transparent'
+  return (
+    <div className="bg-surface rounded-[10px] p-4 flex flex-col min-w-0" style={{ boxShadow: '0 1px 0 rgba(16,24,40,0.04)' }}>
+      <div className="text-xs text-ink-2 leading-snug">{label}</div>
+      <div className="mt-2 flex items-baseline gap-1.5 flex-wrap">
+        <span className="text-[28px] leading-none font-semibold tracking-tight tabular-nums text-ink">{value}</span>
+        {unit && <span className="text-sm text-ink-2">{unit}</span>}
+      </div>
+      {note && <div className="text-[12px] text-ink-2 mt-1.5 leading-snug">{note}</div>}
+      {tone && <div className="h-1 rounded mt-2" style={{ background: bar, width: 40 }} />}
+      <div className="mt-auto pt-3 flex items-center gap-2 text-[11px] text-ink-3">
+        <span className="inline-flex items-center gap-1"><span className={`inline-block w-1.5 h-1.5 rounded-full ${source === 'CMS' ? 'bg-ink-3' : source === 'Modeled' ? 'bg-accent' : 'bg-ink-2'}`} aria-hidden />{source}</span>
+        {how && <button className="press underline underline-offset-2 hover:text-ink" onClick={() => setOpen(o => !o)} aria-expanded={open}>How this is calculated</button>}
+      </div>
+      {open && how && <div className="mt-2 text-[12px] text-ink-2 leading-snug border-t border-hairline pt-2">{how}</div>}
+    </div>
+  )
+}

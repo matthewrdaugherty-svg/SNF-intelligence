@@ -16,8 +16,9 @@ export interface Filters {
   bedsMax: number | null
   lat: number | null; lng: number | null; miles: number | null  // catchment radius
   place: string             // label for the radius center
+  hospitals: string[]       // CCNs: keep SNFs located in these hospitals' visible service-area ZIPs (modeled layer)
 }
-export const EMPTY: Filters = { q: '', states: [], county: '', stars: [], ownership: [], sff: false, abuse: false, hospital: false, vbp: false, bedsMin: null, bedsMax: null, lat: null, lng: null, miles: null, place: '' }
+export const EMPTY: Filters = { q: '', states: [], county: '', stars: [], ownership: [], sff: false, abuse: false, hospital: false, vbp: false, bedsMin: null, bedsMax: null, lat: null, lng: null, miles: null, place: '', hospitals: [] }
 
 const OWN = ['for_profit', 'non_profit', 'government'] as const
 const clean = (s: string | null, max = 80) => (s ?? '').replace(/[;\u0000-\u001f]/g, '').slice(0, max)
@@ -35,6 +36,7 @@ export function fromParams(p: URLSearchParams): Filters {
     sff: p.get('sff') === '1', abuse: p.get('abuse') === '1', hospital: p.get('hosp') === '1', vbp: p.get('vbp') === '1',
     bedsMin: num('bmin', 0, 5000), bedsMax: num('bmax', 0, 5000),
     lat: hasRadius ? lat : null, lng: hasRadius ? lng : null, miles: hasRadius ? miles : null, place: hasRadius ? clean(p.get('place'), 120) : '',
+    hospitals: [...new Set((p.get('h') ?? '').split(',').filter(x => /^[0-9A-Z]{6}$/.test(x)))].slice(0, 20),
   }
 }
 export function toParams(f: Filters, base?: URLSearchParams): URLSearchParams {
@@ -44,11 +46,12 @@ export function toParams(f: Filters, base?: URLSearchParams): URLSearchParams {
   set('sff', f.sff ? '1' : null); set('abuse', f.abuse ? '1' : null); set('hosp', f.hospital ? '1' : null); set('vbp', f.vbp ? '1' : null)
   set('bmin', f.bedsMin != null ? String(f.bedsMin) : null); set('bmax', f.bedsMax != null ? String(f.bedsMax) : null)
   set('lat', f.lat != null ? f.lat.toFixed(5) : null); set('lng', f.lng != null ? f.lng.toFixed(5) : null); set('mi', f.miles != null ? String(f.miles) : null); set('place', f.place)
+  set('h', f.hospitals.join(','))
   return p
 }
 export function isActive(f: Filters) { return toParams(f).toString().length > 0 }
 export function countActive(f: Filters) {
-  return [f.q, f.states.length, f.county, f.stars.length, f.ownership.length, f.sff, f.abuse, f.hospital, f.vbp, f.bedsMin != null || f.bedsMax != null, f.lat != null && f.miles != null].filter(Boolean).length
+  return [f.q, f.states.length, f.county, f.stars.length, f.ownership.length, f.sff, f.abuse, f.hospital, f.vbp, f.bedsMin != null || f.bedsMax != null, f.lat != null && f.miles != null, f.hospitals.length].filter(Boolean).length
 }
 
 /** Distance in miles as a SQL expression (haversine on facility lat/long). */
@@ -77,6 +80,7 @@ export function whereClause(f: Filters): string {
   if (f.bedsMin != null) w.push(`number_of_certified_beds >= ${f.bedsMin}`)
   if (f.bedsMax != null) w.push(`number_of_certified_beds <= ${f.bedsMax}`)
   if (f.lat != null && f.lng != null && f.miles != null) w.push(`${distExpr(f.lat, f.lng)} <= ${f.miles}`)
+  if (f.hospitals.length) w.push(`ccn IN (SELECT ccn FROM snf_hospital_area WHERE hospital_ccn IN (${f.hospitals.map(sqlStr).join(',')}))`)
   return w.length ? 'WHERE ' + w.join(' AND ') : ''
 }
 
