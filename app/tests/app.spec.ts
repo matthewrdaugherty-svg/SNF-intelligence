@@ -87,8 +87,10 @@ test('map renders facility markers and the pin radius', async ({ page }) => {
   const errors: string[] = []
   page.on('console', m => { if (m.type() === 'error' && /worker/i.test(m.text())) errors.push(m.text()) })
   await page.waitForTimeout(6000)
-  const canvas = await page.locator('.maplibregl-canvas').count()
-  expect(canvas).toBe(1)
+  const box = await page.locator('.maplibregl-map').boundingBox()
+  expect(box && box.height > 300 && box.width > 300).toBeTruthy()
+  const markers = await page.evaluate(() => (document.querySelector('.maplibregl-canvas') as HTMLCanvasElement | null)?.height ?? 0)
+  expect(markers).toBeGreaterThan(300)
   expect(errors).toEqual([])
   await page.goto('/map?lat=39.2904&lng=-76.6122&mi=15&place=Baltimore')
   await expect(count(page)).toHaveText('77', { timeout: 90_000 })

@@ -133,7 +133,7 @@ export default function MapPage() {
     <div className="flex h-[calc(100dvh-52px)]">
       <FilterPanel f={f} onChange={onFilters} resultCount={rows?.length ?? null} />
       <section className="flex-1 min-w-0 relative">
-        <div ref={mapEl} className="absolute inset-0" />
+        <div ref={mapEl} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }} />  {/* inline: maplibre's unlayered CSS overrides Tailwind utilities */}
         <div className="absolute top-3 left-3 flex items-center gap-2 z-10">
           <button className={`press btn text-sm ${pinMode ? 'btn-primary' : 'btn-surface here'}`} aria-pressed={pinMode} onClick={() => setPinMode(p => !p)}>{pinMode ? 'Click the map to set the center' : hasDist ? 'Move pin' : 'Drop a pin for a radius'}</button>
           {hasDist && <div className="bg-surface here rounded-[6px] px-3 py-1.5 text-sm text-ink-2">{f.miles} mi around {f.place || 'pin'}</div>}
