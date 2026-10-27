@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useSearchParams } from 'react-router'
 import * as maplibregl from 'maplibre-gl'
+import maplibreWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?url'
 import type { Feature, Point as GPoint } from 'geojson'
 import { q } from '../lib/db'
 import { fromParams, toParams, whereClause, distExpr, type Filters } from '../lib/filters'
@@ -8,6 +9,8 @@ import FilterPanel from '../components/FilterPanel'
 import { QualityStrip, Empty } from '../components/ui'
 import { titleCase } from '../lib/format'
 
+// MapLibre 6 loads its worker from a sibling file the bundler doesn't copy; point it at the bundled copy.
+maplibregl.setWorkerUrl(maplibreWorkerUrl)
 const STYLE = 'https://tiles.openfreemap.org/styles/liberty'
 const FALLBACK_STYLE: maplibregl.StyleSpecification = { version: 8, sources: {}, layers: [{ id: 'bg', type: 'background', paint: { 'background-color': '#e9edec' } }] }
 async function loadStyle(): Promise<{ style: maplibregl.StyleSpecification | string; fallback: boolean }> {

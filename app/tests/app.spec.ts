@@ -84,9 +84,12 @@ test('compare holds up to six facilities', async ({ page }) => {
 test('map renders facility markers and the pin radius', async ({ page }) => {
   await page.goto('/map?st=MD')
   await expect(count(page)).toHaveText('221', { timeout: 90_000 })
-  await page.waitForTimeout(4000)
-  const n = await page.evaluate(() => { const m = (document.querySelector('.maplibregl-map') as any); return m ? 1 : 0 })
-  expect(n).toBe(1)
+  const errors: string[] = []
+  page.on('console', m => { if (m.type() === 'error' && /worker/i.test(m.text())) errors.push(m.text()) })
+  await page.waitForTimeout(6000)
+  const canvas = await page.locator('.maplibregl-canvas').count()
+  expect(canvas).toBe(1)
+  expect(errors).toEqual([])
   await page.goto('/map?lat=39.2904&lng=-76.6122&mi=15&place=Baltimore')
   await expect(count(page)).toHaveText('77', { timeout: 90_000 })
   await expect(page.getByText('15 mi around Baltimore')).toBeVisible()
