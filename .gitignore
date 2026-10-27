@@ -2,7 +2,8 @@
 raw/*.csv
 raw/*.pdf
 db/snf.duckdb
-output/
+output/*
+!output/SNF_Intelligence_CareCompare_Sep2026.xlsx
 app/node_modules/
 app/dist/
 app/test-results/
