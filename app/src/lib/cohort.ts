@@ -1,9 +1,9 @@
-// Cohort conditions: a list of (field, operator, value) ANDed together, serialized into the URL so a cohort is a link.
+// Cohort constraints: a list of (field, operator, value) ANDed together, serialized into the URL so a cohort is a link.
 import { sqlStr } from './db'
 import { TABLE_COLS, type TableCol, type Unit } from './measures'
 
 export type Op = 'ge' | 'le' | 'eq' | 'between' | 'blank' | 'notblank' | 'contains' | 'in' | 'yes' | 'no'
-export interface Condition { field: string; op: Op; a?: string; b?: string }
+export interface Constraint { field: string; op: Op; a?: string; b?: string }
 
 /** Fields a cohort can test: the Explore table columns plus a few identity fields and the modeled hospital layer. */
 export interface CohortField { key: string; label: string; unit: Unit; group: string; kind: 'number' | 'text' | 'flag' | 'stars' | 'hospital' }
@@ -30,9 +30,9 @@ export const OPS: Record<CohortField['kind'], { op: Op; label: string }[]> = {
 
 /** Strict number: digits with optional sign and decimals. Typed-in '%', '$' and thousands commas are tolerated; hex, exponents, NaN and Infinity are not. */
 const num = (s?: string) => { const t = (s ?? '').trim().replace(/[%$,\s]/g, ''); return /^-?\d+(\.\d+)?$/.test(t) ? Number(t) : null }
-export const MAX_CONDITIONS = 20, MAX_LIST = 200
-/** Why a condition cannot run, in plain words — or null when it is complete and valid. The page shows this instead of silently ignoring the condition. */
-export function problem(c: Condition): string | null {
+export const MAX_CONSTRAINTS = 20, MAX_LIST = 200
+/** Why a constraint cannot run, in plain words — or null when it is complete and valid. The page shows this instead of silently ignoring the constraint. */
+export function problem(c: Constraint): string | null {
   const f = fieldByKey(c.field); if (!f) return 'Unknown measure.'
   if (f.kind === 'flag' || ['blank', 'notblank'].includes(c.op)) return null
   if (f.kind === 'hospital') { const parts = (c.a ?? '').split(',').map(s => s.trim()).filter(Boolean); if (!parts.length) return 'Enter one or more 6-character hospital CCNs, separated by commas.'; if (parts.length > MAX_LIST) return `At most ${MAX_LIST} CCNs.`; const bad = parts.find(s => !/^[0-9A-Za-z]{6}$/.test(s)); return bad ? `“${bad}” is not a 6-character CCN.` : null }
@@ -47,8 +47,8 @@ const likeEsc = (s: string) => s.replace(/[\\%_]/g, m => '\\' + m)
 /** Text values: no ';' or control characters (the query layer refuses multi-statement SQL), at most 80 characters. */
 const clean = (s?: string) => (s ?? '').replace(/[;\u0000-\u001f]/g, '').slice(0, 80)
 
-/** SQL for one condition, or null if it is incomplete (ignored). Every value is numeric-checked or sqlStr-escaped. */
-export function condSql(c: Condition): string | null {
+/** SQL for one constraint, or null if it is incomplete (ignored). Every value is numeric-checked or sqlStr-escaped. */
+export function condSql(c: Constraint): string | null {
   const f = fieldByKey(c.field); if (!f) return null
   const col = f.key
   if (f.kind === 'hospital') {
@@ -73,25 +73,25 @@ export function condSql(c: Condition): string | null {
   if (c.op === 'between') return a == null || b == null ? null : `${col} BETWEEN ${Math.min(a, b)} AND ${Math.max(a, b)}`
   return null
 }
-export const whereSql = (conds: Condition[]) => { const parts = conds.map(condSql).filter((s): s is string => !!s); return parts.length ? parts.join(' AND ') : 'TRUE' }
-/** True when the URL carried more conditions than the page keeps (the extra ones are dropped and the page says so). */
-export const overflowed = (items: string[]) => items.length > MAX_CONDITIONS
+export const whereSql = (conds: Constraint[]) => { const parts = conds.map(condSql).filter((s): s is string => !!s); return parts.length ? parts.join(' AND ') : 'TRUE' }
+/** True when the URL carried more constraints than the page keeps (the extra ones are dropped and the page says so). */
+export const overflowed = (items: string[]) => items.length > MAX_CONSTRAINTS
 
-// URL form: one `c` parameter per condition, `field.op.value` (between: `field.between.a_b`). Field keys and ops never contain '.', so the
+// URL form: one `c` parameter per constraint, `field.op.value` (between: `field.between.a_b`). Field keys and ops never contain '.', so the
 // first two dots split the parts and a value may contain dots. Values are percent-encoded by URLSearchParams, nothing else.
-export function serialize(conds: Condition[]): string[] {
+export function serialize(conds: Constraint[]): string[] {
   return conds.map(c => { const v = c.op === 'between' ? `${c.a ?? ''}_${c.b ?? ''}` : (c.a ?? ''); return [c.field, c.op, v].join('.') })
 }
-export function parse(items: string[]): Condition[] {
+export function parse(items: string[]): Constraint[] {
   return items.map(part => {
     const i = part.indexOf('.'), j = i < 0 ? -1 : part.indexOf('.', i + 1)
     if (i < 0 || j < 0) return null
     const field = part.slice(0, i), op = part.slice(i + 1, j) as Op, v = part.slice(j + 1)
-    const c: Condition = op === 'between' ? { field, op, a: v.split('_')[0], b: v.split('_')[1] ?? '' } : { field, op, a: v }
+    const c: Constraint = op === 'between' ? { field, op, a: v.split('_')[0], b: v.split('_')[1] ?? '' } : { field, op, a: v }
     return c
-  }).filter((c): c is Condition => !!c && !!fieldByKey(c.field) && OPS[fieldByKey(c.field)!.kind].some(o => o.op === c.op)).slice(0, MAX_CONDITIONS)
+  }).filter((c): c is Constraint => !!c && !!fieldByKey(c.field) && OPS[fieldByKey(c.field)!.kind].some(o => o.op === c.op)).slice(0, MAX_CONSTRAINTS)
 }
-export function describe(c: Condition): string {
+export function describe(c: Constraint): string {
   const f = fieldByKey(c.field); if (!f) return ''
   const op = (OPS[f.kind].find(o => o.op === c.op)?.label ?? c.op).replace(/ \(.*\)$/, '')
   const val = c.op === 'between' ? `${c.a ?? '?'} and ${c.b ?? '?'}` : ['blank', 'notblank', 'yes', 'no'].includes(c.op) ? '' : (c.a ?? '?')

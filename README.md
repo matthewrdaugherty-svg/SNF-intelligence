@@ -7,7 +7,7 @@ Post-Acute Care PUF, used for a clearly-labelled *modeled* view of which SNFs se
 (1) a DuckDB database, (2) a filterable Excel workbook, and (3) a web app whose database runs inside the browser
 (live: https://snf-intelligence.vercel.app).
 
-Pages: Explore (filter/sort/export every SNF; filter by a hospital's or a whole system's service area), Cohorts (stack conditions,
+Pages: Explore (filter/sort/export every SNF; filter by a hospital's or a whole system's service area), Cohorts (stack constraints,
 benchmark against all facilities, break down by state/chain/ownership, share by link), Hospitals (service area, modeled quality mix,
 owners), Map, Compare, Discharge flows (drop in a hospital's real discharge counts), Methodology & trust.
 

@@ -251,7 +251,7 @@ test('hospital search finds Hopkins and the service-area filter works in Explore
   await expect(page.getByRole('row').nth(1)).toContainText('Complete Care at Heritage')
 })
 
-test('cohorts: conditions from the URL produce the counts in the database and the link is shareable', async ({ page }) => {
+test('cohorts: constraints from the URL produce the counts in the database and the link is shareable', async ({ page }) => {
   const errors: string[] = []
   page.on('pageerror', e => errors.push(e.message))
   // MD · 4–5★ · short-stay rehospitalization ≤ 18 → 31 facilities, median 15.0 (db: 14.985)
@@ -267,10 +267,10 @@ test('cohorts: conditions from the URL produce the counts in the database and th
   expect(errors).toEqual([])
 })
 
-test('cohorts: builder adds a condition, breaks down by ownership, and exports', async ({ page }) => {
+test('cohorts: builder adds a constraint, breaks down by ownership, and exports', async ({ page }) => {
   await page.goto('/cohorts')
   await expect(page.getByText('14,690', { exact: true }).first()).toBeVisible({ timeout: 120_000 })
-  await page.getByRole('button', { name: 'Add condition' }).click()   // default: overall rating is any of 4,5
+  await page.getByRole('button', { name: 'Add constraint' }).click()   // default: overall rating is any of 4,5
   await page.getByLabel('Value').fill('1,2')
   await expect(page.getByText('5,912', { exact: true }).first()).toBeVisible({ timeout: 60_000 })
   await expect(page).toHaveURL(/c=overall_rating\.in\.1%2C2/)
@@ -280,7 +280,7 @@ test('cohorts: builder adds a condition, breaks down by ownership, and exports',
   await expect(first).toContainText('2,532')
   // hospital-area condition: Hopkins service area ∩ 1–2★ … switch to 4–5★ to check 94
   await page.getByLabel('Value').fill('4,5')
-  await page.getByRole('button', { name: 'Add condition' }).click()
+  await page.getByRole('button', { name: 'Add constraint' }).click()
   await page.getByLabel('Measure', { exact: true }).nth(1).selectOption('hospital_area')
   await page.getByLabel('Value').nth(1).fill('210009')
   await expect(page.getByText('94', { exact: true }).first()).toBeVisible({ timeout: 60_000 })
@@ -288,7 +288,7 @@ test('cohorts: builder adds a condition, breaks down by ownership, and exports',
   await page.getByRole('button', { name: 'Export CSV' }).click()
   const text = fs.readFileSync(await (await dl).path(), 'utf8')
   expect(text.split('\n').length).toBe(98)   // 3 comment lines + header + 94 rows
-  expect(text.split('\n')[1]).toContain('# Conditions: Overall star rating is any of 4,5 AND')
+  expect(text.split('\n')[1]).toContain('# Constraints: Overall star rating is any of 4,5 AND')
   expect(text.split('\n')[3]).toContain('CMS footnote')
 })
 
@@ -298,14 +298,14 @@ test('cohorts: hostile URL values are ignored, never executed', async ({ page })
   await page.goto("/cohorts?c=provider_name.contains.%27%3B%20DROP%20TABLE%20facility_master%3B--&c=qm_521_adj.ge.abc&c=nope.ge.1&c=garbage&m=ccn%3B&g=zzz")
   // the unreadable number is shown as a problem and nothing is counted until it is fixed; the unknown field and the junk item are dropped
   await expect(page.getByRole('alert').filter({ hasText: '“abc” is not a number.' })).toBeVisible({ timeout: 120_000 })
-  await expect(page.getByText('Fix the highlighted condition to run this cohort.')).toBeVisible()
+  await expect(page.getByText('Fix the highlighted constraint to run this cohort.')).toBeVisible()
   await expect(page.getByText('Nursing homes in cohort')).toHaveCount(0)
-  await page.getByRole('button', { name: /Remove condition Short-stay/ }).click()
+  await page.getByRole('button', { name: /Remove constraint Short-stay/ }).click()
   // the contains-condition is kept as a literal string → 0 rows
-  await expect(page.getByText('No nursing homes meet these conditions.')).toBeVisible({ timeout: 60_000 })
+  await expect(page.getByText('No nursing homes meet these constraints.')).toBeVisible({ timeout: 60_000 })
   await page.goto('/cohorts?c=overall_rating.in.4,5')
   await expect(page.getByText('Nursing homes in cohort')).toBeVisible({ timeout: 120_000 })
-  await expect(page.getByText('No nursing homes meet these conditions.')).toHaveCount(0)
+  await expect(page.getByText('No nursing homes meet these constraints.')).toHaveCount(0)
   expect(errors).toEqual([])
 })
 
