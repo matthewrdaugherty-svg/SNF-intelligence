@@ -8,8 +8,8 @@ export default function About() {
   if (!ref) return <div className="p-8 text-sm text-ink-2">Loading…</div>
   const tabs = [['overview', 'Overview'], ['measures', 'Measures and direction'], ['lineage', 'Column lineage'], ['footnotes', 'Footnote codes'], ['limits', 'Limitations'], ['checks', 'Verification']] as const
   return (
-    <div className="max-w-5xl mx-auto px-4 md:px-6 py-6">
-      <h1 className="text-xl font-semibold tracking-tight">Methodology & trust</h1>
+    <div className="page">
+      <h1>Methodology & trust</h1>
       <p className="text-sm text-ink-2 mt-1 max-w-3xl">Every number in this app comes from a CMS file, unchanged, or from a count or sum of CMS rows whose rule is written down here. Nothing is estimated or filled in. Where CMS suppressed a value, it is blank and carries CMS's footnote.</p>
       <div className="flex gap-1 mt-5 border-b border-hairline overflow-x-auto whitespace-nowrap">
         {tabs.map(([k, l]) => <button key={k} onClick={() => setTab(k)} className={`press px-3 py-2 text-sm -mb-px border-b-2 ${tab === k ? 'border-ink text-ink font-medium' : 'border-transparent text-ink-2 hover:text-ink'}`}>{l}</button>)}
@@ -49,9 +49,9 @@ export default function About() {
       {tab === 'lineage' && (
         <div className="mt-5 text-sm">
           <p className="text-ink-2 max-w-3xl mb-3">Each column in the facility table, the CMS file and header it came from, and how it was derived.</p>
-          <table className="w-full text-xs"><thead><tr className="text-left text-ink-3"><th className="font-normal py-1">Column</th><th className="font-normal">Database name</th><th className="font-normal">CMS file</th><th className="font-normal">CMS header / rule</th></tr></thead><tbody>
-            {ref.lineage.map((l, i) => <tr key={i} className="border-t border-hairline/60 align-top"><td className="py-1 pr-2">{l['Facility_Master header']}</td><td className="py-1 pr-2 text-ink-2"><code>{l['db column']}</code></td><td className="py-1 pr-2 text-ink-2">{l.source_file}</td><td className="py-1 text-ink-2">{l.original_header}{l.how_derived && l.how_derived !== 'direct copy' ? ` — ${l.how_derived}` : ''}</td></tr>)}
-          </tbody></table>
+          <div className="overflow-x-auto"><table className="tbl tbl-compact text-xs"><thead><tr><th>Column</th><th>Database name</th><th>CMS file</th><th>CMS header / rule</th></tr></thead><tbody>
+            {ref.lineage.map((l, i) => <tr key={i}><td className="[overflow-wrap:anywhere]">{l['Facility_Master header']}</td><td className="text-ink-2 [overflow-wrap:anywhere]"><code>{l['db column']}</code></td><td className="text-ink-2 [overflow-wrap:anywhere]">{l.source_file.replace(/^[a-z0-9]{4}-[a-z0-9]{4}_\d{4}-\d{2}-\d{2}_/, '')}</td><td className="text-ink-2 [overflow-wrap:anywhere]">{l.original_header}{l.how_derived && l.how_derived !== 'direct copy' ? ` — ${l.how_derived}` : ''}</td></tr>)}
+          </tbody></table></div>
         </div>
       )}
 
@@ -78,7 +78,7 @@ export default function About() {
         <div className="mt-5 text-sm max-w-3xl">
           <p className="text-ink-2 mb-3">{ref.meta.validation}</p>
           <div className="font-medium mb-1">Cross-file reconciliation (facilities matching / total)</div>
-          <table className="w-full text-xs"><tbody>{ref.reconciliation.map((r, i) => <tr key={i} className="border-t border-hairline/60"><td className="py-1 pr-3">{r.Check}</td><td className="py-1 tabular-nums text-ink-2 whitespace-nowrap">{r.Result}</td></tr>)}</tbody></table>
+          <div className="overflow-x-auto"><table className="tbl tbl-compact text-xs"><tbody>{ref.reconciliation.map((r, i) => <tr key={i}><td>{r.Check}</td><td className="num text-ink-2 whitespace-nowrap">{r.Result}</td></tr>)}</tbody></table></div>
           <div className="text-xs text-ink-3 mt-3">The one known difference — Provider Info's rating-cycle deficiency counts versus the inspection-cycle counts in the survey files — is explained for 287 of 449 facilities (citations under informal dispute) and open for the rest. This app uses the survey-file counts.</div>
         </div>
       )}

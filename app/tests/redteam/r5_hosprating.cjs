@@ -1,0 +1,6 @@
+const { chromium } = require('@playwright/test')
+;(async () => { const b = await chromium.launch(); const p = await b.newPage({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 2 })
+  await p.goto('http://localhost:4180/hospital/210009'); await p.waitForFunction(() => /Nursing homes in the service area/.test(document.body.innerText), null, { timeout: 120000 }); await p.waitForTimeout(1000)
+  const card = p.locator('div.rounded-\\[10px\\].p-4.flex.flex-col').first(); await card.screenshot({ path: '../screenshots/redteam5-hospital-210009-rating-card.png' })
+  console.log(await card.evaluate(c => { const v = c.children[1]; const s = v.querySelector('span span') || v.firstElementChild; const a = v.getBoundingClientRect(), r = s.getBoundingClientRect(); return { row: [a.top, a.bottom], chip: [r.top, r.bottom] } }))
+  await b.close() })()

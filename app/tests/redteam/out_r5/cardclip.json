@@ -1,0 +1,131 @@
+{
+ "1440 /facility/215085": [],
+ "1440 /facility/015463": [],
+ "1440 /facility/035106": [],
+ "1440 /hospital/210009": [
+  {
+   "label": "Hospital overall rating",
+   "labelCut": false,
+   "valueCut": true,
+   "noteCut": false,
+   "note": "CMS Care Compare, 2026"
+  }
+ ],
+ "1440 /cohorts?c=qm_521_adj.between.15_20&c=state.eq.MD": [],
+ "1024 /facility/215085": [
+  {
+   "label": "Fines, 3 years",
+   "labelCut": false,
+   "valueCut": false,
+   "noteCut": true,
+   "note": "MD average $21,934 · nation $30,972 · $284,616 worse than state"
+  }
+ ],
+ "1024 /facility/015463": [
+  {
+   "label": "Fines, 3 years",
+   "labelCut": false,
+   "valueCut": false,
+   "noteCut": true,
+   "note": "AL average $12,315 · nation $30,972 · $305,755 worse than state"
+  }
+ ],
+ "1024 /facility/035106": [],
+ "1024 /hospital/210009": [
+  {
+   "label": "Hospital overall rating",
+   "labelCut": false,
+   "valueCut": true,
+   "noteCut": false,
+   "note": "CMS Care Compare, 2026"
+  },
+  {
+   "label": "Volume-weighted facility measures",
+   "labelCut": false,
+   "valueCut": false,
+   "noteCut": true,
+   "note": "Rehospitalized 21.2% · readmitted after SNF 11.7% · to community 56.0%"
+  }
+ ],
+ "1024 /cohorts?c=qm_521_adj.between.15_20&c=state.eq.MD": [],
+ "390 /facility/215085": [
+  {
+   "label": "Short-stay residents rehospitalized",
+   "labelCut": false,
+   "valueCut": false,
+   "noteCut": true,
+   "note": "MD average 21.0% · nation 23.8% · 0.8 pts better than state"
+  },
+  {
+   "label": "Fines, 3 years",
+   "labelCut": false,
+   "valueCut": false,
+   "noteCut": true,
+   "note": "MD average $21,934 · nation $30,972 · $284,616 worse than state"
+  }
+ ],
+ "390 /facility/015463": [
+  {
+   "label": "Short-stay residents rehospitalized",
+   "labelCut": false,
+   "valueCut": false,
+   "noteCut": true,
+   "note": "AL average 24.8% · nation 23.8% · 9.6 pts worse than state"
+  },
+  {
+   "label": "Fines, 3 years",
+   "labelCut": false,
+   "valueCut": false,
+   "noteCut": true,
+   "note": "AL average $12,315 · nation $30,972 · $305,755 worse than state"
+  }
+ ],
+ "390 /facility/035106": [
+  {
+   "label": "Short-stay residents rehospitalized",
+   "labelCut": false,
+   "valueCut": false,
+   "noteCut": true,
+   "note": "AZ average 23.7% · nation 23.8% · 0.1 pts worse than state"
+  },
+  {
+   "label": "Fines, 3 years",
+   "labelCut": false,
+   "valueCut": false,
+   "noteCut": true,
+   "note": "AZ average $8,928 · nation $30,972 · $8,928 better than state"
+  }
+ ],
+ "390 /hospital/210009": [
+  {
+   "label": "Hospital overall rating",
+   "labelCut": false,
+   "valueCut": true,
+   "noteCut": false,
+   "note": "CMS Care Compare, 2026"
+  },
+  {
+   "label": "Medicare inpatient discharges, 2024",
+   "labelCut": false,
+   "valueCut": false,
+   "noteCut": true,
+   "note": "7,404 beneficiaries · $428,579,020 Medicare paid"
+  },
+  {
+   "label": "Volume-weighted facility measures",
+   "labelCut": false,
+   "valueCut": false,
+   "noteCut": true,
+   "note": "Rehospitalized 21.2% · readmitted after SNF 11.7% · to community 56.0%"
+  }
+ ],
+ "390 /cohorts?c=qm_521_adj.between.15_20&c=state.eq.MD": [
+  {
+   "label": "Rehospitalized % (QM 521) — cohort median",
+   "labelCut": false,
+   "valueCut": false,
+   "noteCut": true,
+   "note": "mean 18.0% · p25 17.4% · p75 18.8% · 57 with a value"
+  }
+ ]
+}

@@ -28,7 +28,21 @@ export const OPS: Record<CohortField['kind'], { op: Op; label: string }[]> = {
   hospital: [{ op: 'in', label: 'is any of (CCNs, comma-separated)' }],
 }
 
-const num = (s?: string) => { const n = Number(s); return s != null && s.trim() !== '' && Number.isFinite(n) ? n : null }
+/** Strict number: digits with optional sign and decimals. Typed-in '%', '$' and thousands commas are tolerated; hex, exponents, NaN and Infinity are not. */
+const num = (s?: string) => { const t = (s ?? '').trim().replace(/[%$,\s]/g, ''); return /^-?\d+(\.\d+)?$/.test(t) ? Number(t) : null }
+export const MAX_CONDITIONS = 20, MAX_LIST = 200
+/** Why a condition cannot run, in plain words — or null when it is complete and valid. The page shows this instead of silently ignoring the condition. */
+export function problem(c: Condition): string | null {
+  const f = fieldByKey(c.field); if (!f) return 'Unknown measure.'
+  if (f.kind === 'flag' || ['blank', 'notblank'].includes(c.op)) return null
+  if (f.kind === 'hospital') { const parts = (c.a ?? '').split(',').map(s => s.trim()).filter(Boolean); if (!parts.length) return 'Enter one or more 6-character hospital CCNs, separated by commas.'; if (parts.length > MAX_LIST) return `At most ${MAX_LIST} CCNs.`; const bad = parts.find(s => !/^[0-9A-Za-z]{6}$/.test(s)); return bad ? `“${bad}” is not a 6-character CCN.` : null }
+  if (f.kind === 'text') return (c.a ?? '').trim() ? null : 'Enter some text.'
+  if (c.op === 'in') { const parts = (c.a ?? '').split(',').map(s => s.trim()).filter(Boolean); if (!parts.length) return 'Enter star values like 1,2.'; const bad = parts.find(s => !/^[1-5]$/.test(s)); return bad ? `“${bad}” is not a whole star value from 1 to 5.` : null }
+  if (num(c.a) == null) return `“${c.a ?? ''}” is not a number.`
+  if (c.op === 'between' && num(c.b) == null) return `“${c.b ?? ''}” is not a number.`
+  if ((f.kind === 'stars') && !/^[1-5]$/.test((c.a ?? '').trim())) return 'Stars are whole numbers from 1 to 5.'
+  return null
+}
 const likeEsc = (s: string) => s.replace(/[\\%_]/g, m => '\\' + m)
 /** Text values: no ';' or control characters (the query layer refuses multi-statement SQL), at most 80 characters. */
 const clean = (s?: string) => (s ?? '').replace(/[;\u0000-\u001f]/g, '').slice(0, 80)
@@ -38,7 +52,7 @@ export function condSql(c: Condition): string | null {
   const f = fieldByKey(c.field); if (!f) return null
   const col = f.key
   if (f.kind === 'hospital') {
-    const ccns = (c.a ?? '').split(',').map(s => s.trim().toUpperCase()).filter(s => /^[0-9A-Z]{6}$/.test(s))
+    const ccns = (c.a ?? '').split(',').map(s => s.trim().toUpperCase()).filter(s => /^[0-9A-Z]{6}$/.test(s)).slice(0, MAX_LIST)
     return ccns.length ? `ccn IN (SELECT ccn FROM snf_hospital_area WHERE hospital_ccn IN (${ccns.map(sqlStr).join(',')}))` : null
   }
   if (f.kind === 'flag') return `${col} ${c.op === 'yes' ? '=' : '<>'} 'Y'`
@@ -51,7 +65,7 @@ export function condSql(c: Condition): string | null {
   // number / stars
   if (c.op === 'blank') return `${col} IS NULL`
   if (c.op === 'notblank') return `${col} IS NOT NULL`
-  if (c.op === 'in') { const vals = (c.a ?? '').split(',').map(s => num(s)).filter((n): n is number => n != null && n >= 1 && n <= 5); return vals.length ? `${col} IN (${vals.join(',')})` : null }
+  if (c.op === 'in') { const vals = (c.a ?? '').split(',').map(s => s.trim()).filter(s => /^[1-5]$/.test(s)); return vals.length ? `${col} IN (${vals.join(',')})` : null }
   const a = num(c.a), b = num(c.b)
   if (c.op === 'ge') return a == null ? null : `${col} >= ${a}`
   if (c.op === 'le') return a == null ? null : `${col} <= ${a}`
@@ -60,6 +74,8 @@ export function condSql(c: Condition): string | null {
   return null
 }
 export const whereSql = (conds: Condition[]) => { const parts = conds.map(condSql).filter((s): s is string => !!s); return parts.length ? parts.join(' AND ') : 'TRUE' }
+/** True when the URL carried more conditions than the page keeps (the extra ones are dropped and the page says so). */
+export const overflowed = (items: string[]) => items.length > MAX_CONDITIONS
 
 // URL form: one `c` parameter per condition, `field.op.value` (between: `field.between.a_b`). Field keys and ops never contain '.', so the
 // first two dots split the parts and a value may contain dots. Values are percent-encoded by URLSearchParams, nothing else.
@@ -73,11 +89,11 @@ export function parse(items: string[]): Condition[] {
     const field = part.slice(0, i), op = part.slice(i + 1, j) as Op, v = part.slice(j + 1)
     const c: Condition = op === 'between' ? { field, op, a: v.split('_')[0], b: v.split('_')[1] ?? '' } : { field, op, a: v }
     return c
-  }).filter((c): c is Condition => !!c && !!fieldByKey(c.field) && OPS[fieldByKey(c.field)!.kind].some(o => o.op === c.op)).slice(0, 20)
+  }).filter((c): c is Condition => !!c && !!fieldByKey(c.field) && OPS[fieldByKey(c.field)!.kind].some(o => o.op === c.op)).slice(0, MAX_CONDITIONS)
 }
 export function describe(c: Condition): string {
   const f = fieldByKey(c.field); if (!f) return ''
-  const op = OPS[f.kind].find(o => o.op === c.op)?.label ?? c.op
+  const op = (OPS[f.kind].find(o => o.op === c.op)?.label ?? c.op).replace(/ \(.*\)$/, '')
   const val = c.op === 'between' ? `${c.a ?? '?'} and ${c.b ?? '?'}` : ['blank', 'notblank', 'yes', 'no'].includes(c.op) ? '' : (c.a ?? '?')
   return `${f.label} ${op} ${val}`.trim()
 }

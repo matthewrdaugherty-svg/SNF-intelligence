@@ -70,27 +70,27 @@ export default function Explore() {
   const groups = useMemo(() => { const g = new Map<string, TableCol[]>(); for (const c of TABLE_COLS) g.set(c.group, [...(g.get(c.group) ?? []), c]); return [...g.entries()] }, [])
 
   return (
-    <div className="flex h-[calc(100dvh-52px)] relative">
+    <div className="flex h-[calc(100dvh-56px)] relative">
       <FilterPanel f={f} onPatch={onPatch} onClear={onClear} resultCount={rows?.length ?? null} open={filtersOpen} onClose={() => setFiltersOpen(false)} />
       <section className="flex-1 min-w-0 flex flex-col relative">
-        <div className="flex items-center gap-3 px-4 h-12 shrink-0">
-          <button className="press btn btn-surface text-sm md:hidden" onClick={() => setFiltersOpen(o => !o)} aria-expanded={filtersOpen}>Filters</button>
+        <div className="flex items-center gap-3 px-4 h-14 shrink-0">
+          <button className="press btn btn-surface md:hidden" onClick={() => setFiltersOpen(o => !o)} aria-expanded={filtersOpen}>Filters</button>
           <div className="text-sm text-ink-2">{rows ? <><span className="text-ink font-medium tabular-nums" data-testid="result-count">{rows.length.toLocaleString()}</span> facilities</> : 'Loading…'}{hasDist && f.place ? <span className="text-ink-3"> · within {f.miles} mi of {f.place}</span> : null}{hasHosp ? <span className="text-ink-3"> · in the service area of {f.hospitals.length} hospital{f.hospitals.length > 1 ? 's' : ''} (modeled)</span> : null}</div>
           <div className="ml-auto flex items-center gap-2 relative shrink-0">
-            <button className="press btn btn-surface text-sm" onClick={() => setPicker(p => !p)} aria-expanded={picker}>Columns · {cols.length}</button>
-            <button className="press btn btn-primary text-sm" onClick={exportCsv} disabled={!rows?.length}>Export CSV</button>
+            <button className="press btn btn-surface" onClick={() => setPicker(p => !p)} aria-expanded={picker}>Columns · {cols.length}</button>
+            <button className="press btn btn-primary" onClick={exportCsv} disabled={!rows?.length}>Export CSV</button>
             {picker && (
               <div className="absolute right-0 top-10 w-[min(520px,calc(100vw-2rem))] max-h-[70vh] overflow-auto bg-surface rounded-[10px] p-4 z-20" style={{ boxShadow: 'var(--shadow-float)' }} role="dialog" aria-label="Choose columns" onKeyDown={e => { if (e.key === 'Escape') setPicker(false) }}>
-                <div className="flex items-center justify-between mb-2"><div className="font-medium">Columns</div><button className="press btn btn-quiet text-xs" onClick={() => setColKeys(TABLE_COLS.filter(c => c.default).map(c => c.key))}>Reset to default</button></div>
+                <div className="flex items-center justify-between mb-2"><div className="font-medium">Columns</div><button className="press btn btn-quiet btn-sm" onClick={() => setColKeys(TABLE_COLS.filter(c => c.default).map(c => c.key))}>Reset to default</button></div>
                 {groups.map(([g, cs]) => (
                   <div key={g} className="mb-3">
                     <div className="text-xs text-ink-2 mb-1">{g}</div>
                     <div className="grid grid-cols-2 gap-x-4">
-                      {cs.map(c => <label key={c.key} className="flex items-center gap-2 text-sm py-0.5 cursor-pointer"><input type="checkbox" className="accent-ink" checked={colKeys.includes(c.key)} onChange={e => setColKeys(k => e.target.checked ? [...k, c.key] : k.filter(x => x !== c.key))} /><span className="truncate" title={c.label}>{c.label}</span></label>)}
+                      {cs.map(c => <label key={c.key} className="flex items-center gap-2 text-sm py-0.5 cursor-pointer"><input type="checkbox" className="accent-accent" checked={colKeys.includes(c.key)} onChange={e => setColKeys(k => e.target.checked ? [...k, c.key] : k.filter(x => x !== c.key))} /><span className="truncate" title={c.label}>{c.label}</span></label>)}
                     </div>
                   </div>
                 ))}
-                <button className="press btn btn-primary text-sm mt-1" onClick={() => setPicker(false)}>Done</button>
+                <button className="press btn btn-primary mt-2" onClick={() => setPicker(false)}>Done</button>
               </div>
             )}
           </div>
@@ -117,7 +117,7 @@ function Footer({ rows, cols }: { rows: Record<string, unknown>[]; cols: TableCo
     <div className="shrink-0 border-t border-hairline bg-surface px-4 py-2 text-xs text-ink-2 flex flex-wrap gap-x-5 gap-y-1">
       <span>Averages of this set:</span>
       {starAvg != null && <span>overall stars <span className="text-ink tabular-nums">{starAvg.toFixed(2)}</span></span>}
-      {stats.map(s => s.mean != null && <span key={s.c.key} title={`${s.n.toLocaleString()} facilities with a value`}>{s.c.label.replace(/\s*\(.*\)$/, '')} <span className="text-ink tabular-nums">{fmt(s.mean, s.c.unit, s.c.unit === 'count' ? undefined : 1)}</span></span>)}
+      {stats.map(s => s.mean != null && <span key={s.c.key} title={`${s.c.label} · ${s.n.toLocaleString()} facilities with a value`}>{(s.c.short ?? s.c.label).replace(/\s*\(.*\)$/, '')} <span className="text-ink tabular-nums">{fmt(s.mean, s.c.unit, s.c.unit === 'count' ? undefined : 1)}</span></span>)}
     </div>
   )
 }

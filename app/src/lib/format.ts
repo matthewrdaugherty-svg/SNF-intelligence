@@ -25,9 +25,10 @@ export function fmt(v: unknown, unit: Unit, decimals?: number): string {
 export const fmtInt = (n: number) => nf(0).format(n)
 export const fmtPct = (n: number, d = 1) => nf(d).format(n) + '%'
 export const fmtUsd = (n: number) => usd.format(n)
+const KEEP_UPPER = new Set(['HCA', 'CHS', 'UPMC', 'UHS', 'LLC', 'LP', 'LLP', 'PC', 'JV', 'USA', 'NYU', 'UCLA', 'UCSF', 'UC', 'SSM', 'CHI', 'AHS', 'MUSC', 'UNC', 'UAB', 'UT', 'UW', 'UNM', 'VCU', 'OSF', 'CHOC', 'II', 'III', 'IV'])
 export function titleCase(s: string) {
   s = s.replace(/,\s*THE\s*$/i, '').replace(/^(.*)$/, m => /,\s*THE\s*$/i.test(s) ? 'THE ' + m : m)   // 'JOHNS HOPKINS HOSPITAL, THE' -> 'The Johns Hopkins Hospital'
-  return s.toLowerCase().replace(/(^|[^a-z0-9'’])([a-z])/g, (_, pre, c) => pre + c.toUpperCase()).replace(/\bLlc\b/g, 'LLC').replace(/\bSnf\b/g, 'SNF').replace(/\b(Of|And|The|At|For|In|On)\b/g, m => m.toLowerCase()).replace(/^(of|and|the|at|for|in|on)\b/, m => m[0].toUpperCase() + m.slice(1))
+  return s.toLowerCase().replace(/(^|[^a-z0-9'’])([a-z])/g, (_, pre, c) => pre + c.toUpperCase()).replace(/\bSnf\b/g, 'SNF').replace(/\b([A-Za-z]{2,4})\b/g, w => KEEP_UPPER.has(w.toUpperCase()) ? w.toUpperCase() : w).replace(/\b(Of|And|The|At|For|In|On)\b/g, m => m.toLowerCase()).replace(/^(of|and|the|at|for|in|on)\b/, m => m[0].toUpperCase() + m.slice(1))
 }
 /** 'Baltimore City' and Louisiana parishes are not 'X County'. */
 export function countyLabel(county: string, state: string) {

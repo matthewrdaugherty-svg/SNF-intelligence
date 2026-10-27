@@ -19,40 +19,40 @@ export default function Compare() {
     return () => { live = false }
   }, [ccns])
   if (!ccns.length) return <Empty title="Nothing to compare yet."><p>Tick facilities in Explore or on a facility page. Up to {MAX_COMPARE} at a time.</p><Link to="/explore" className="underline">Go to Explore</Link></Empty>
-  const colW = `minmax(150px, 1fr)`
+  const colW = `minmax(112px, 1fr)`
   return (
-    <div className="px-4 md:px-6 py-6 overflow-x-auto">
-      <div className="flex items-center gap-3 mb-4">
-        <h1 className="text-xl font-semibold tracking-tight">Compare</h1>
-        <div className="text-sm text-ink-2">{rows.length} of {MAX_COMPARE}</div>
-        <button className="press btn btn-quiet text-sm ml-auto" onClick={() => compareStore.clear()}>Clear all</button>
+    <div className="page">
+      <div className="flex items-center gap-3 mb-6">
+        <h1>Compare</h1>
+        <div className="t-body text-ink-2">{rows.length} of {MAX_COMPARE}</div>
+        <button className="press btn btn-quiet ml-auto" onClick={() => compareStore.clear()}>Clear all</button>
       </div>
-      <div className="bg-surface rounded-[10px] px-5 py-4" style={{ minWidth: 320 + rows.length * 160 }}>
-        <div className="grid gap-4 items-end border-b border-hairline pb-3" style={{ gridTemplateColumns: `320px repeat(${rows.length}, ${colW})` }}>
-          <div className="text-xs text-ink-3">Best value in each row is in bold (by our reading of the measure's direction).<div className="mt-1">{STRIP_HEADER}</div></div>
+      <div className="panel panel-pad overflow-x-auto">
+        <div className="grid gap-4 items-end border-b border-hairline pb-3" style={{ gridTemplateColumns: `minmax(140px, 240px) repeat(${rows.length}, ${colW})` }}>
+          <div className="t-caption sticky left-0 bg-surface z-10">Best value in each row is in bold (by our reading of the measure's direction).<div className="mt-1">{STRIP_HEADER}</div></div>
           {rows.map(r => (
-            <div key={String(r.ccn)} className="min-w-0">
-              <Link to={`/facility/${r.ccn}`} className="block text-sm font-medium text-ink hover:underline underline-offset-2 leading-tight">{titleCase(String(r.provider_name))}</Link>
-              <div className="text-[11px] text-ink-3 truncate">{titleCase(String(r.city_town))}, {String(r.state)} · {r.number_of_certified_beds != null ? `${Number(r.number_of_certified_beds)} beds` : ''}</div>
+            <div key={String(r.ccn)} className="min-w-0 text-right">
+              <Link to={`/facility/${r.ccn}`} className="block t-body font-medium hover:underline underline-offset-2">{titleCase(String(r.provider_name))}</Link>
+              <div className="t-caption truncate">{titleCase(String(r.city_town))}, {String(r.state)} · {r.number_of_certified_beds != null ? `${Number(r.number_of_certified_beds)} beds` : ''}</div>
               <div className="mt-1"><QualityStrip row={r} /></div>
-              <button className="press btn btn-quiet text-xs px-0 mt-1" onClick={() => compareStore.remove(String(r.ccn))}>Remove</button>
+              <button className="press btn btn-quiet btn-sm mt-1" onClick={() => compareStore.remove(String(r.ccn))}>Remove</button>
             </div>
           ))}
         </div>
         {GROUPS.map(g => (
-          <div key={g.id} className="mt-4">
-            <div className="font-medium text-sm text-ink mb-1">{g.title}</div>
+          <div key={g.id} className="mt-6">
+            <div className="section-title mb-1 sticky left-0 bg-surface">{g.title}</div>
             {g.measures.map(m => {
               const vals = rows.map(r => { const v = r[m.key]; return v == null || v === '' ? null : Number(v) })
               const present = vals.filter((v): v is number => v != null)
               const best = present.length > 1 && m.direction !== 'none' ? (m.direction === 'lower' ? Math.min(...present) : Math.max(...present)) : null
               return (
-                <div key={m.key} className="grid gap-4 py-1.5 border-b border-hairline/60 last:border-0 items-center" style={{ gridTemplateColumns: `320px repeat(${rows.length}, ${colW})` }}>
-                  <div className="text-sm text-ink-2">{m.label}</div>
+                <div key={m.key} className="grid gap-4 py-2 border-b border-hairline/60 last:border-0 items-center" style={{ gridTemplateColumns: `minmax(140px, 240px) repeat(${rows.length}, ${colW})` }}>
+                  <div className="t-body text-ink-2 sticky left-0 bg-surface z-10">{m.label}</div>
                   {rows.map((r, i) => (
-                    <div key={String(r.ccn)} className={`text-sm tabular-nums ${best != null && vals[i] === best ? 'font-semibold text-ink' : 'text-ink'}`}>
+                    <div key={String(r.ccn)} className={`t-body tabular-nums text-right ${best != null && vals[i] === best && present.length > 1 && present.filter(v => v === best).length === 1 ? 'font-semibold' : ''}`}>
                       {fmt(vals[i], m.unit, m.decimals)}{vals[i] == null && m.fn ? <Fn code={r[m.fn]} ref={ref} /> : null}
-                      {m.compPerf && r[m.compPerf] ? <div className="text-[11px] text-ink-3 font-normal">{String(r[m.compPerf])}</div> : null}
+                      {m.compPerf && r[m.compPerf] ? <div className="t-caption font-normal">{String(r[m.compPerf]).toLowerCase()}</div> : null}
                     </div>
                   ))}
                 </div>

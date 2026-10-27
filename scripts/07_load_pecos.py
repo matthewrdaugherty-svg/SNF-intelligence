@@ -86,25 +86,30 @@ print("  Hopkins:", hop); assert any(x[1]==8 for x in hop), hop   # 7 CCNs + 09S
 
 # ---------- hospital families (superset across holding companies) ----------
 # A hospital lists its direct owner and every indirect owner up the chain, so one system shows up under several holding-company
-# names (an HCA hospital lists Hercules Holding II, Frisco Holding II, HCA Inc, HCA Healthcare Inc, HealthTrust ...). Families are
-# built from the data, with no fuzzy name matching: (1) owner records with the exact same organization name are one organization;
-# (2) an organization whose Care Compare hospitals are at least 80% contained in a larger organization's hospitals is a subsidiary
-# of the largest such organization; (3) a family is the tree that results, labelled with its largest member and carrying every
-# member name as an alias. A hospital owned by organizations from two families (a joint venture) belongs to both.
+# names. Families are built from the data with no fuzzy name matching: (1) owner records with the exact same organization name
+# are one organization; (2) only CONTROLLING interests count — an owner's stake in a hospital counts when its reported percentage
+# is 50% or more, or is not reported (minority investors such as a 20% holding vehicle or a joint-venture partner never pull a
+# hospital into their family); (3) an organization whose controlled hospitals are at least 80% contained in a larger organization's
+# controlled hospitals is a subsidiary of the largest such organization; (4) a family is the resulting tree, labelled with its
+# largest member that is not named as a holding/acquisition vehicle, carrying every member name as an alias.
 print("== Hospital families")
-rows=con.execute("SELECT DISTINCT upper(trim(owner_name)) AS name, hospital_ccn FROM hospital_owner_org WHERE in_hospital_master").fetchall()
-sets={}
-for name,ccn in rows: sets.setdefault(name,set()).add(ccn)
-names=sorted(sets, key=lambda n:(-len(sets[n]), n))
+rows=con.execute("""SELECT upper(trim(owner_name)) AS name, hospital_ccn, max(coalesce(pct, 100)) AS pct
+  FROM hospital_owner_org WHERE in_hospital_master GROUP BY 1,2""").fetchall()
+sets={}; allsets={}
+for name,ccn,pct in rows:
+    allsets.setdefault(name,set()).add(ccn)
+    if pct>=50: sets.setdefault(name,set()).add(ccn)
+names=sorted(allsets, key=lambda n:(-len(sets.get(n,())), n))
 parent={}
 for n in names:
-    A=sets[n]; best=None
+    A=sets.get(n,set())
+    if not A: continue
+    best=None
     for m in names:
         if m==n: continue
-        B=sets[m]
-        if len(B)<len(A) or (len(B)==len(A) and m>n): continue   # only attach to a larger (or equal, name-ordered) organization
-        if len(A&B)/len(A)>=0.8:
-            if best is None or len(B)>len(sets[best]): best=m
+        B=sets.get(m,set())
+        if len(B)<len(A) or (len(B)==len(A) and m>n): continue
+        if len(A&B)/len(A)>=0.8 and (best is None or len(B)>len(sets[best])): best=m
     if best: parent[n]=best
 def root(n):
     while n in parent: n=parent[n]
@@ -114,32 +119,39 @@ for n in names: fam.setdefault(root(n),[]).append(n)
 print(f"  {len(names):,} owner organizations → {len(fam):,} families; {sum(1 for f in fam.values() if len(f)>1)} families have more than one member name")
 con.execute("DROP TABLE IF EXISTS hospital_family"); con.execute("DROP TABLE IF EXISTS hospital_family_org"); con.execute("DROP TABLE IF EXISTS hospital_family_member")
 con.execute("CREATE TABLE hospital_family (family_id INTEGER, label VARCHAR, n_member_orgs INTEGER, aliases VARCHAR)")
-con.execute("CREATE TABLE hospital_family_org (family_id INTEGER, org_name VARCHAR, n_hospitals INTEGER, parent_org VARCHAR)")
-# Label: the largest member whose name is not a generic holding vehicle ("HOLDING", "HOLDINGS", "ACQUISITION"); else the largest member.
+con.execute("CREATE TABLE hospital_family_org (family_id INTEGER, org_name VARCHAR, n_hospitals_controlled INTEGER, n_hospitals_any INTEGER, parent_org VARCHAR)")
 import re as _re
-GENERIC=_re.compile(r"\b(HOLDING|HOLDINGS|ACQUISITION|ACQUISITIONS)\b")
+GENERIC=_re.compile(r"\b(HOLDING|HOLDINGS|ACQUISITION|ACQUISITIONS|BUYER)\b")
 def label_of(members):
     named=[m for m in members if not GENERIC.search(m)]
     return (named or members)[0]
-for i,(r,members) in enumerate(sorted(fam.items(), key=lambda kv:(-len(sets[kv[0]]), kv[0])), start=1):
-    members=sorted(members, key=lambda n:(-len(sets[n]), n)); lab=label_of(members)
+for i,(r,members) in enumerate(sorted(fam.items(), key=lambda kv:(-len(sets.get(kv[0],())), kv[0])), start=1):
+    members=sorted(members, key=lambda n:(-len(sets.get(n,())), n)); lab=label_of(members)
     con.execute("INSERT INTO hospital_family VALUES (?,?,?,?)", [i, lab, len(members), " | ".join(m for m in members if m!=lab)])
-    for m in members: con.execute("INSERT INTO hospital_family_org VALUES (?,?,?,?)", [i, m, len(sets[m]), parent.get(m)])
+    for m in members: con.execute("INSERT INTO hospital_family_org VALUES (?,?,?,?,?)", [i, m, len(sets.get(m,())), len(allsets[m]), parent.get(m)])
+# membership = hospitals the family CONTROLS (some member holds ≥50% or an unreported share); minority stakes are kept separately
 con.execute("""CREATE TABLE hospital_family_member AS
-  SELECT DISTINCT fo.family_id, o.hospital_ccn, h.state, h.hospital_name, (o.hospital_ccn IN (SELECT hospital_ccn FROM hospital_service_area)) AS has_service_area,
-         max(CASE WHEN o.role_code='34' THEN 1 ELSE 0 END) OVER (PARTITION BY fo.family_id, o.hospital_ccn) = 1 AS direct
-  FROM hospital_owner_org o JOIN hospital_family_org fo ON fo.org_name = upper(trim(o.owner_name)) JOIN hospital_master h USING (hospital_ccn) WHERE o.in_hospital_master""")
-con.execute("ALTER TABLE hospital_family ADD COLUMN n_hospitals INTEGER"); con.execute("ALTER TABLE hospital_family ADD COLUMN n_with_service_area INTEGER"); con.execute("ALTER TABLE hospital_family ADD COLUMN n_states INTEGER")
-con.execute("""UPDATE hospital_family SET n_hospitals = m.n, n_with_service_area = m.a, n_states = m.s FROM
-  (SELECT family_id, count(DISTINCT hospital_ccn) n, count(DISTINCT CASE WHEN has_service_area THEN hospital_ccn END) a, count(DISTINCT state) s FROM hospital_family_member GROUP BY 1) m WHERE m.family_id = hospital_family.family_id""")
-top=con.execute("SELECT label, n_member_orgs, n_hospitals, n_states, aliases FROM hospital_family ORDER BY n_hospitals DESC LIMIT 6").fetchall()
-for t in top: print("  ", t[0], "| orgs", t[1], "| hospitals", t[2], "| states", t[3], "| aliases:", (t[4] or "")[:120])
-hca=con.execute("SELECT count(DISTINCT family_id) FROM hospital_family_org WHERE org_name IN ('HCA INC','HCA HEALTHCARE INC','HERCULES HOLDING II','FRISCO HOLDING II','HEALTHTRUST INC - THE HOSPITAL COMPANY','HCA SQUARED LLC')").fetchone()[0]
-assert hca==1, f"HCA holding companies split across {hca} families"
-sep=con.execute("SELECT count(DISTINCT family_id) FROM hospital_family_org WHERE org_name IN ('HCA INC','UNIVERSAL HEALTH SERVICES INC','COMMONSPIRIT HEALTH','TENET HEALTHCARE CORPORATION','THE JOHNS HOPKINS HEALTH SYSTEM CORPORATION')").fetchone()[0]
-assert sep==5, f"distinct systems merged: {sep}"
-hop=con.execute("SELECT state, count(*) FROM hospital_family_member WHERE family_id=(SELECT family_id FROM hospital_family_org WHERE org_name='THE JOHNS HOPKINS HEALTH SYSTEM CORPORATION') GROUP BY 1 ORDER BY 1").fetchall()
-print("  Hopkins family by state:", hop)
+  WITH o AS (SELECT upper(trim(owner_name)) AS org_name, hospital_ccn, max(coalesce(pct,100)) AS pct, max(CASE WHEN role_code='34' THEN 1 ELSE 0 END) AS direct
+             FROM hospital_owner_org WHERE in_hospital_master GROUP BY 1,2)
+  SELECT fo.family_id, o.hospital_ccn, h.state, h.hospital_name, (o.hospital_ccn IN (SELECT hospital_ccn FROM hospital_service_area)) AS has_service_area,
+         max(o.direct) = 1 AS direct, max(o.pct) AS pct_max, max(o.pct) >= 50 AS controlled
+  FROM o JOIN hospital_family_org fo USING (org_name) JOIN hospital_master h USING (hospital_ccn) GROUP BY 1,2,3,4""")
+con.execute("ALTER TABLE hospital_family ADD COLUMN n_hospitals INTEGER"); con.execute("ALTER TABLE hospital_family ADD COLUMN n_with_service_area INTEGER"); con.execute("ALTER TABLE hospital_family ADD COLUMN n_states INTEGER"); con.execute("ALTER TABLE hospital_family ADD COLUMN n_minority_stakes INTEGER")
+con.execute("""UPDATE hospital_family SET n_hospitals = m.n, n_with_service_area = m.a, n_states = m.s, n_minority_stakes = m.mi FROM
+  (SELECT family_id, count(*) FILTER (WHERE controlled) n, count(*) FILTER (WHERE controlled AND has_service_area) a, count(DISTINCT CASE WHEN controlled THEN state END) s, count(*) FILTER (WHERE NOT controlled) mi
+   FROM hospital_family_member GROUP BY 1) m WHERE m.family_id = hospital_family.family_id""")
+top=con.execute("SELECT label, n_member_orgs, n_hospitals, n_states, n_minority_stakes, aliases FROM hospital_family ORDER BY n_hospitals DESC LIMIT 8").fetchall()
+for t in top: print("  ", t[0], "| orgs", t[1], "| controls", t[2], "| states", t[3], "| minority stakes", t[4], "| aliases:", (t[5] or "")[:90])
+def famof(name): return con.execute("SELECT family_id FROM hospital_family_org WHERE org_name=?",[name]).fetchone()
+assert famof('HCA INC')==famof('HCA HEALTHCARE INC')==famof('HEALTHTRUST INC - THE HOSPITAL COMPANY'), "HCA wholly-owned chain split"
+# minority holding vehicles (Hercules/Frisco hold 14–20% of ~155 HCA hospitals) may sit inside the HCA family through the handful they control,
+# but their minority stakes must never add hospitals: every HCA-family hospital is controlled by an HCA entity with a reported >=50% share or an unreported share.
+assert con.execute("SELECT count(*) FROM hospital_family_member WHERE family_id=? AND NOT controlled",[famof('HCA INC')[0]]).fetchone()[0]==0
+assert famof('HENRY FORD HEALTH SYSTEM')!=famof('ASCENSION HEALTH'), "JV partner merged (Henry Ford → Ascension)"
+assert len({famof(x)[0] for x in ['HCA INC','UNIVERSAL HEALTH SERVICES INC','COMMONSPIRIT HEALTH','TENET HEALTHCARE CORPORATION','THE JOHNS HOPKINS HEALTH SYSTEM CORPORATION']})==5
+hop=con.execute("SELECT state, count(*) FROM hospital_family_member WHERE controlled AND family_id=(SELECT family_id FROM hospital_family_org WHERE org_name='THE JOHNS HOPKINS HEALTH SYSTEM CORPORATION') GROUP BY 1 ORDER BY 1").fetchall()
+print("  Hopkins family by state (controlled):", hop)
+print("  JV check: hospitals in 2+ families:", con.execute("SELECT count(*) FROM (SELECT hospital_ccn FROM hospital_family_member WHERE controlled GROUP BY 1 HAVING count(*)>1)").fetchone()[0])
 
 # ---------- SNF PECOS view ----------
 print("== SNF PECOS view")

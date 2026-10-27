@@ -44,7 +44,8 @@ test('suppressed value shows a footnote, not zero', async ({ page }) => {
   await page.goto('/facility/235324')
   await expect(page.getByRole('heading', { level: 1 })).toContainText('Riverside Healthcare Center')
   const row = page.getByTestId('measure-qm_472_4q')
-  await expect(row).toContainText('fn 9')
+  await expect(row).toContainText('too few residents to report')
+  await expect(row.getByRole('note')).toHaveAttribute('title', /CMS footnote 9: The number of residents or resident stays is too small to report/)
   await expect(row).not.toContainText('0.0%')
 })
 
@@ -117,7 +118,7 @@ test('discharge flows: rejects a bad file, accepts a good one, computes the qual
   await expect(page.getByText(/5 valid rows/)).toBeVisible()
   await expect(page.getByText(/1 row skipped/)).toBeVisible()
   await expect(page.getByText(/must be 6 characters/)).toBeVisible()
-  await expect(page.getByText('Discharges to SNFs')).toBeVisible()
+  await expect(page.getByText('Discharges to nursing homes')).toBeVisible()
   // total 100: low 50 (50%), mid 15, high 30, unmatched 5
   const cards = page.locator('[class*="grid-cols-5"] > div')
   await expect(cards.nth(0)).toContainText('100')
@@ -131,7 +132,7 @@ test('discharge flows: rejects a bad file, accepts a good one, computes the qual
   await shot(page, '06-flows')
   // persists across reload
   await page.reload()
-  await expect(page.getByText('Discharges to SNFs')).toBeVisible({ timeout: 90_000 })
+  await expect(page.getByText('Discharges to nursing homes')).toBeVisible({ timeout: 90_000 })
   await page.getByRole('button', { name: 'Remove uploaded data' }).click()
   await expect(page.getByText('No discharge data loaded.')).toBeVisible()
 })
@@ -142,7 +143,7 @@ test('methodology page lists lineage, footnotes and limitations', async ({ page 
   await page.getByRole('button', { name: 'Footnote codes' }).click()
   await expect(page.getByText('The number of residents or resident stays is too small to report', { exact: false })).toBeVisible()
   await page.getByRole('button', { name: 'Column lineage' }).click()
-  await expect(page.getByText('4pq5-n9py_2026-09-30_NH_ProviderInfo_Sep2026_3.csv').first()).toBeVisible()
+  await expect(page.getByText('NH_ProviderInfo_Sep2026_3.csv').first()).toBeVisible()
   await page.getByRole('button', { name: 'Limitations' }).click()
   await expect(page.getByText(/No hospital→SNF discharge flow/)).toBeVisible()
   await shot(page, '07-about')
@@ -220,7 +221,7 @@ test('search box accepts spaces mid-phrase and commits the whole phrase', async 
 test('hospital page: Johns Hopkins service area and modeled quality mix match the database', async ({ page }) => {
   await page.goto('/hospital/210009')
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('The Johns Hopkins Hospital', { timeout: 120_000 })
-  const sentence = page.locator('p.text-lg')
+  const sentence = page.locator('p.t-lead')
   await expect(sentence).toContainText('10,834')
   await expect(sentence).toContainText('200')
   await expect(sentence).toContainText('209')
@@ -286,16 +287,21 @@ test('cohorts: builder adds a condition, breaks down by ownership, and exports',
   const dl = page.waitForEvent('download')
   await page.getByRole('button', { name: 'Export CSV' }).click()
   const text = fs.readFileSync(await (await dl).path(), 'utf8')
-  expect(text.split('\n').length).toBe(95)
-  expect(text.split('\n')[0]).toContain('CMS footnote')
+  expect(text.split('\n').length).toBe(98)   // 3 comment lines + header + 94 rows
+  expect(text.split('\n')[1]).toContain('# Conditions: Overall star rating is any of 4,5 AND')
+  expect(text.split('\n')[3]).toContain('CMS footnote')
 })
 
 test('cohorts: hostile URL values are ignored, never executed', async ({ page }) => {
   const errors: string[] = []
   page.on('pageerror', e => errors.push(e.message))
   await page.goto("/cohorts?c=provider_name.contains.%27%3B%20DROP%20TABLE%20facility_master%3B--&c=qm_521_adj.ge.abc&c=nope.ge.1&c=garbage&m=ccn%3B&g=zzz")
-  await expect(page.getByText('Facilities in cohort')).toBeVisible({ timeout: 120_000 })
-  // the contains-condition is kept (as a literal string → 0 rows); the junk ones are dropped
+  // the unreadable number is shown as a problem and nothing is counted until it is fixed; the unknown field and the junk item are dropped
+  await expect(page.getByRole('alert').filter({ hasText: '“abc” is not a number.' })).toBeVisible({ timeout: 120_000 })
+  await expect(page.getByText('Fix the highlighted condition to run this cohort.')).toBeVisible()
+  await expect(page.getByText('Facilities in cohort')).toHaveCount(0)
+  await page.getByRole('button', { name: /Remove condition Short-stay/ }).click()
+  // the contains-condition is kept as a literal string → 0 rows
   await expect(page.getByText('No facilities meet these conditions.')).toBeVisible({ timeout: 60_000 })
   await page.goto('/cohorts?c=overall_rating.in.4,5')
   await expect(page.getByText('Facilities in cohort')).toBeVisible({ timeout: 120_000 })
@@ -318,7 +324,7 @@ test('system picker: "Whole system" finds the Johns Hopkins family, lets you dro
   await panel.getByRole('button', { name: 'DC · 1' }).click()
   await panel.getByRole('button', { name: 'FL · 1' }).click()
   await panel.getByRole('button', { name: 'Add 4 hospitals' }).click()
-  await expect(page.getByRole('status')).toContainText('added 4 hospitals; 1 in the chosen states have no service-area data')
+  await expect(page.getByRole('status')).toContainText('added 4 hospitals; 1 in the chosen state has no service-area data and was left out')
   await expect(count(page)).toHaveText('226', { timeout: 60_000 })
   await expect(page).toHaveURL(/h=210009%2C210022%2C210029%2C210048/)
   await page.getByRole('button', { name: 'Remove all 4' }).click()
@@ -340,6 +346,6 @@ test('hospital page names its PECOS owner and links to the whole system; facilit
   await expect(count(page)).toHaveText('226')
   await page.goto('/facility/215085')
   await expect(page.getByTestId('snapshot')).toContainText('Carroll Park Healthcare is a 2-star (poor), 140-bed for profit nursing home in Baltimore, MD. 20.2% of its short-stay residents were rehospitalized, better than the MD average of 21.0%.', { timeout: 120_000 })
-  await expect(page.getByTestId('snapshot')).toContainText('4 harm-or-jeopardy deficiencies and $306,550 in fines')
-  await expect(page.getByTestId('pecos')).toContainText('enrolled as Gwynnfalls Md Opco doing business as Carroll Park Healthcare; CMS affiliation entity Engage Healthcare; proprietary; 1 change of ownership since 2016, most recently 2023-08-01 (buyer Gwynnfalls Md Opco).')
+  await expect(page.getByTestId('snapshot')).toContainText('CMS recorded 4 harm-or-jeopardy deficiencies across the last three inspection cycles and $306,550 in fines over the three-year penalties window')
+  await expect(page.getByTestId('pecos')).toContainText('enrolled as Gwynnfalls Md Opco doing business as Carroll Park Healthcare; CMS affiliation entity Engage Healthcare; proprietary; changed ownership on 2023-08-01 (buyer Gwynnfalls Md Opco, seller Wilkens Ave Baltimore Md Opco LLC)')
 })

@@ -10,7 +10,7 @@ export const tierWord = (n: number | null) => n == null ? 'not rated' : n <= 2 ?
 /** One star-rating cell. Color says what the number means: red = 1–2 (poor), amber = 3 (average), green = 4–5 (good). */
 export function Stars({ value, size = 'md', label }: { value: unknown; size?: 'sm' | 'md' | 'lg'; label?: string }) {
   const n = value == null ? null : Number(value)
-  const cls = { sm: 'h-4 min-w-7 text-[11px]', md: 'h-6 min-w-9 text-xs', lg: 'h-8 min-w-12 text-sm' }[size]
+  const cls = { sm: 'h-5 w-9 text-[11px]', md: 'h-6 w-9 text-xs', lg: 'h-8 min-w-12 text-sm' }[size]
   if (n == null || Number.isNaN(n)) return <span className={`inline-flex items-center justify-center rounded px-1 bg-well text-ink-3 ${cls}`} title={label ? `${label}: not rated` : 'Not rated'}>–</span>
   return <span className={`inline-flex items-center justify-center rounded px-1 font-semibold ${cls}`} style={{ background: `var(--color-q${Math.round(n)})`, color: starFg(n) }} title={`${label ? label + ': ' : ''}${n} of 5 stars (${tierWord(n)})`}>{n}</span>
 }
@@ -18,6 +18,17 @@ export function Stars({ value, size = 'md', label }: { value: unknown; size?: 's
 const STRIP = [['overall_rating', 'Overall', 'overall'], ['health_inspection_rating', 'Health inspection', 'inspection'], ['qm_rating', 'Quality measures', 'quality'], ['staffing_rating', 'Staffing', 'staffing']] as const
 /** Header text that names the four chips once, in order, instead of captioning every row. */
 export const STRIP_HEADER = 'Stars: overall · inspection · quality · staffing'
+/** Column header for the strip: one short label per chip, in fixed slots the same width as the chips, so each name sits over its rating. */
+export function StripHeader({ title = 'Stars' }: { title?: string }) {
+  return (
+    <span className="inline-flex flex-col">
+      <span>{title}</span>
+      <span className="inline-flex gap-1 font-normal text-ink-3 text-[10px] leading-3 tracking-tight" aria-hidden>
+        {['Overall', 'Inspect.', 'Quality', 'Staffing'].map(l => <span key={l} className="w-9 text-center">{l}</span>)}
+      </span>
+    </span>
+  )
+}
 /** The four CMS star ratings side by side, always in the same order (overall, inspection, quality, staffing); the column header names them once. */
 export function QualityStrip({ row, size = 'sm', captions = false }: { row: Record<string, unknown>; size?: 'sm' | 'md'; captions?: boolean }) {
   return (
@@ -32,13 +43,18 @@ export function QualityStrip({ row, size = 'sm', captions = false }: { row: Reco
   )
 }
 
+/** Short reasons for the CMS footnote codes that appear on suppressed values (full sentence in the tooltip and on the Methodology page). */
+const SHORT_FN: Record<string, string> = { '1': 'too new to rate', '2': 'not enough data to rate', '6': 'staffing data did not meet criteria', '7': 'suppressed by CMS', '9': 'too few residents to report', '10': 'data not submitted', '13': 'shorter period than required', '14': 'not required to report', '18': 'special focus facility, not rated', '20': 'CMS could not validate the data', '21': 'CMS could not validate the data', '22': 'address not matched to coordinates', '23': 'staffing data not submitted', '24': 'many days without an RN onsite', '25': 'CMS could not validate staffing data', '26': 'staffing data invalid for turnover', '27': 'staffing data did not meet criteria', '28': 'annual measure', '29': 'risk-based survey' }
 /** Footnote marker: small, text-first, meaning on hover and in the title. */
-export function Fn({ code, ref }: { code: unknown; ref: Reference | null }) {
+export function Fn({ code, ref, compact = false }: { code: unknown; ref: Reference | null; compact?: boolean }) {
   if (code == null || code === '' || code === '-') return null
   const s = String(code)
   const meaning = s.split(',').map(c => ref?.footnotes[c.trim()]?.meaning ?? s).join(' / ')
   // focusable so keyboard and screen-reader users get the meaning, not just the code
-  return <span tabIndex={0} role="note" aria-label={`CMS footnote ${s}: ${meaning}`} className="text-ink-3 text-[11px] ml-1 cursor-help underline decoration-dotted underline-offset-2" title={meaning}>{/^\d/.test(s) ? `fn ${s}` : s}</span>
+  // Shown in words, never as a bare code: a short reason inline, the full CMS sentence on hover / for screen readers.
+  const short = SHORT_FN[s.split(',')[0].trim()] ?? meaning
+  // compact (table cells): a dash with the reason in the tooltip; full (cards, rows): the short reason in words
+  return <span tabIndex={0} role="note" aria-label={`CMS footnote ${s}: ${meaning}`} className={`text-ink-3 cursor-help underline decoration-dotted underline-offset-2 whitespace-nowrap ${compact ? 'text-sm' : 'text-[11px] ml-1'}`} title={`${short} — CMS footnote ${s}: ${meaning}`}>{compact ? '—' : short}</span>
 }
 
 /** A rust-colored flag for enforcement facts. Text, not an icon. */
@@ -95,24 +111,34 @@ export function Segmented<T extends string>({ value, options, onChange, ariaLabe
 }
 
 /** Big-number card: value, unit, a one-line note, and a provenance tag with an expandable "how this is calculated". */
-export function Stat({ label, value, unit, note, source, how, tone }: { label: string; value: ReactNode; unit?: string; note?: ReactNode; source: 'CMS' | 'Modeled' | 'Derived' | 'Hospital-reported'; how?: ReactNode; tone?: 'good' | 'mid' | 'bad' }) {
+export type Source = 'CMS' | 'Modeled' | 'Derived' | 'Hospital-reported'
+/** Big-number card on three fixed rows (label 32 · value 32 · note 32) so every card in a row shares the same baselines.
+ *  No per-card footer: the source is stated once per row by StatRow; "How this is calculated" is the ⓘ button. */
+export function Stat({ label, value, unit, note, how, tone, source }: { label: string; value: ReactNode; unit?: string; note?: ReactNode; source?: Source; how?: ReactNode; tone?: 'good' | 'mid' | 'bad' }) {
   const [open, setOpen] = useState(false)
   const bar = tone === 'good' ? 'var(--color-q5)' : tone === 'mid' ? '#dc6803' : tone === 'bad' ? 'var(--color-q2)' : 'transparent'
+  void source
   return (
-    <div className="bg-surface rounded-[10px] p-4 flex flex-col min-w-0" style={{ boxShadow: '0 1px 0 rgba(16,24,40,0.04)' }}>
-      {/* Fixed rows: label (2 lines), number, note (2 lines), tone bar, footer — so every card in a row lines up. */}
-      <div className="text-xs text-ink-2 leading-4 h-8 line-clamp-2" title={label}>{label}</div>
-      <div className="mt-2 h-8 flex items-baseline gap-1.5 overflow-hidden whitespace-nowrap">
-        <span className="text-[28px] leading-8 font-semibold tracking-tight tabular-nums text-ink">{value}</span>
-        {unit && <span className="text-sm text-ink-2">{unit}</span>}
+    <div className="panel relative p-4 grid gap-2 min-w-0" style={{ gridTemplateRows: '32px 32px 32px auto' }}>
+      <div className="t-label line-clamp-2 pr-7" title={label}>{label}</div>
+      {how && <button className="press absolute top-3 right-3 w-6 h-6 rounded-full text-ink-3 hover:text-ink hover:bg-well text-[12px] leading-6 text-center" onClick={() => setOpen(o => !o)} aria-expanded={open} aria-label={`How this is calculated: ${label}`} title="How this is calculated">i</button>}
+      <div className="flex items-baseline gap-1.5 whitespace-nowrap overflow-hidden">
+        <span className="t-display">{value}</span>
+        {unit && <span className="t-body text-ink-2">{unit}</span>}
+        {tone && <span className="ml-auto self-center h-1 w-8 rounded shrink-0" style={{ background: bar }} aria-hidden />}
       </div>
-      <div className="text-[12px] text-ink-2 mt-1.5 leading-4 h-8 line-clamp-2">{note}</div>
-      <div className="h-1 rounded mt-2" style={{ background: tone ? bar : 'transparent', width: 40 }} />
-      <div className="mt-auto pt-3 flex items-center gap-2 text-[11px] text-ink-3">
-        <span className="inline-flex items-center gap-1"><span className={`inline-block w-1.5 h-1.5 rounded-full ${source === 'CMS' ? 'bg-ink-3' : source === 'Modeled' ? 'bg-accent' : 'bg-ink-2'}`} aria-hidden />{source}</span>
-        {how && <button className="press underline underline-offset-2 hover:text-ink" onClick={() => setOpen(o => !o)} aria-expanded={open}>How this is calculated</button>}
-      </div>
-      {open && how && <div className="mt-2 text-[12px] text-ink-2 leading-snug border-t border-hairline pt-2">{how}</div>}
+      <div className="t-label line-clamp-2">{note}</div>
+      {open && how && <div className="t-label border-t border-hairline pt-2">{how}</div>}
+    </div>
+  )
+}
+/** A row of Stat cards with the source stated once underneath. */
+export function StatRow({ source, children, cols = 4, note }: { source: Source; children: ReactNode; cols?: 2 | 3 | 4 | 5; note?: ReactNode }) {
+  const grid = { 2: 'sm:grid-cols-2', 3: 'sm:grid-cols-3', 4: 'sm:grid-cols-2 md:grid-cols-4', 5: 'sm:grid-cols-3 md:grid-cols-5' }[cols]
+  return (
+    <div>
+      <div className={`grid grid-cols-1 ${grid} gap-4`}>{children}</div>
+      <div className="t-caption mt-2 flex items-center gap-1.5"><span className={`inline-block w-1.5 h-1.5 rounded-full ${source === 'Modeled' ? 'bg-accent' : 'bg-ink-3'}`} aria-hidden />Source: {source === 'CMS' ? 'CMS public files' : source === 'Modeled' ? 'modeled from CMS public files (see Methodology)' : source === 'Derived' ? 'derived from CMS public files' : 'hospital-reported upload'}{note ? <> · {note}</> : null}</div>
     </div>
   )
 }

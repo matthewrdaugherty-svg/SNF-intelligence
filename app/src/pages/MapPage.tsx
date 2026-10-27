@@ -132,7 +132,7 @@ export default function MapPage() {
 
   const list = rows ?? []
   return (
-    <div className="flex h-[calc(100dvh-52px)] relative">
+    <div className="flex h-[calc(100dvh-56px)] relative">
       <FilterPanel f={f} onPatch={onPatch} onClear={onClear} resultCount={rows?.length ?? null} open={filtersOpen} onClose={() => setFiltersOpen(false)} />
       <section className="flex-1 min-w-0 relative">
         <div ref={mapEl} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }} />  {/* inline: maplibre's unlayered CSS overrides Tailwind utilities */}
@@ -142,10 +142,10 @@ export default function MapPage() {
           {hasDist && <div className="bg-surface here rounded-[6px] px-3 py-1.5 text-sm text-ink-2">{f.miles} mi around {f.place || 'pin'}</div>}
           {noBasemap && <div className="bg-surface here rounded-[6px] px-3 py-1.5 text-xs text-ink-2">The street basemap could not be reached; facilities are still shown.</div>}
         </div>
-        <div className="absolute bottom-3 left-3 bg-surface here rounded-[6px] px-3 py-2 text-[11px] text-ink-2 flex items-center gap-2 z-10">
+        <div className="absolute bottom-3 left-3 right-3 md:right-auto bg-surface here rounded-[6px] px-3 py-2 t-caption text-ink-2 flex flex-wrap items-center gap-x-3 gap-y-1 z-10">
           <span>Overall stars</span>{RAMP.map((c, i) => <span key={i} className="inline-flex items-center gap-1"><span className="inline-block w-3 h-3 rounded-full" style={{ background: c, border: '0.6px solid #111827' }} />{i + 1}{i === 0 ? ' poor' : i === 2 ? ' average' : i === 4 ? ' good' : ''}</span>)}
-          <span className="inline-flex items-center gap-1 ml-2"><span className="inline-block w-3 h-3 rounded-full bg-white" style={{ border: '0.6px solid #111827' }} />not rated</span>
-          <span className="inline-flex items-center gap-1 ml-2"><span className="inline-block w-3 h-3 rounded-full bg-white" style={{ border: '2.2px solid #b42318' }} />special focus or abuse icon</span>
+          <span className="inline-flex items-center gap-1 whitespace-nowrap"><span className="inline-block w-3 h-3 rounded-full bg-white" style={{ border: '0.6px solid #111827' }} />not rated</span>
+          <span className="inline-flex items-center gap-1 whitespace-nowrap"><span className="inline-block w-3 h-3 rounded-full bg-white" style={{ border: '2.2px solid #b42318' }} />flagged (special focus or abuse icon)</span>
         </div>
       </section>
       <aside className="hidden lg:block w-80 shrink-0 border-l border-hairline bg-surface overflow-y-auto" aria-label="Facilities on the map">

@@ -43,7 +43,7 @@ export default function HospitalPicker({ selected, onChange }: { selected: strin
     const skipped = pending.members.filter(m => pending.states.has(m.state) && !m.has_service_area).length
     const add = usable.map(m => m.hospital_ccn).filter(c => !selected.includes(c))
     onChange([...selected, ...add])
-    setNote(`${titleCase(pending.fam.label)}: added ${add.length} hospital${add.length === 1 ? '' : 's'}${skipped > 0 ? `; ${skipped} in the chosen states have no service-area data and were left out` : ''}.`)
+    setNote(`${titleCase(pending.fam.label)}: added ${add.length} hospital${add.length === 1 ? '' : 's'}${skipped > 0 ? `; ${skipped} in the chosen state${pending.states.size === 1 ? '' : 's'} ${skipped === 1 ? 'has' : 'have'} no service-area data and ${skipped === 1 ? 'was' : 'were'} left out` : ''}.`)
     setPending(null)
   }
   const results = mode === 'hospital' ? hospitals.length : systems.length
@@ -53,7 +53,7 @@ export default function HospitalPicker({ selected, onChange }: { selected: strin
     <div ref={box} className="relative">
       <div className="mb-1.5"><Segmented value={mode} onChange={m => { setMode(m as Mode); reset() }} options={[{ value: 'hospital', label: 'Hospital' }, { value: 'system', label: 'System' }]} ariaLabel="Pick by" /></div>
       <input className="control w-full" value={text} onChange={e => setText(e.target.value)} onFocus={() => results && setOpen(true)}
-        onKeyDown={e => { if (e.key === 'Escape') setOpen(false); if (e.key === 'Enter') { if (mode === 'hospital' && hospitals[0]) addHospital(hospitals[0]); if (mode === 'system' && systems[0]) pickSystem(systems[0]) } }}
+        onKeyDown={e => { if (e.key === 'Escape') setOpen(false); if (e.key === 'ArrowDown' && open) { e.preventDefault(); (box.current?.querySelector('#hosp-results button:not([disabled])') as HTMLButtonElement | null)?.focus() } if (e.key === 'Enter' && open) { if (mode === 'hospital' && hospitals[0]) addHospital(hospitals[0]); if (mode === 'system' && systems[0]) pickSystem(systems[0]) } }}
         placeholder={mode === 'hospital' ? 'Hospital name, city or CCN' : 'System or owner name, e.g. Johns Hopkins, HCA'} aria-label={mode === 'hospital' ? 'Find a hospital' : 'Find a hospital system'} role="combobox" aria-expanded={open} aria-controls="hosp-results" />
       {open && results > 0 && (
         <ul id="hosp-results" role="listbox" className="absolute left-0 right-0 top-full mt-1 max-h-72 overflow-auto bg-surface rounded-[8px] z-30 py-1" style={{ boxShadow: 'var(--shadow-float)' }}>
@@ -67,9 +67,9 @@ export default function HospitalPicker({ selected, onChange }: { selected: strin
           )) : systems.map(s => (
             <li key={s.family_id} role="option" aria-selected={false}>
               <button className="press w-full text-left px-3 py-1.5 hover:bg-paper" onClick={() => pickSystem(s)} disabled={s.n_with_service_area === 0}>
-                <div className="text-sm text-ink truncate">{titleCase(s.label)}</div>
+                <div className="text-sm text-ink truncate" title={titleCase(s.label)}>{titleCase(s.label)}</div>
                 <div className="text-[11px] text-ink-3">{s.n_hospitals} hospital{s.n_hospitals === 1 ? '' : 's'} · {s.n_states} state{s.n_states === 1 ? '' : 's'}{s.n_with_service_area < s.n_hospitals ? ` · ${s.n_with_service_area} with service-area data` : ''}{s.n_member_orgs > 1 ? ` · ${s.n_member_orgs} owner names` : ''}</div>
-                {s.aliases && <div className="text-[11px] text-ink-3 truncate">also {titleCase(s.aliases.split(' | ').slice(0, 4).join(', '))}{s.aliases.split(' | ').length > 4 ? ', …' : ''}</div>}
+                {s.matched_alias ? <div className="text-[11px] text-ink-3 truncate">matches owner name {titleCase(s.matched_alias)}</div> : s.aliases ? <div className="text-[11px] text-ink-3 truncate" title={titleCase(s.aliases.split(' | ').join(', '))}>also {titleCase(s.aliases.split(' | ').slice(0, 3).join(', '))}{s.aliases.split(' | ').length > 3 ? ', …' : ''}</div> : null}
               </button>
             </li>
           ))}
@@ -91,7 +91,7 @@ export default function HospitalPicker({ selected, onChange }: { selected: strin
           </div>
         </div>
       )}
-      {mode === 'system' && !pending && <div className="text-[11px] text-ink-3 mt-1">A system is a PECOS owner organization (5%-or-greater direct or indirect interest) grouped with its holding companies; see Methodology for the rule.</div>}
+      {mode === 'system' && !pending && <div className="text-[11px] text-ink-3 mt-1">A system is the organization that controls the hospital (a 50%-or-greater or unreported share in CMS's PECOS file), grouped with its holding companies. Minority stakes and joint-venture partners are not included.</div>}
       {note && <div className="text-[12px] text-ink-2 mt-1.5" role="status">{note}</div>}
       {chosen.length > 0 && (
         <ul className="mt-2 space-y-1 max-h-56 overflow-auto">

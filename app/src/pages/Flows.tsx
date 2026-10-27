@@ -4,7 +4,7 @@ import Papa from 'papaparse'
 import { getDb, q, sqlStr } from '../lib/db'
 import { distExpr } from '../lib/filters'
 import { fmtInt, fmtPct, fmtUsd, titleCase } from '../lib/format'
-import { QualityStrip, STRIP_HEADER, Empty, Fn, useReference } from '../components/ui'
+import { QualityStrip, StripHeader, Empty, Fn, Stat, StatRow, useReference } from '../components/ui'
 
 type Row = Record<string, unknown>
 const REQUIRED = ['hospital_ccn', 'hospital_name', 'snf_ccn', 'period_start', 'period_end', 'n_discharges']
@@ -152,11 +152,11 @@ export default function Flows() {
   }, [alts])
 
   return (
-    <div className="max-w-6xl mx-auto px-4 md:px-6 py-6">
-      <h1 className="text-xl font-semibold tracking-tight">Discharge flows</h1>
-      <p className="text-sm text-ink-2 mt-1 max-w-3xl">Where a hospital's patients go after discharge, and how much of that volume lands in high- versus low-rated facilities. CMS publishes no hospital-to-SNF flows, so this page runs on counts a hospital provides; the schema is fixed so real data drops in without any rework. Until a hospital shares its data, the <Link to="/hospitals" className="underline">Hospitals</Link> pages give a modeled view of the same question, built from CMS's public service-area and utilization files and labelled “Modeled” everywhere it appears.</p>
+    <div className="page stack">
+      <div><h1>Discharge flows</h1>
+      <p className="t-body text-ink-2 mt-2 max-w-3xl">Where a hospital's patients go after discharge, and how much of that volume lands in high- versus low-rated facilities. CMS publishes no hospital-to-SNF flows, so this page runs on counts a hospital provides; the schema is fixed so real data drops in without any rework. Until a hospital shares its data, the <Link to="/hospitals" className="underline">Hospitals</Link> pages give a modeled view of the same question, built from CMS's public service-area and utilization files and labelled “Modeled” everywhere it appears.</p></div>
 
-      <div className="mt-5 bg-surface rounded-[10px] px-5 py-4">
+      <div className="panel panel-pad">
         <div className="flex flex-wrap items-center gap-3">
           <label className="press btn btn-primary text-sm cursor-pointer has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-accent">Upload CSV<input type="file" accept=".csv,text/csv" className="sr-only" onChange={e => { const f = e.target.files?.[0]; if (f) onFile(f); e.currentTarget.value = '' }} /></label>
           <a className="press btn btn-surface text-sm" href={`${import.meta.env.BASE_URL}data/discharge_flows_template.csv`} download>Download the template</a>
@@ -184,56 +184,47 @@ export default function Flows() {
             {hospRow && <span className="text-xs text-ink-3">{String(hospRow.p0)} to {String(hospRow.p1)} · hospital-reported</span>}
           </div>
 
-          <div className="mt-4 grid grid-cols-2 md:grid-cols-5 gap-3">
-            {[
-              { label: 'Discharges to SNFs', v: fmtInt(Number(summary.total)), sub: `${fmtInt(Number(summary.n_snf))} facilities` },
-              { label: 'To 4–5★ facilities (good)', v: `${shares?.high ?? 0}%`, sub: `${fmtInt(Number(summary.high))} discharges`, bar: 'var(--color-q5)' },
-              { label: 'To 3★ facilities (average)', v: `${shares?.mid ?? 0}%`, sub: `${fmtInt(Number(summary.mid))} discharges`, bar: '#dc6803' },
-              { label: 'To 1–2★ facilities (poor)', v: `${shares?.low ?? 0}%`, sub: `${fmtInt(Number(summary.low))} discharges`, bar: 'var(--color-q2)' },
-              { label: 'Unrated or unmatched CCN', v: `${shares?.other ?? 0}%`, sub: `${fmtInt(Number(summary.unmatched))} to CCNs not in the CMS file`, bar: 'var(--color-ink-3)' },
-            ].map(c => (
-              <div key={c.label} className="bg-surface rounded-[10px] p-4">
-                <div className="text-xs text-ink-2">{c.label}</div>
-                <div className="text-2xl font-semibold tabular-nums mt-1">{c.v}</div>
-                <div className="text-[11px] text-ink-3">{c.sub}</div>
-                {c.bar && <div className="h-1.5 rounded mt-2 bg-well"><div className="h-full rounded" style={{ background: c.bar, width: c.v }} /></div>}
-              </div>
-            ))}
-          </div>
-          <div className="mt-3 text-sm text-ink-2 bg-surface rounded-[10px] px-5 py-3 flex flex-wrap gap-x-6 gap-y-1">
+          <StatRow source="Hospital-reported" cols={5} note="quality mix of the uploaded discharges">
+            <Stat label="Discharges to nursing homes" value={fmtInt(Number(summary.total))} note={`${fmtInt(Number(summary.n_snf))} facilities`} />
+            <Stat label="To 4–5★ (good)" value={`${shares?.high ?? 0}%`} note={`${fmtInt(Number(summary.high))} discharges`} tone="good" />
+            <Stat label="To 3★ (average)" value={`${shares?.mid ?? 0}%`} note={`${fmtInt(Number(summary.mid))} discharges`} tone="mid" />
+            <Stat label="To 1–2★ (poor)" value={`${shares?.low ?? 0}%`} note={`${fmtInt(Number(summary.low))} discharges`} tone="bad" />
+            <Stat label="Unrated or not found" value={`${shares?.other ?? 0}%`} note={`${fmtInt(Number(summary.unmatched))} to CCNs not in the CMS file`} />
+          </StatRow>
+          <div className="panel panel-pad t-body text-ink-2 flex flex-wrap gap-x-6 gap-y-1">
             <span>Volume-weighted averages of the destinations' CMS measures:</span>
             {summary.wstars != null && <span>overall stars <span className="text-ink font-medium tabular-nums">{Number(summary.wstars).toFixed(2)}</span></span>}
             {summary.w521 != null && <span>short-stay rehospitalization <span className="text-ink font-medium tabular-nums">{fmtPct(Number(summary.w521))}</span></span>}
             {summary.w004 != null && <span>30-day preventable readmission after SNF discharge <span className="text-ink font-medium tabular-nums">{fmtPct(Number(summary.w004))}</span></span>}
             {summary.w005 != null && <span>discharge to community <span className="text-ink font-medium tabular-nums">{fmtPct(Number(summary.w005))}</span></span>}
-            <span className="text-xs text-ink-3 w-full">Weighted by discharges; facilities with a suppressed value are left out of that average. These are facility-level CMS rates, not this hospital's own patients' outcomes.</span>
+            <span className="t-caption w-full">Weighted by discharges; facilities with a suppressed value are left out of that average. These are facility-level CMS rates, not this hospital's own patients' outcomes.</span>
           </div>
 
-          <section className="mt-6 bg-surface rounded-[10px] px-5 py-4">
-            <h2 className="font-medium">Destinations <span className="text-ink-3 font-normal">· {dest.length}</span></h2>
-            <div className="overflow-x-auto"><table className="w-full text-sm mt-2">
-              <thead><tr className="text-[11px] text-ink-3 text-left"><th className="font-normal py-1">Facility</th><th className="font-normal text-right">Discharges</th><th className="font-normal text-right">Share</th><th className="font-normal pl-3">{STRIP_HEADER}</th>{summary.hasLoc ? <th className="font-normal text-right">Miles</th> : null}<th className="font-normal text-right">Rehosp. %</th><th className="font-normal text-right">Readmit %</th><th className="font-normal text-right">To community %</th><th className="font-normal text-right">Fines 3-yr</th><th className="font-normal text-right">G–L deficiencies</th></tr></thead>
+          <section className="panel panel-pad">
+            <h2 className="section-title">Destinations <span className="text-ink-3 font-normal">· {dest.length}</span></h2>
+            <div className="overflow-x-auto"><table className="tbl tbl-compact mt-2">
+              <thead><tr><th>Nursing home</th><th className="num">Discharges</th><th className="num">Share</th><th><StripHeader /></th>{summary.hasLoc ? <th className="num">Miles</th> : null}<th className="num">Rehospitalized</th><th className="num">Readmitted after SNF</th><th className="num">To community</th><th className="num">Fines, 3 yr</th><th className="num">Harm deficiencies</th></tr></thead>
               <tbody>
                 {dest.map(d => (
-                  <tr key={String(d.snf_ccn)} className="border-t border-hairline/60">
-                    <td className="py-1.5 pr-2">{d.ccn ? <Link to={`/facility/${d.ccn}`} className="hover:underline underline-offset-2">{titleCase(String(d.provider_name))}</Link> : <span className="text-ink-2">CCN {String(d.snf_ccn)} <span className="font-medium text-ink">not in the CMS file</span></span>}{d.ccn ? <div className="text-[11px] text-ink-3">{titleCase(String(d.city_town))}, {String(d.state)}{d.special_focus_status ? <span className="text-rust"> · {String(d.special_focus_status)}</span> : ''}{d.abuse_icon === 'Y' ? <span className="text-rust"> · abuse icon</span> : ''}</div> : null}</td>
-                    <td className="text-right tabular-nums pl-2">{fmtInt(Number(d.n))}</td><td className="text-right tabular-nums text-ink-2 pl-3">{share(d.n)}</td>
-                    <td className="pl-3">{d.ccn ? <QualityStrip row={d} /> : null}</td>
-                    {summary.hasLoc ? <td className="text-right tabular-nums">{d.distance_mi != null ? Number(d.distance_mi).toFixed(1) : ''}</td> : null}
-                    <td className="text-right tabular-nums">{d.qm_521_adj != null ? fmtPct(Number(d.qm_521_adj)) : <Fn code={d.qm_521_fn} ref={ref} />}</td>
-                    <td className="text-right tabular-nums">{d.qrp_004_ppr_pd_rsrr != null ? fmtPct(Number(d.qrp_004_ppr_pd_rsrr)) : <Fn code={d.qrp_004_ppr_pd_rsrr_fn} ref={ref} />}</td>
-                    <td className="text-right tabular-nums">{d.qrp_005_dtc_rs_rate != null ? fmtPct(Number(d.qrp_005_dtc_rs_rate)) : <Fn code={d.qrp_005_dtc_rs_rate_fn} ref={ref} />}</td>
-                    <td className="text-right tabular-nums">{d.pen_total_fines_usd != null ? fmtUsd(Number(d.pen_total_fines_usd)) : ''}</td>
-                    <td className="text-right tabular-nums">{d.hc_n_severity_G_or_worse != null ? fmtInt(Number(d.hc_n_severity_G_or_worse)) : ''}</td>
+                  <tr key={String(d.snf_ccn)}>
+                    <td>{d.ccn ? <Link to={`/facility/${d.ccn}`} className="hover:underline underline-offset-2">{titleCase(String(d.provider_name))}</Link> : <span className="text-ink-2">CCN {String(d.snf_ccn)} <span className="font-medium text-ink">not in the CMS file</span></span>}{d.ccn ? <span className="sub">{titleCase(String(d.city_town))}, {String(d.state)}{d.special_focus_status ? <span className="text-rust"> · {String(d.special_focus_status)}</span> : ''}{d.abuse_icon === 'Y' ? <span className="text-rust"> · abuse icon</span> : ''}</span> : null}</td>
+                    <td className="num">{fmtInt(Number(d.n))}</td><td className="num text-ink-2">{share(d.n)}</td>
+                    <td>{d.ccn ? <QualityStrip row={d} /> : null}</td>
+                    {summary.hasLoc ? <td className="num">{d.distance_mi != null ? Number(d.distance_mi).toFixed(1) : <span className="empty">—</span>}</td> : null}
+                    <td className="num">{d.qm_521_adj != null ? fmtPct(Number(d.qm_521_adj)) : <Fn code={d.qm_521_fn} ref={ref} compact />}</td>
+                    <td className="num">{d.qrp_004_ppr_pd_rsrr != null ? fmtPct(Number(d.qrp_004_ppr_pd_rsrr)) : <Fn code={d.qrp_004_ppr_pd_rsrr_fn} ref={ref} compact />}</td>
+                    <td className="num">{d.qrp_005_dtc_rs_rate != null ? fmtPct(Number(d.qrp_005_dtc_rs_rate)) : <Fn code={d.qrp_005_dtc_rs_rate_fn} ref={ref} compact />}</td>
+                    <td className="num">{d.pen_total_fines_usd != null ? fmtUsd(Number(d.pen_total_fines_usd)) : <span className="empty">—</span>}</td>
+                    <td className="num">{d.hc_n_severity_G_or_worse != null ? fmtInt(Number(d.hc_n_severity_G_or_worse)) : <span className="empty">—</span>}</td>
                   </tr>
                 ))}
               </tbody>
             </table></div>
           </section>
 
-          <section className="mt-6 bg-surface rounded-[10px] px-5 py-4">
+          <section className="panel panel-pad">
             <div className="flex flex-wrap items-center gap-3">
-              <h2 className="font-medium">4–5★ facilities near this hospital</h2>
+              <h2 className="section-title">4–5★ nursing homes near this hospital</h2>
               {Boolean(summary.hasLoc) ? <><label className="text-sm text-ink-2 ml-2">within</label><input type="range" min={3} max={40} value={radius} onChange={e => setRadius(Number(e.target.value))} aria-label="Radius in miles" /><span className="text-sm tabular-nums">{radius} mi</span></> : <span className="text-xs text-ink-3">Add hospital_lat and hospital_lng to the CSV to see nearby alternatives and distances.</span>}
             </div>
             {Boolean(summary.hasLoc) && (
@@ -243,20 +234,20 @@ export default function Flows() {
                   {Number(summary.low) > 0 && <> This hospital sent <span className="text-ink font-medium">{fmtInt(Number(summary.low))}</span> discharges ({share(summary.low)}) to 1–2★ facilities in the period.</>}
                 </div>
                 <div className="text-xs text-ink-3 mt-1">Arithmetic on CMS facility averages, for sizing the conversation. It does not say these facilities have capacity or are clinically right for the patients, and it is not an estimate of readmissions avoided.</div>
-                <div className="overflow-x-auto"><table className="w-full text-sm mt-3">
-                  <thead><tr className="text-[11px] text-ink-3 text-left"><th className="font-normal py-1">Facility</th><th className="font-normal text-right">Miles</th><th className="font-normal pl-3">{STRIP_HEADER}</th><th className="font-normal text-right">Beds</th><th className="font-normal text-right">Residents/day</th><th className="font-normal text-right">Rehosp. %</th><th className="font-normal text-right">Readmit %</th><th className="font-normal text-right">To community %</th><th className="font-normal text-right">Fines 3-yr</th><th className="font-normal">Already a destination</th></tr></thead>
+                <div className="overflow-x-auto"><table className="tbl tbl-compact mt-3">
+                  <thead><tr><th>Nursing home</th><th className="num">Miles</th><th><StripHeader /></th><th className="num">Beds</th><th className="num">Residents per day</th><th className="num">Rehospitalized</th><th className="num">Readmitted after SNF</th><th className="num">To community</th><th className="num">Fines, 3 yr</th><th>Already a destination</th></tr></thead>
                   <tbody>
                     {alts.map(a => (
-                      <tr key={String(a.ccn)} className="border-t border-hairline/60">
-                        <td className="py-1.5 pr-2"><Link to={`/facility/${a.ccn}`} className="hover:underline underline-offset-2">{titleCase(String(a.provider_name))}</Link><div className="text-[11px] text-ink-3">{titleCase(String(a.city_town))}, {String(a.state)}</div></td>
-                        <td className="text-right tabular-nums">{Number(a.distance_mi).toFixed(1)}</td><td className="pl-3"><QualityStrip row={a} /></td>
-                        <td className="text-right tabular-nums">{a.number_of_certified_beds != null ? fmtInt(Number(a.number_of_certified_beds)) : ''}</td>
-                        <td className="text-right tabular-nums">{a.average_number_of_residents_per_day != null ? Number(a.average_number_of_residents_per_day).toFixed(0) : ''}</td>
-                        <td className="text-right tabular-nums">{a.qm_521_adj != null ? fmtPct(Number(a.qm_521_adj)) : ''}</td>
-                        <td className="text-right tabular-nums">{a.qrp_004_ppr_pd_rsrr != null ? fmtPct(Number(a.qrp_004_ppr_pd_rsrr)) : ''}</td>
-                        <td className="text-right tabular-nums">{a.qrp_005_dtc_rs_rate != null ? fmtPct(Number(a.qrp_005_dtc_rs_rate)) : ''}</td>
-                        <td className="text-right tabular-nums">{a.pen_total_fines_usd != null ? fmtUsd(Number(a.pen_total_fines_usd)) : ''}</td>
-                        <td className="text-ink-2">{a.already_used ? 'yes' : ''}</td>
+                      <tr key={String(a.ccn)}>
+                        <td><Link to={`/facility/${a.ccn}`} className="hover:underline underline-offset-2">{titleCase(String(a.provider_name))}</Link><span className="sub">{titleCase(String(a.city_town))}, {String(a.state)}</span></td>
+                        <td className="num">{Number(a.distance_mi).toFixed(1)}</td><td><QualityStrip row={a} /></td>
+                        <td className="num">{a.number_of_certified_beds != null ? fmtInt(Number(a.number_of_certified_beds)) : <span className="empty">—</span>}</td>
+                        <td className="num">{a.average_number_of_residents_per_day != null ? Number(a.average_number_of_residents_per_day).toFixed(0) : <span className="empty">—</span>}</td>
+                        <td className="num">{a.qm_521_adj != null ? fmtPct(Number(a.qm_521_adj)) : <span className="empty">—</span>}</td>
+                        <td className="num">{a.qrp_004_ppr_pd_rsrr != null ? fmtPct(Number(a.qrp_004_ppr_pd_rsrr)) : <span className="empty">—</span>}</td>
+                        <td className="num">{a.qrp_005_dtc_rs_rate != null ? fmtPct(Number(a.qrp_005_dtc_rs_rate)) : <span className="empty">—</span>}</td>
+                        <td className="num">{a.pen_total_fines_usd != null ? fmtUsd(Number(a.pen_total_fines_usd)) : <span className="empty">—</span>}</td>
+                        <td className="text-ink-2">{a.already_used ? 'yes' : <span className="empty">—</span>}</td>
                       </tr>
                     ))}
                     {alts.length === 0 && <tr><td colSpan={10} className="py-3 text-ink-3 text-sm">No 4–5★ facilities within {radius} miles. Widen the radius.</td></tr>}
