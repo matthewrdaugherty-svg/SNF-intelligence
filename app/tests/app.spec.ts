@@ -306,7 +306,7 @@ test('cohorts: hostile URL values are ignored, never executed', async ({ page })
 test('system picker: "Whole system" finds the Johns Hopkins family, lets you drop DC and FL, and adds the 4 Maryland hospitals', async ({ page }) => {
   await page.goto('/explore')
   await ready(page)
-  await page.getByRole('radio', { name: 'Whole system' }).click()
+  await page.getByRole('radio', { name: 'System', exact: true }).click()
   await page.getByLabel('Find a hospital system').fill('johns hopkins')
   const opt = page.getByRole('option').filter({ hasText: 'The Johns Hopkins Health System Corporation' }).first()
   await expect(opt).toBeVisible({ timeout: 60_000 })

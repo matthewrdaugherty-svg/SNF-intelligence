@@ -51,7 +51,7 @@ export default function HospitalPicker({ selected, onChange }: { selected: strin
   const pendingCount = pending ? pending.members.filter(m => pending.states.has(m.state) && m.has_service_area).length : 0
   return (
     <div ref={box} className="relative">
-      <div className="mb-1.5"><Segmented value={mode} onChange={m => { setMode(m as Mode); reset() }} options={[{ value: 'hospital', label: 'One hospital' }, { value: 'system', label: 'Whole system' }]} ariaLabel="Pick by" /></div>
+      <div className="mb-1.5"><Segmented value={mode} onChange={m => { setMode(m as Mode); reset() }} options={[{ value: 'hospital', label: 'Hospital' }, { value: 'system', label: 'System' }]} ariaLabel="Pick by" /></div>
       <input className="control w-full" value={text} onChange={e => setText(e.target.value)} onFocus={() => results && setOpen(true)}
         onKeyDown={e => { if (e.key === 'Escape') setOpen(false); if (e.key === 'Enter') { if (mode === 'hospital' && hospitals[0]) addHospital(hospitals[0]); if (mode === 'system' && systems[0]) pickSystem(systems[0]) } }}
         placeholder={mode === 'hospital' ? 'Hospital name, city or CCN' : 'System or owner name, e.g. Johns Hopkins, HCA'} aria-label={mode === 'hospital' ? 'Find a hospital' : 'Find a hospital system'} role="combobox" aria-expanded={open} aria-controls="hosp-results" />
