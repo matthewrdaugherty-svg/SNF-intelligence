@@ -15,12 +15,18 @@ export interface ScenarioParams {
   n: number | null          // the hospital's annual SNF discharges (optional; absolute numbers need it)
   mode: 'nearest' | 'optimal' // nearest: split across the k nearest acceptable facilities; optimal: every moved patient goes to the best-fit acceptable facility within reach that still has room
   objective: Objective      // what 'best fit' means in optimal mode
+  weights: Weights          // for objective = 'blend'
 }
-export type Objective = 'readmit' | 'rehosp' | 'community' | 'cost' | 'stars'
-export const OBJECTIVE_LABEL: Record<Objective, string> = { readmit: 'Fewest readmissions after SNF discharge', rehosp: 'Fewest short-stay rehospitalizations', community: 'Most discharges to community', cost: 'Lowest Medicare payment per stay', stars: 'Highest overall rating' }
+export type Objective = 'balanced' | 'blend' | 'readmit' | 'rehosp' | 'community' | 'cost' | 'stars'
+export const OBJECTIVE_LABEL: Record<Objective, string> = { balanced: 'Balanced: readmissions, rehospitalization, discharge to community and cost, equally', blend: 'Custom blend of those four', readmit: 'Fewest readmissions after SNF discharge', rehosp: 'Fewest short-stay rehospitalizations', community: 'Most discharges to community', cost: 'Lowest Medicare payment per stay', stars: 'Highest overall rating' }
+/** Short form for sentences. */
+export const OBJECTIVE_WORD: Record<Objective, string> = { balanced: 'the best balance of readmissions, rehospitalization, discharge to community and Medicare cost', blend: 'your custom blend of readmissions, rehospitalization, discharge to community and cost', readmit: 'fewest readmissions after SNF discharge', rehosp: 'fewest short-stay rehospitalizations', community: 'most discharges to community', cost: 'lowest Medicare payment per stay', stars: 'highest overall rating' }
+/** Blend weights, in the order readmit · rehosp · community · cost; each 0–10. Balanced = 1,1,1,1. */
+export type Weights = [number, number, number, number]
+export const WEIGHT_LABEL = ['Readmissions after SNF discharge', 'Short-stay rehospitalization', 'Discharge to community', 'Medicare payment per stay']
 /** MedPAC July 2026 Data Book, Chart 8-3: 18.7% of FFS hospital discharges (2019) went to a SNF. Used only to size a hospital's SNF volume when the user has not entered it. */
 export const SNF_SHARE_OF_DISCHARGES = 0.187
-export const DEFAULTS: Omit<ScenarioParams, 'hospital'> = { minStars: 4, excludeFlags: true, snfOnly: true, units: [], minOverlap: null, maxMiles: 10, k: 3, shift: 1, n: null, mode: 'nearest', objective: 'readmit' }
+export const DEFAULTS: Omit<ScenarioParams, 'hospital'> = { minStars: 4, excludeFlags: true, snfOnly: true, units: [], minOverlap: null, maxMiles: 10, k: 3, shift: 1, n: null, mode: 'nearest', objective: 'balanced', weights: [1, 1, 1, 1] }
 const UNIT_SQL: Record<string, string> = { vent: 'coalesce(f.beds_ventilator,0) > 0', dialysis: 'coalesce(f.beds_dialysis,0) > 0', alz: 'coalesce(f.beds_alzheimers,0) > 0', hospice: 'coalesce(f.beds_hospice,0) > 0', trauma: 'coalesce(f.beds_head_trauma,0) > 0', rehab: 'coalesce(f.beds_rehab,0) > 0' }
 export const UNIT_LABEL: Record<string, string> = { vent: 'Ventilator unit', dialysis: 'Dialysis unit', alz: 'Dementia unit', hospice: 'Hospice unit', trauma: 'Head trauma unit', rehab: 'Rehab unit' }
 
@@ -32,12 +38,19 @@ export function fromParams(p: URLSearchParams): ScenarioParams | null {
     hospital: h, minStars: Math.round(num('stars', 1, 5, DEFAULTS.minStars)), excludeFlags: p.get('flags') !== '0', snfOnly: p.get('snf') !== '0',
     units: [...new Set((p.get('units') ?? '').split(',').filter(u => u in UNIT_SQL))], minOverlap: p.get('ov') != null && Number.isFinite(Number(p.get('ov'))) ? Math.min(1, Math.max(0, Number(p.get('ov')) / 100)) : null,
     maxMiles: num('mi', 1, 60, DEFAULTS.maxMiles), k: Math.round(num('k', 1, 10, DEFAULTS.k)), shift: num('shift', 0, 100, 100) / 100, n: p.get('n') != null && /^\d{1,7}$/.test(p.get('n')!) ? Number(p.get('n')) : null,
-    mode: p.get('mode') === 'optimal' ? 'optimal' : 'nearest', objective: (['readmit', 'rehosp', 'community', 'cost', 'stars'] as Objective[]).find(o => o === p.get('obj')) ?? 'readmit',
+    mode: p.get('mode') === 'optimal' ? 'optimal' : 'nearest', objective: (['balanced', 'blend', 'readmit', 'rehosp', 'community', 'cost', 'stars'] as Objective[]).find(o => o === p.get('obj')) ?? 'balanced',
+    weights: parseWeights(p.get('w')),
   }
+}
+/** 'w=2,1,1,3' → [2,1,1,3]; anything malformed → equal weights. Weights are whole numbers 0–10 and at least one must be > 0. */
+export function parseWeights(v: string | null): Weights {
+  const parts = (v ?? '').split(',').map(x => Number(x))
+  if (parts.length !== 4 || parts.some(x => !Number.isInteger(x) || x < 0 || x > 10) || parts.every(x => x === 0)) return [1, 1, 1, 1]
+  return parts as Weights
 }
 export function toParams(s: ScenarioParams): URLSearchParams {
   const p = new URLSearchParams({ h: s.hospital, stars: String(s.minStars), mi: String(s.maxMiles), k: String(s.k), shift: String(Math.round(100 * s.shift)) })
-  if (!s.excludeFlags) p.set('flags', '0'); if (!s.snfOnly) p.set('snf', '0'); if (s.units.length) p.set('units', s.units.join(',')); if (s.minOverlap != null) p.set('ov', String(Math.round(100 * s.minOverlap))); if (s.n != null) p.set('n', String(s.n)); if (s.mode === 'optimal') p.set('mode', 'optimal'); if (s.objective !== 'readmit') p.set('obj', s.objective)
+  if (!s.excludeFlags) p.set('flags', '0'); if (!s.snfOnly) p.set('snf', '0'); if (s.units.length) p.set('units', s.units.join(',')); if (s.minOverlap != null) p.set('ov', String(Math.round(100 * s.minOverlap))); if (s.n != null) p.set('n', String(s.n)); if (s.mode === 'optimal') p.set('mode', 'optimal'); if (s.objective !== 'balanced') p.set('obj', s.objective); if (s.objective === 'blend' && s.weights.join(',') !== '1,1,1,1') p.set('w', s.weights.join(','))
   return p
 }
 
@@ -91,23 +104,33 @@ export async function runScenario(s: ScenarioParams, prefix = 'sc'): Promise<Out
   const [hm] = await q<Row>(`SELECT medicare_discharges_2024 FROM hospital_master WHERE hospital_ccn = ${h}`)
   const annual = s.n ?? (hm?.medicare_discharges_2024 != null ? Math.round(Number(hm.medicare_discharges_2024) * SNF_SHARE_OF_DISCHARGES) : null)
   const annualSource: Outcome['annualSource'] = s.n != null ? 'given' : annual != null ? 'estimated' : 'none'
+  // "goodness" of each measure as a national percentile (1 = best SNF in the country, 0 = worst), direction-aware, so four measures in different units can be averaged
+  await q(`CREATE OR REPLACE TEMP TABLE ${T('good')} AS SELECT f.ccn,
+      CASE WHEN f.qrp_004_ppr_pd_rsrr IS NOT NULL THEN 1 - percent_rank() OVER (PARTITION BY f.qrp_004_ppr_pd_rsrr IS NULL ORDER BY f.qrp_004_ppr_pd_rsrr) END AS g004,
+      CASE WHEN f.qm_521_adj IS NOT NULL THEN 1 - percent_rank() OVER (PARTITION BY f.qm_521_adj IS NULL ORDER BY f.qm_521_adj) END AS g521,
+      CASE WHEN f.qrp_005_dtc_rs_rate IS NOT NULL THEN percent_rank() OVER (PARTITION BY f.qrp_005_dtc_rs_rate IS NULL ORDER BY f.qrp_005_dtc_rs_rate) END AS g005,
+      CASE WHEN u.medicare_stays_2024 > 0 THEN 1 - percent_rank() OVER (PARTITION BY u.medicare_stays_2024 > 0 ORDER BY u.medicare_payment_2024 / nullif(u.medicare_stays_2024, 0)) END AS gpay
+    FROM facility_master f LEFT JOIN snf_utilization u USING (ccn)`)
   const cands = await q<Row>(`
     WITH nv AS (SELECT b.ccn, b.w FROM ${T('base')} b WHERE b.ccn NOT IN (SELECT ccn FROM ${T('viable')})),
     alos AS (SELECT quantile_cont(medicare_days_2024 * 1.0 / medicare_stays_2024, 0.5) AS med FROM snf_utilization WHERE medicare_stays_2024 > 0)
     SELECT nv.ccn AS from_ccn, nv.w, v.ccn AS to_ccn, ${dist('a', 'c')} AS miles, c.overall_rating, c.qrp_004_ppr_pd_rsrr, c.qm_521_adj, c.qrp_005_dtc_rs_rate,
-           u.medicare_payment_2024 / nullif(u.medicare_stays_2024, 0) AS pay, v.casemix_overlap,
+           u.medicare_payment_2024 / nullif(u.medicare_stays_2024, 0) AS pay, v.casemix_overlap, g.g004, g.g521, g.g005, g.gpay,
            greatest(c.number_of_certified_beds - c.average_number_of_residents_per_day, 0) * 365.0 / coalesce(u.medicare_days_2024 * 1.0 / nullif(u.medicare_stays_2024, 0), (SELECT med FROM alos)) AS capacity_stays
-    FROM nv JOIN facility_master a ON a.ccn = nv.ccn JOIN ${T('viable')} v ON v.ccn <> nv.ccn JOIN facility_master c ON c.ccn = v.ccn LEFT JOIN snf_utilization u ON u.ccn = v.ccn
+    FROM nv JOIN facility_master a ON a.ccn = nv.ccn JOIN ${T('viable')} v ON v.ccn <> nv.ccn JOIN facility_master c ON c.ccn = v.ccn LEFT JOIN snf_utilization u ON u.ccn = v.ccn LEFT JOIN ${T('good')} g ON g.ccn = v.ccn
     WHERE ${dist('a', 'c')} <= ${s.maxMiles}`)
   // rank candidates per source: nearest mode by distance; optimal mode by the objective (unknown last), then rating, then readmission, then distance
   const num = (v: unknown) => v == null ? null : Number(v)
-  const objKey: Record<Objective, { col: string; lowerBetter: boolean }> = { readmit: { col: 'qrp_004_ppr_pd_rsrr', lowerBetter: true }, rehosp: { col: 'qm_521_adj', lowerBetter: true }, community: { col: 'qrp_005_dtc_rs_rate', lowerBetter: false }, cost: { col: 'pay', lowerBetter: true }, stars: { col: 'overall_rating', lowerBetter: false } }
-  const ob = objKey[s.objective]
+  const objKey: Record<Exclude<Objective, 'balanced' | 'blend'>, { col: string; lowerBetter: boolean }> = { readmit: { col: 'qrp_004_ppr_pd_rsrr', lowerBetter: true }, rehosp: { col: 'qm_521_adj', lowerBetter: true }, community: { col: 'qrp_005_dtc_rs_rate', lowerBetter: false }, cost: { col: 'pay', lowerBetter: true }, stars: { col: 'overall_rating', lowerBetter: false } }
+  const wts: Weights = s.objective === 'blend' ? s.weights : [1, 1, 1, 1]
+  /** Weighted mean of the available percentile goodnesses (missing measures drop out with their weight); null when none is published. */
+  const composite = (r: Row) => { const g = [r.g004, r.g521, r.g005, r.gpay].map(num); let sw = 0, sv = 0; g.forEach((v, i) => { if (v != null && wts[i] > 0) { sw += wts[i]; sv += wts[i] * v } }); return sw > 0 ? sv / sw : null }
+  const objective = (r: Row): { v: number | null; lowerBetter: boolean } => s.objective === 'balanced' || s.objective === 'blend' ? { v: composite(r), lowerBetter: false } : { v: num(r[objKey[s.objective].col]), lowerBetter: objKey[s.objective].lowerBetter }
   const cmp = (x: Row, y: Row) => {
     if (s.mode === 'optimal') {
-      const vx = num(x[ob.col]), vy = num(y[ob.col])
+      const ox = objective(x), oy = objective(y); const vx = ox.v, vy = oy.v
       if ((vx == null) !== (vy == null)) return vx == null ? 1 : -1
-      if (vx != null && vy != null && vx !== vy) return ob.lowerBetter ? vx - vy : vy - vx
+      if (vx != null && vy != null && vx !== vy) return ox.lowerBetter ? vx - vy : vy - vx
       const rx = num(x.overall_rating) ?? 0, ry = num(y.overall_rating) ?? 0; if (rx !== ry) return ry - rx
       const qx = num(x.qrp_004_ppr_pd_rsrr), qy = num(y.qrp_004_ppr_pd_rsrr)
       if ((qx == null) !== (qy == null)) return qx == null ? 1 : -1

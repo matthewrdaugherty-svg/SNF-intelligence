@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router'
-import { DEFAULTS, OBJECTIVE_LABEL, UNIT_LABEL, fromParams, runScenario, toParams, type Objective, type Outcome, type ScenarioParams } from '../lib/scenario'
+import { DEFAULTS, OBJECTIVE_LABEL, OBJECTIVE_WORD, UNIT_LABEL, WEIGHT_LABEL, fromParams, runScenario, toParams, type Objective, type Outcome, type ScenarioParams, type Weights } from '../lib/scenario'
 import { hospitalsByCcn, searchHospitals, type HospitalLite } from '../lib/hospitals'
 import { fmtInt, fmtPct, fmtUsd, titleCase } from '../lib/format'
 import { Empty, FlagCell, QualityStrip, StripHeader, Stat, StatRow } from '../components/ui'
@@ -45,7 +45,7 @@ export default function Scenarios() {
 
   /** 'SNF(s)' when the acceptable set is Medicare-certified SNFs only, else 'facility / facilities' — never a bare 'home', which reads as the patient's home. */
   const F = s?.snfOnly ? 'SNFs' : 'facilities', F1 = s?.snfOnly ? 'SNF' : 'facility'
-  const objWord = s ? OBJECTIVE_LABEL[s.objective].toLowerCase().replace('snf', 'SNF') : ''
+  const objWord = s ? OBJECTIVE_WORD[s.objective] : ''
   /** Shares as whole percentages; anything that would round to 0% but is not zero reads "<1%". */
 const sharePct = (x: number) => x > 0 && x < 0.005 ? '<1%' : fmtPct(100 * x, 0)
 const miles = (m: number) => `${Number.isInteger(m) ? m : m.toFixed(1)} ${m === 1 ? 'mile' : 'miles'}`
@@ -104,8 +104,9 @@ const miles = (m: number) => `${Number.isInteger(m) ? m : m.toFixed(1)} ${m === 
               <div className="flabel mt-3">Share of those patients actually moved</div>
               <div className="flex items-center gap-2"><input type="range" min={10} max={100} step={10} value={Math.round(100 * s.shift)} onChange={e => set({ shift: Number(e.target.value) / 100 })} className="w-full" aria-label="Share moved" /><span className="t-body tabular-nums w-14 text-right">{Math.round(100 * s.shift)}%</span></div>
               <div className="flabel mt-3">Optimize for</div>
-              <select className="control w-full" value={s.objective} onChange={e => set({ objective: e.target.value as Objective })} aria-label="Optimize for">{(Object.keys(OBJECTIVE_LABEL) as Objective[]).map(o => <option key={o} value={o}>{OBJECTIVE_LABEL[o]}</option>)}</select>
-              <div className="fhelp">What "best fit" means when you press Optimize. Ties: higher rating, then lower readmission after SNF discharge, then nearer.</div>
+              <select className="control w-full" value={s.objective} onChange={e => set({ objective: e.target.value as Objective })} aria-label="Optimize for">{(Object.keys(OBJECTIVE_LABEL) as Objective[]).map(o => <option key={o} value={o}>{OBJECTIVE_LABEL[o]}{o === 'balanced' ? ' (recommended)' : ''}</option>)}</select>
+              {s.objective === 'blend' && <div className="mt-2 space-y-1.5" data-testid="blend-weights">{WEIGHT_LABEL.map((l, i) => <div key={l} className="grid grid-cols-[1fr_96px_28px] items-center gap-2"><span className="t-caption">{l}</span><input type="range" min={0} max={10} step={1} value={s.weights[i]} aria-label={`Weight: ${l}`} onChange={e => { const w = [...s.weights] as Weights; w[i] = Number(e.target.value); if (w.every(x => x === 0)) return; set({ weights: w }) }} /><span className="t-caption tabular-nums text-right">{s.weights[i]}</span></div>)}</div>}
+              <div className="fhelp">What "best fit" means when you press Optimize. Balanced and custom blends score each SNF by its national percentile on each measure (1 = best in the country) and average them with the weights; a measure CMS has not published for a SNF drops out of its average. Ties: higher rating, then lower readmission after SNF discharge, then nearer.</div>
               <div className="flabel mt-3">Annual SNF discharges <span className="t-caption">(optional — turns rates into counts)</span></div>
               <input className="control w-40" inputMode="numeric" value={s.n ?? ''} placeholder="e.g. 1800" onChange={e => { const v = e.target.value.replace(/[^\d]/g, ''); set({ n: v ? Number(v) : null }) }} aria-label="Annual SNF discharges" />
             </div>
@@ -153,7 +154,7 @@ const miles = (m: number) => `${Number.isInteger(m) ? m : m.toFixed(1)} ${m === 
                     const r = room == null || got == null || room <= 0 ? null : Math.max(0, got / room)   // may exceed 1: the best-fit ranking optimizes rating and QRP 004 first, so a nearest split can beat it on another measure
                     const yr = key === 'pay_per_stay' && s.n && room != null ? ` · ${fmtUsd(room * s.n)} per year at the optimum` : ''
                     return <Stat key={key} label={`Realization: ${label}`} value={r == null ? '–' : r > 1 ? 'over 100%' : fmtPct(100 * r, 0)} verdict={r == null ? null : { kind: r >= 0.8 ? 'better' : r >= 0.4 ? 'same' : 'worse', text: r > 1 ? 'beats the optimal' : r >= 0.8 ? 'most of it' : r >= 0.4 ? 'part of it' : 'little of it' }}
-                      note={room == null ? 'no room to improve under these constraints' : `yours ${f(a)} · optimal ${f(o)}${yr}`} how={`(before − yours) ÷ (before − optimal) on ${label.toLowerCase()}, volume-weighted; before is ${f(b)}. 100% means your scenario captures the whole modeled opportunity. The optimal allocation ranks facilities by the objective you chose (${objWord}) and respects each facility's room, so on the other measures a nearest-facility split can beat it, shown as "over 100%".`} />
+                      note={room == null ? 'no room to improve under these constraints' : `yours ${f(a)} · optimal ${f(o)}${yr}`} how={`(before − yours) ÷ (before − optimal) on ${label.toLowerCase()}, volume-weighted; before is ${f(b)}. 100% means your scenario captures the whole modeled opportunity. The optimal allocation ranks facilities by the objective you chose (${objWord}) and respects each facility's room; a single-measure objective can lose ground on the other measures, and a nearest-facility split can even beat it there, shown as "over 100%".`} />
                   })}
                 </StatRow>
               </div>

@@ -8,7 +8,7 @@ def hav(a, b):
     h = math.sin((la2 - la1) / 2) ** 2 + math.cos(la1) * math.cos(la2) * math.sin((lo2 - lo1) / 2) ** 2
     return 3958.8 * 2 * math.asin(math.sqrt(h))
 
-def run(h, minStars=4, excludeFlags=True, snfOnly=True, units=(), minOverlap=None, maxMiles=10, k=3, shift=1.0, verbose=True, optimal=False, objective='readmit', n=None):
+def run(h, minStars=4, excludeFlags=True, snfOnly=True, units=(), minOverlap=None, maxMiles=10, k=3, shift=1.0, verbose=True, optimal=False, objective='balanced', n=None, weights=(1, 1, 1, 1)):
     """optimal=True: shift=1, candidates ranked by the objective (nulls last), then rating desc, then QRP 004 asc, then miles; fill the best with room, spill to the next.
     Capacity (both modes): empty beds × 365 ÷ the facility's Medicare ALOS (national median when missing), in stays/yr, against n = annual SNF discharges
     (given, else hospital 2024 Medicare discharges × 0.187 per MedPAC)."""
@@ -28,6 +28,27 @@ def run(h, minStars=4, excludeFlags=True, snfOnly=True, units=(), minOverlap=Non
         return empty * 365.0 / alos
     def pay_of(c):
         p, st = U.get(c, (None, None)); return (p / st) if (st and st > 0 and p is not None) else None
+    # national percentile goodness per measure (1 = best), direction-aware, computed independently of the app's SQL window functions
+    def goodness(values, lower_better):
+        ks = [c for c, v in values.items() if v is not None]
+        ks.sort(key=lambda c: values[c])
+        n_ = len(ks); out = {}
+        # percent_rank: (rank - 1) / (n - 1) with ties sharing the lowest rank
+        i = 0
+        while i < n_:
+            j = i
+            while j + 1 < n_ and values[ks[j + 1]] == values[ks[i]]: j += 1
+            pr = i / (n_ - 1) if n_ > 1 else 0.0
+            for c in ks[i:j + 1]: out[c] = (1 - pr) if lower_better else pr
+            i = j + 1
+        return out
+    G = [goodness({c: f['qrp_004_ppr_pd_rsrr'] for c, f in F.items()}, True), goodness({c: f['qm_521_adj'] for c, f in F.items()}, True),
+         goodness({c: f['qrp_005_dtc_rs_rate'] for c, f in F.items()}, False), goodness({c: pay_of(c) for c in F}, True)]
+    def composite(c):
+        sw = sv = 0.0
+        for g, w in zip(G, weights):
+            if c in g and w > 0: sw += w; sv += w * g[c]
+        return sv / sw if sw > 0 else None
     # baseline
     base = defaultdict(float)
     for ccn, w in con.execute("select ccn, modeled_weight from snf_hospital_area where hospital_ccn = ?", [h]).fetchall():
@@ -59,7 +80,7 @@ def run(h, minStars=4, excludeFlags=True, snfOnly=True, units=(), minOverlap=Non
     # moves (largest sources first), with capacity
     after = dict(base); moves = []; unplaced = 0.0; full = 0.0
     cap = {}
-    OBJ = {'readmit': (lambda f: f['qrp_004_ppr_pd_rsrr'], True), 'rehosp': (lambda f: f['qm_521_adj'], True), 'community': (lambda f: f['qrp_005_dtc_rs_rate'], False), 'cost': (lambda f: pay_of(f['ccn']), True), 'stars': (lambda f: f['overall_rating'], False)}
+    OBJ = {'balanced': (lambda f: composite(f['ccn']), False), 'blend': (lambda f: composite(f['ccn']), False), 'readmit': (lambda f: f['qrp_004_ppr_pd_rsrr'], True), 'rehosp': (lambda f: f['qm_521_adj'], True), 'community': (lambda f: f['qrp_005_dtc_rs_rate'], False), 'cost': (lambda f: pay_of(f['ccn']), True), 'stars': (lambda f: f['overall_rating'], False)}
     ofn, lower = OBJ[objective]
     for ccn, w in sorted(base.items(), key=lambda x: -x[1]):
         if ccn in Vset: continue
@@ -118,5 +139,6 @@ def run(h, minStars=4, excludeFlags=True, snfOnly=True, units=(), minOverlap=Non
 if __name__ == '__main__':
     h = sys.argv[1] if len(sys.argv) > 1 else '210009'
     print('== nearest'); run(h)
-    print('== optimal (readmit)'); run(h, optimal=True)
-    print('== optimal (cost)'); run(h, optimal=True, objective='cost')
+    print('== optimal (balanced)'); run(h, optimal=True)
+    print('== optimal (readmit)'); run(h, optimal=True, objective='readmit')
+    print('== optimal (blend 3,1,1,2)'); run(h, optimal=True, objective='blend', weights=(3, 1, 1, 2))
