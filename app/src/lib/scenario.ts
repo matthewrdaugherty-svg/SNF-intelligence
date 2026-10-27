@@ -1,0 +1,95 @@
+// Placement scenarios (MODELED). Everything here is arithmetic on CMS facility rates and a stated reassignment rule; no patient data.
+// The same engine runs on a hospital's real discharge counts (user_flows) when they are loaded — see `baselineSql`.
+import { q, sqlStr, type Row } from './db'
+
+export interface ScenarioParams {
+  hospital: string          // hospital CCN
+  minStars: number          // viable SNF must have overall rating >= this (1–5)
+  excludeFlags: boolean     // drop special-focus and abuse-icon homes from the viable set
+  snfOnly: boolean          // Medicare-certified SNFs only
+  units: string[]           // required dedicated units: vent, dialysis, alz, hospice, trauma, rehab
+  minOverlap: number | null // minimum case-mix overlap 0–1, or null to ignore
+  maxMiles: number          // a displaced patient can be moved at most this far from the SNF they would have used
+  k: number                 // split moved volume across the k nearest viable SNFs
+  shift: number             // share of non-viable volume that is moved, 0–1
+  n: number | null          // the hospital's annual SNF discharges (optional; absolute numbers need it)
+}
+export const DEFAULTS: Omit<ScenarioParams, 'hospital'> = { minStars: 4, excludeFlags: true, snfOnly: true, units: [], minOverlap: null, maxMiles: 10, k: 3, shift: 1, n: null }
+const UNIT_SQL: Record<string, string> = { vent: 'coalesce(f.beds_ventilator,0) > 0', dialysis: 'coalesce(f.beds_dialysis,0) > 0', alz: 'coalesce(f.beds_alzheimers,0) > 0', hospice: 'coalesce(f.beds_hospice,0) > 0', trauma: 'coalesce(f.beds_head_trauma,0) > 0', rehab: 'coalesce(f.beds_rehab,0) > 0' }
+export const UNIT_LABEL: Record<string, string> = { vent: 'Ventilator unit', dialysis: 'Dialysis unit', alz: 'Dementia unit', hospice: 'Hospice unit', trauma: 'Head trauma unit', rehab: 'Rehab unit' }
+
+/** Every URL value is checked here; nothing reaches SQL unvalidated. */
+export function fromParams(p: URLSearchParams): ScenarioParams | null {
+  const h = (p.get('h') ?? '').toUpperCase(); if (!/^[0-9A-Z]{6}$/.test(h)) return null
+  const num = (k: string, lo: number, hi: number, d: number) => { const v = Number(p.get(k)); return p.get(k) != null && Number.isFinite(v) && v >= lo && v <= hi ? v : d }
+  return {
+    hospital: h, minStars: Math.round(num('stars', 1, 5, DEFAULTS.minStars)), excludeFlags: p.get('flags') !== '0', snfOnly: p.get('snf') !== '0',
+    units: [...new Set((p.get('units') ?? '').split(',').filter(u => u in UNIT_SQL))], minOverlap: p.get('ov') != null && Number.isFinite(Number(p.get('ov'))) ? Math.min(1, Math.max(0, Number(p.get('ov')) / 100)) : null,
+    maxMiles: num('mi', 1, 60, DEFAULTS.maxMiles), k: Math.round(num('k', 1, 10, DEFAULTS.k)), shift: num('shift', 0, 100, 100) / 100, n: p.get('n') != null && /^\d{1,7}$/.test(p.get('n')!) ? Number(p.get('n')) : null,
+  }
+}
+export function toParams(s: ScenarioParams): URLSearchParams {
+  const p = new URLSearchParams({ h: s.hospital, stars: String(s.minStars), mi: String(s.maxMiles), k: String(s.k), shift: String(Math.round(100 * s.shift)) })
+  if (!s.excludeFlags) p.set('flags', '0'); if (!s.snfOnly) p.set('snf', '0'); if (s.units.length) p.set('units', s.units.join(',')); if (s.minOverlap != null) p.set('ov', String(Math.round(100 * s.minOverlap))); if (s.n != null) p.set('n', String(s.n))
+  return p
+}
+
+const dist = (a: string, b: string) => `3958.8 * 2 * asin(sqrt(pow(sin(radians(${b}.latitude - ${a}.latitude) / 2), 2) + cos(radians(${a}.latitude)) * cos(radians(${b}.latitude)) * pow(sin(radians(${b}.longitude - ${a}.longitude) / 2), 2)))`
+
+/** Baseline volume per SNF as a share of the hospital's SNF volume. Hospital-reported counts when loaded, else the modeled service-area weights. */
+export const baselineSql = (h: string, source: 'reported' | 'modeled') => source === 'reported'
+  ? `SELECT snf_ccn AS ccn, sum(n_discharges) * 1.0 / (SELECT sum(n_discharges) FROM user_flows WHERE hospital_ccn = ${sqlStr(h)}) AS w FROM user_flows WHERE hospital_ccn = ${sqlStr(h)} GROUP BY 1`
+  : `SELECT ccn, sum(modeled_weight) / (SELECT sum(modeled_weight) FROM snf_hospital_area WHERE hospital_ccn = ${sqlStr(h)}) AS w FROM snf_hospital_area WHERE hospital_ccn = ${sqlStr(h)} GROUP BY 1`
+
+export const viableSql = (s: ScenarioParams) => {
+  const w = [`f.overall_rating >= ${s.minStars}`]
+  if (s.excludeFlags) w.push(`f.special_focus_status IS NULL`, `coalesce(f.abuse_icon,'N') <> 'Y'`)
+  if (s.snfOnly) w.push(`f.provider_type <> 'Medicaid'`)
+  for (const u of s.units) w.push(UNIT_SQL[u])
+  if (s.minOverlap != null) w.push(`o.casemix_overlap >= ${s.minOverlap}`)
+  return `SELECT f.ccn FROM facility_master f LEFT JOIN (SELECT s.ccn, CASE WHEN k.known >= 0.6 THEN sum(least(h.share, s.share)) END AS casemix_overlap FROM hospital_chapter_mix h JOIN snf_chapter_mix s USING (chapter) JOIN (SELECT ccn, sum(share) AS known FROM snf_chapter_mix GROUP BY 1) k ON k.ccn = s.ccn WHERE h.hospital_ccn = ${sqlStr(s.hospital)} GROUP BY s.ccn, k.known) o USING (ccn) WHERE ${w.join(' AND ')}`
+}
+
+export interface Outcome { source: 'reported' | 'modeled'; before: Row; after: Row; moved: number; unplaced: number; addedMiles: number | null; gains: Row[]; losses: Row[]; nViable: number; nBaseline: number; nReceiving: number; nLosing: number }
+
+/** Run the scenario entirely in SQL: (1) baseline shares; (2) viable set; (3) each non-viable SNF's volume × shift goes to its k nearest viable SNFs within maxMiles, split equally; (4) volume-weighted rates before and after. */
+export async function runScenario(s: ScenarioParams): Promise<Outcome> {
+  const h = sqlStr(s.hospital)
+  const [{ n: reported }] = await q<{ n: number } & Row>(`SELECT count(*) AS n FROM user_flows WHERE hospital_ccn = ${h}`)
+  const source: 'reported' | 'modeled' = Number(reported) > 0 ? 'reported' : 'modeled'
+  await q(`CREATE OR REPLACE TEMP TABLE sc_base AS ${baselineSql(s.hospital, source)}`)
+  await q(`CREATE OR REPLACE TEMP TABLE sc_viable AS ${viableSql(s)}`)
+  // moves: non-viable baseline volume → k nearest viable SNFs within maxMiles of the SNF it would have used
+  await q(`CREATE OR REPLACE TEMP TABLE sc_moves AS
+    WITH nv AS (SELECT b.ccn, b.w FROM sc_base b WHERE b.ccn NOT IN (SELECT ccn FROM sc_viable)),
+    cand AS (SELECT nv.ccn AS from_ccn, nv.w, v.ccn AS to_ccn, ${dist('a', 'c')} AS miles,
+                    row_number() OVER (PARTITION BY nv.ccn ORDER BY ${dist('a', 'c')}) AS rn
+             FROM nv JOIN facility_master a ON a.ccn = nv.ccn JOIN sc_viable v ON v.ccn <> nv.ccn JOIN facility_master c ON c.ccn = v.ccn
+             WHERE ${dist('a', 'c')} <= ${s.maxMiles}),
+    picked AS (SELECT from_ccn, to_ccn, miles, w, count(*) OVER (PARTITION BY from_ccn) AS kk FROM cand WHERE rn <= ${s.k})
+    SELECT from_ccn, to_ccn, miles, w * ${s.shift} / kk AS moved FROM picked`)
+  await q(`CREATE OR REPLACE TEMP TABLE sc_after AS
+    SELECT ccn, sum(w) AS w FROM (
+      SELECT ccn, w FROM sc_base
+      UNION ALL SELECT from_ccn, -moved FROM sc_moves
+      UNION ALL SELECT to_ccn, moved FROM sc_moves) GROUP BY 1 HAVING sum(w) > 1e-12`)
+  const metrics = (t: string) => q<Row>(`SELECT sum(w) AS total,
+      sum(w * f.qm_521_adj) / nullif(sum(CASE WHEN f.qm_521_adj IS NOT NULL THEN w END),0) AS r521, sum(CASE WHEN f.qm_521_adj IS NOT NULL THEN w END) / sum(w) AS c521,
+      sum(w * f.qrp_004_ppr_pd_rsrr) / nullif(sum(CASE WHEN f.qrp_004_ppr_pd_rsrr IS NOT NULL THEN w END),0) AS r004, sum(CASE WHEN f.qrp_004_ppr_pd_rsrr IS NOT NULL THEN w END) / sum(w) AS c004,
+      sum(w * f.qrp_005_dtc_rs_rate) / nullif(sum(CASE WHEN f.qrp_005_dtc_rs_rate IS NOT NULL THEN w END),0) AS r005,
+      sum(w * f.overall_rating) / nullif(sum(CASE WHEN f.overall_rating IS NOT NULL THEN w END),0) AS stars,
+      sum(CASE WHEN f.overall_rating <= 2 THEN w ELSE 0 END) / sum(w) AS low_share, sum(CASE WHEN f.overall_rating >= 4 THEN w ELSE 0 END) / sum(w) AS high_share,
+      sum(w * (u.medicare_payment_2024 / nullif(u.medicare_stays_2024,0))) / nullif(sum(CASE WHEN u.medicare_stays_2024 > 0 THEN w END),0) AS pay_per_stay, sum(CASE WHEN u.medicare_stays_2024 > 0 THEN w END) / sum(w) AS cpay,
+      count(*) AS n_snf
+    FROM ${t} b JOIN facility_master f USING (ccn) LEFT JOIN snf_utilization u USING (ccn)`).then(r => r[0])
+  const [before, after] = await Promise.all([metrics('sc_base'), metrics('sc_after')])
+  const [mv] = await q<Row>(`SELECT coalesce(sum(moved),0) AS moved, coalesce(sum(moved * miles),0) / nullif(sum(moved),0) AS miles, count(DISTINCT to_ccn) AS n_to, count(DISTINCT from_ccn) AS n_from FROM sc_moves`)
+  const [np] = await q<Row>(`SELECT coalesce(sum(w),0) * ${s.shift} AS unplaced FROM sc_base WHERE ccn NOT IN (SELECT ccn FROM sc_viable) AND ccn NOT IN (SELECT from_ccn FROM sc_moves)`)
+  const gains = await q(`SELECT m.to_ccn AS ccn, f.provider_name, f.city_town, f.state, f.overall_rating, f.qm_521_adj, f.qrp_004_ppr_pd_rsrr, sum(m.moved) AS gained, coalesce(b.w, 0) AS before_w, avg(m.miles) AS miles
+    FROM sc_moves m JOIN facility_master f ON f.ccn = m.to_ccn LEFT JOIN sc_base b ON b.ccn = m.to_ccn GROUP BY 1,2,3,4,5,6,7,9 ORDER BY gained DESC LIMIT 40`)
+  const losses = await q(`SELECT m.from_ccn AS ccn, f.provider_name, f.city_town, f.state, f.overall_rating, f.special_focus_status, f.abuse_icon, f.qm_521_adj, f.qrp_004_ppr_pd_rsrr, sum(m.moved) AS lost, b.w AS before_w
+    FROM sc_moves m JOIN facility_master f ON f.ccn = m.from_ccn JOIN sc_base b ON b.ccn = m.from_ccn GROUP BY 1,2,3,4,5,6,7,8,9,11 ORDER BY lost DESC LIMIT 40`)
+  const [{ n: nViable }] = await q<{ n: number } & Row>(`SELECT count(*) AS n FROM sc_viable`)
+  const [{ n: nBaseline }] = await q<{ n: number } & Row>(`SELECT count(*) AS n FROM sc_base`)
+  return { source, before, after, moved: Number(mv.moved), unplaced: Number(np.unplaced), addedMiles: mv.miles == null ? null : Number(mv.miles), gains, losses, nViable: Number(nViable), nBaseline: Number(nBaseline), nReceiving: Number(mv.n_to), nLosing: Number(mv.n_from) }
+}

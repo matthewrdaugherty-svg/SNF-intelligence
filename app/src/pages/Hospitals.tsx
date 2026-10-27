@@ -94,7 +94,8 @@ export default function Hospital() {
         </div>
         <div className="shrink-0 flex flex-col sm:flex-row md:flex-col items-stretch md:items-end gap-2 w-full md:w-64">
           <Link to={exploreLink} className="press btn btn-primary">Explore SNFs in this service area</Link>
-          <Link to={`/map?h=${ccn}`} className="press btn btn-surface">Show on the map</Link>
+          <Link to={`/scenarios?h=${ccn}`} className="press btn btn-surface">Run a placement scenario</Link>
+          <Link to={`/map?h=${ccn}`} className="press btn btn-quiet">Show on the map</Link>
         </div>
       </div>
       </header>

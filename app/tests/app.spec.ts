@@ -413,3 +413,22 @@ test('hospital discharge mix and SNF patient mix come from the CMS DRG and PAC f
   await expect(pt).toContainText('Heart failure')
   await expect(pt).toContainText('60%')
 })
+
+test('placement scenario for Johns Hopkins matches the arithmetic run directly on the database', async ({ page }) => {
+  await page.goto('/scenarios?h=210009')
+  const sum = page.getByTestId('scenario-summary')
+  await expect(sum).toContainText('55% goes to homes that do not meet the bar and could be moved to 99 acceptable homes within 10 miles', { timeout: 120_000 })
+  await expect(sum).toContainText('2% could not be placed')
+  await expect(sum).toContainText('3.0 miles farther')
+  await expect(sum).toContainText('11.6%')          // QRP 004 after
+  await expect(sum).toContainText('before 11.7%')
+  await expect(sum).toContainText('$13,981')        // payment per stay after
+  await expect(sum).toContainText('before $15,638')
+  await expect(sum).toContainText('before 38%')     // 1–2★ share before
+  await expect(page.getByText('Homes that would receive patients · 99, largest 40 shown')).toBeVisible()
+  await expect(page.locator('section').filter({ hasText: 'Homes that would receive patients' }).locator('tbody tr').first()).toContainText('Future Care Northpoint')
+  // with an annual count the rates become counts
+  await page.getByLabel('Annual SNF discharges').fill('1800')
+  await expect(sum).toContainText('per year', { timeout: 60_000 })
+  await expect(page).toHaveURL(/n=1800/)
+})
