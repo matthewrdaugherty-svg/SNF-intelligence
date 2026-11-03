@@ -22,6 +22,11 @@ Lessons-Learned Manager role and change only through an entry in DECISION_LOG.md
    the output) spot-checks a random sample of facilities against the public Care Compare website.
 8. **Say what we don't know.** Every deliverable carries a "Known limitations" section. Chief among them, until
    resolved: the Care Compare data does NOT contain hospital-to-SNF discharge flows.
+9. **Primary source first.** Data is pulled from the agency that produces it (CMS, HRSA, SAMHSA, Census, CDC, NPPES)
+   whenever that source is reachable. Aggregators and re-packagers (DataUSA, Kaggle mirrors, vendor extracts, third-party
+   "cleaned" copies) are used only when the primary source is unavailable or does not publish the figure, and then the
+   ledger entry names BOTH the aggregator and the underlying agency, vintage and release. A number is never cited to an
+   aggregator when it exists at the source. (Matt, 2026-11-02.)
 
 ## 2. Data conventions
 - Primary key everywhere: `ccn` (6-character string, zero-padded; never cast to integer — leading zeros matter).
