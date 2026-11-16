@@ -1,5 +1,6 @@
 // In-browser DuckDB over the validated Arrow exports (Arrow is read natively; Parquet would need a runtime extension download). One instance per page load.
 import * as duckdb from '@duckdb/duckdb-wasm'
+import { dataUrl } from './dataUrl'
 import { tableFromIPC } from 'apache-arrow'
 import mvpWasm from '@duckdb/duckdb-wasm/dist/duckdb-mvp.wasm?url'
 import mvpWorker from '@duckdb/duckdb-wasm/dist/duckdb-browser-mvp.worker.js?url'
@@ -24,11 +25,10 @@ async function init(): Promise<duckdb.AsyncDuckDBConnection> {
   const worker = new Worker(bundle.mainWorker!, { type: 'module' })
   const db = new duckdb.AsyncDuckDB(new duckdb.VoidLogger(), worker)
   await db.instantiate(bundle.mainModule, bundle.pthreadWorker)
-  const base = `${import.meta.env.BASE_URL}data/`
   const conn = await db.connect()
   for (const f of FILES) {
     report(`Loading ${f.replace(/_/g, ' ')}`)
-    const res = await fetch(`${base}${f}.arrow`)
+    const res = await fetch(dataUrl(`${f}.arrow`))
     if (!res.ok) throw new Error(`Could not load ${f}.arrow (${res.status})`)
     const table = tableFromIPC(new Uint8Array(await res.arrayBuffer()))
     if (table.numRows === 0) throw new Error(`${f}.arrow is empty`)   // insertArrowTable never returns on an empty table
@@ -69,7 +69,7 @@ export function ensureTables(names: readonly string[]): Promise<void[]> {
       p = (async () => {
         const conn = await getDb()
         report(`Loading ${name.replace(/_/g, ' ')}`)
-        const res = await fetch(`${import.meta.env.BASE_URL}data/${name}.arrow`)
+        const res = await fetch(dataUrl(`${name}.arrow`))
         if (!res.ok) throw new Error(`Could not load ${name}.arrow (${res.status})`)
         const table = tableFromIPC(new Uint8Array(await res.arrayBuffer()))
         if (table.numRows === 0) throw new Error(`${name}.arrow is empty`)

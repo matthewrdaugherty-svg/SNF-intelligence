@@ -1,5 +1,6 @@
 // Reference data shipped as JSON next to the Parquet files (small, loaded once).
 import { q } from './db'
+import { dataUrl } from './dataUrl'
 
 export interface Meta { data_vintage: string; release: string; n_facilities: number; window_12m_start: string; built: string; validation: string; hospital_layer?: { pecos_release?: string; ltc671_release?: string; hwr_note?: string }; underwriting?: Underwriting }
 /** Vintages and counts of the value-model data layer (scripts/14_load_underwriting.py writes it; nothing here is typed by hand). */
@@ -13,8 +14,7 @@ export interface Footnote { meaning: string; applies_to: string }
 export interface Lineage { 'Facility_Master header': string; 'db column': string; source_file: string; original_header: string; how_derived: string }
 export interface CatalogRow { source: string; measure_code: string; description: string; resident_type: string | null; used_in_5star: string | null; period: string; master_column: string | null }
 
-const base = () => `${import.meta.env.BASE_URL}data/`
-async function json<T>(name: string): Promise<T> { const r = await fetch(base() + name); if (!r.ok) throw new Error(`Could not load ${name}`); return r.json() }
+async function json<T>(name: string): Promise<T> { const r = await fetch(dataUrl(name)); if (!r.ok) throw new Error(`Could not load ${name}`); return r.json() }
 
 export interface DrgFamily { drg: string; title: string; mdc: string | null; family: string; chapter: string | null }
 export interface Reference {
