@@ -21,6 +21,23 @@ test('value: payer tab matches the replica for a parent organization in a metro 
   for (const k of ['readm', 'home', 'los', 'irf', 'ltch', 'ipdays', 'um']) for (const [i, c] of ['min', 'base', 'stretch'].entries()) await expect(cell(page, k, i + 1)).toHaveText(pmpm(e.cases[c].pmpm[k]))
   await expect(page.getByTestId('payer-result')).toContainText(`${Math.round(e.members).toLocaleString('en-US')} members of UnitedHealth Group, Inc.`)
   await expect(page.getByTestId('payer-result')).toContainText(money(e.cases.base.totalPerYear))
+  // plan revenue: benchmark at the plan's own star tiers, CMS's average bid, rebate by star rating; then the published risk score and the plan's own implied bid
+  const usd0 = (n: number) => `$${Math.round(n).toLocaleString('en-US')}`
+  const R = e.rev
+  await expect(page.getByTestId('bench-revenue')).toHaveText(usd0(R.bench))
+  await expect(page.getByTestId('cms-payment')).toHaveText(usd0(R.payment1))
+  await expect(page.getByTestId('plan-revenue')).toContainText(`${R.stars.toFixed(2)}★`)
+  await expect(page.getByTestId('payer-result')).toContainText(`${(100 * e.cases.base.totalPmpm / R.bench).toFixed(2)}%`)
+  await page.getByRole('radio', { name: `CMS 2024: ${R.risk24.toFixed(2)}` }).click()
+  await expect(page.getByTestId('bench-revenue')).toHaveText(usd0(R.bench * R.risk24))
+  await expect(page.getByTestId('cms-payment')).toHaveText(usd0(R.payment1 * R.risk24))
+  await expect(page.getByTestId('pay-check')).toContainText(`${usd0(R.base24 + R.rebate24)} per member per month`)
+  await page.getByTestId('use-implied-bid').click()
+  const rho = Math.round(1000 * R.impliedBid) / 1000
+  await expect(page.getByTestId('cms-payment')).toHaveText(usd0(R.risk24 * (rho * R.bench + (1 - rho) * R.sBr)))
+  await expect(page.getByTestId('payer-pmpm')).toHaveText(pmpm(e.cases.base.totalPmpm))   // revenue settings never change the savings
+  await page.goto('/value?geo=12580&payer=united')
+  await expect(page.getByTestId('payer-pmpm')).toHaveText(pmpm(e.cases.base.totalPmpm), { timeout: 120_000 })
   // the stretch case, then the unmanaged baseline
   await page.getByRole('radio', { name: 'Stretch' }).click()
   await expect(page.getByTestId('payer-pmpm')).toHaveText(pmpm(e.cases.stretch.totalPmpm))
@@ -36,6 +53,8 @@ test('value: payer tab for all Medicare Advantage in the United States, and an e
   await page.goto('/value')
   await expect(page.getByTestId('payer-pmpm')).toHaveText(pmpm(e.cases.base.totalPmpm), { timeout: 120_000 })
   await expect(page.getByTestId('payer-baseline')).toContainText('Medicare Advantage here')
+  await expect(page.getByTestId('bench-revenue')).toHaveText(`$${Math.round(e.rev.bench).toLocaleString('en-US')}`)
+  await expect(page.getByTestId('bonus-gap')).toContainText(`$${(e.rev.bench5 - e.rev.bench).toFixed(2)}`)
   await expect(page.getByTestId('routing-evidence')).toBeVisible()
   // doubling the readmission assumption doubles that lever and nothing else; the page marks the case as edited
   await page.getByLabel('Readmission rate, points removed').fill('2')

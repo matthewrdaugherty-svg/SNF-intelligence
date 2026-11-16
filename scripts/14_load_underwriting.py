@@ -152,13 +152,119 @@ multi = con.execute("SELECT fips, count(*) FROM ssa_fips GROUP BY 1 HAVING count
 assert [m[0] for m in multi if not m[0].startswith(('60', '66'))] == ['06037'], multi   # outside the territories, only Los Angeles County has more than one SSA code
 # for a FIPS county with several SSA codes, the ratebook rate used is that of the SSA code carrying the most MA enrollment
 con.execute("CREATE OR REPLACE TABLE ssa_primary AS SELECT fips, arg_max(ssa, cpsc_enrollment) AS ssa, count(*) AS n_ssa FROM ssa_fips GROUP BY fips")
-# MA plan x county, visible enrollment only ('*' = 10 or fewer enrollees, never treated as zero); PDPs are not health plans for this purpose
+# ---------------------------------------------------------------- Star Ratings -> quality-bonus tier and rebate share per MA contract (for 2027 payment)
+# Method, as CMS sets it out (42 CFR 422.258(d)(7), 422.266(a)(2); CMS annual "Quality Bonus Payment Determinations" memo):
+#   * the rating used for payment year 2027 is the 2026 Star Rating (released fall 2025; this file is CMS's July 22 2026 update of it): the overall rating for a contract
+#     that offers Part D, the Part C summary rating for one that does not;
+#   * 4 stars or more  -> benchmark at the 5% bonus rate; below 4 -> 0% rate;
+#   * rebate share of (benchmark - bid): 70% at 4.5 stars or more, 65% at 3.5 to 4, 50% below 3.5;
+#   * a contract too new to be rated takes the enrollment-weighted average rating of its parent organization's rated MA contracts; if the parent has none it is a "new MA plan":
+#     3.5% bonus rate, rebate as 3.5 stars (65%);
+#   * a low-enrollment contract ("Not enough data available") is paid at the 3.5% rate with a 65% rebate (the ratebook's own "low enrollment / new contract under new parent org" column).
+# The parent average is weighted by November 2025 enrollment, as CMS does. One approximation, counted in the summary: the average is rounded to the nearest half star,
+# and "the parent has no rated MA contract" stands in for CMS's "no MA contract in the previous three years".
+def _star(v):
+    t = "" if v is None else str(v).strip()
+    return (float(t), None) if re.fullmatch(r"\d(\.\d)?", t) else (None, t or None)
+def read_star_summary(rows, year):
+    hi = next(i for i, r in enumerate(rows) if r and str(r[0]).strip() == "Contract Number")
+    hdr = [str(c).strip() if c is not None else "" for c in rows[hi]]
+    ic, io, ip = hdr.index(f"{year} Part C Summary"), hdr.index(f"{year} Overall"), hdr.index("Parent Organization")
+    out = {}
+    for r in rows[hi + 1:]:
+        cid = str(r[0]).strip() if r and r[0] is not None else ""
+        if not re.fullmatch(r"[A-Z]\d{4}", cid): continue
+        (pc, pc_txt), (ov, ov_txt) = _star(r[ic]), _star(r[io])
+        assert cid not in out, f"duplicate contract {cid} in the {year} Star Ratings"
+        out[cid] = (ov if ov is not None else pc, ov_txt if ov is None and pc is None else None, pc, ov, str(r[ip]).strip() if r[ip] else None)
+    return out
+S26 = RAW / "stars" / "s2026" / "Master Tables Individual Files 8 17 26" / "2026 Star Ratings Data Table - Summary Ratings (July 22 2026).xlsx"
+S27 = RAW / "stars" / "s2027" / "2027 Star Ratings Data Table - Summary Ratings (Oct 8 2026).csv"
+stars26 = read_star_summary([list(r) for r in openpyxl.load_workbook(S26, read_only=True).worksheets[0].iter_rows(values_only=True)], 2026)
+import csv as _csv2
+with open(S27, encoding="cp1252", newline="") as fh: stars27 = read_star_summary(list(_csv2.reader(fh)), 2027)
+assert len(stars26) > 600 and len(stars27) > 600, (len(stars26), len(stars27))
+assert all(v[0] is None or (1 <= v[0] <= 5 and v[0] * 2 == int(v[0] * 2)) for v in list(stars26.values()) + list(stars27.values())), "a star rating is not a half-star value between 1 and 5"
+con.execute("CREATE OR REPLACE TABLE ma_stars (contract_id VARCHAR, rating_2026 DOUBLE, status_2026 VARCHAR, part_c_2026 DOUBLE, overall_2026 DOUBLE, rating_2027 DOUBLE, status_2027 VARCHAR)")
+con.executemany("INSERT INTO ma_stars VALUES (?,?,?,?,?,?,?)", [(c, *stars26.get(c, (None, None, None, None))[:4], *stars27.get(c, (None, None))[:2]) for c in sorted(set(stars26) | set(stars27))])
+# November 2025 enrollment by contract: the month CMS weights by when it averages a parent organization's ratings for a contract too new to be rated (QBP memo)
+NOV = RAW / "contract_enrollment" / "c2025_11" / "Monthly_Report_By_Contract_2025_11" / "Monthly_Report_By_Contract_2025_11.csv"
+with open(NOV, encoding="cp1252", newline="") as fh:
+    nov = [(r["Contract Number"].strip(), r["Plan Type"].strip(), None if r["Enrollment"].strip() == "*" else float(r["Enrollment"].replace(",", ""))) for r in _csv2.DictReader(fh)]
+assert len(nov) == len({r[0] for r in nov}) and len(nov) > 900
+con.execute("CREATE OR REPLACE TABLE ma_contract_nov (contract_id VARCHAR, plan_type VARCHAR, enrollment DOUBLE)"); con.executemany("INSERT INTO ma_contract_nov VALUES (?,?,?)", nov)
+# one row per MA contract in the enrollment file: its parent, visible enrollment, and the payment tier the rules above give it
+con.execute("""CREATE OR REPLACE TABLE ma_contract_qbp AS
+  WITH k AS (SELECT e.contract_id, arg_max(coalesce(c.parent_org, c.org_marketing_name, c.org_name, e.contract_id), coalesce(e.enrollment, 0)) AS parent_org, coalesce(sum(e.enrollment), 0) AS enrollment
+             FROM ma_enroll e JOIN ma_contract c ON c.contract_id = e.contract_id AND c.plan_id IS NOT DISTINCT FROM e.plan_id WHERE c.segment = 'MA' GROUP BY 1),
+       j AS (SELECT k.*, s.rating_2026, s.status_2026, s.rating_2027 FROM k LEFT JOIN ma_stars s USING (contract_id)),
+       pa AS (SELECT j.parent_org, sum(n.enrollment * j.rating_2026) / nullif(sum(n.enrollment), 0) AS parent_avg FROM j JOIN ma_contract_nov n USING (contract_id) WHERE j.rating_2026 IS NOT NULL GROUP BY 1)
+  SELECT j.contract_id, j.parent_org, j.enrollment, j.rating_2026, j.status_2026, j.rating_2027,
+         CASE WHEN j.rating_2026 IS NOT NULL THEN 'rated'
+              WHEN j.status_2026 ILIKE 'Not enough data%' THEN 'low enrollment'
+              WHEN pa.parent_avg IS NOT NULL THEN 'parent average' ELSE 'new' END AS basis,
+         CASE WHEN j.rating_2026 IS NOT NULL THEN j.rating_2026
+              WHEN j.status_2026 ILIKE 'Not enough data%' THEN NULL
+              WHEN pa.parent_avg IS NOT NULL THEN round(pa.parent_avg * 2) / 2 END AS qbp_rating
+  FROM j LEFT JOIN pa USING (parent_org)""")
+con.execute("""ALTER TABLE ma_contract_qbp ADD COLUMN bonus DOUBLE; ALTER TABLE ma_contract_qbp ADD COLUMN rebate_pct DOUBLE;
+  UPDATE ma_contract_qbp SET bonus = CASE WHEN qbp_rating IS NULL THEN 3.5 WHEN qbp_rating >= 4 THEN 5 ELSE 0 END,
+                             rebate_pct = CASE WHEN qbp_rating IS NULL THEN 65 WHEN qbp_rating >= 4.5 THEN 70 WHEN qbp_rating >= 3.5 THEN 65 ELSE 50 END""")
+qbp = con.execute("""SELECT count(*), sum(enrollment), sum(enrollment) FILTER (WHERE basis = 'rated') / sum(enrollment), sum(enrollment) FILTER (WHERE basis = 'parent average') / sum(enrollment),
+     sum(enrollment) FILTER (WHERE basis = 'low enrollment') / sum(enrollment), sum(enrollment) FILTER (WHERE basis = 'new') / sum(enrollment),
+     sum(enrollment) FILTER (WHERE bonus = 5) / sum(enrollment), sum(enrollment) FILTER (WHERE bonus = 3.5) / sum(enrollment),
+     sum(enrollment * rating_2026) FILTER (WHERE basis = 'rated') / sum(enrollment) FILTER (WHERE basis = 'rated'),
+     sum(enrollment) FILTER (WHERE rating_2027 >= 4) / sum(enrollment) FILTER (WHERE rating_2027 IS NOT NULL), sum(enrollment * rebate_pct) / sum(enrollment) FROM ma_contract_qbp""").fetchall()[0]
+assert qbp[2] > 0.90, f"only {qbp[2]:.1%} of MA enrollment is in a contract with a 2026 Star Rating"
+# Reasonableness check against CMS's own published figures (2027 Star Ratings fact sheet): enrollment-weighted average MA-PD overall rating 4.01 for 2026 (after the June 2026
+# updates) and 3.99 for 2027, with about 71% of MA-PD enrollees in contracts at 4 stars or more for 2027.
+chk = con.execute("""SELECT (SELECT sum(n.enrollment * s.overall_2026) / sum(n.enrollment) FROM ma_contract_nov n JOIN ma_stars s USING (contract_id) WHERE s.overall_2026 IS NOT NULL AND n.plan_type IN ('HMO/HMOPOS','Local PPO','Regional PPO','PFFS','MSA')),
+    (SELECT sum(n.enrollment) FILTER (WHERE s.overall_2026 >= 4) / sum(n.enrollment) FROM ma_contract_nov n JOIN ma_stars s USING (contract_id) WHERE s.overall_2026 IS NOT NULL AND n.plan_type IN ('HMO/HMOPOS','Local PPO','Regional PPO','PFFS','MSA')),
+    (SELECT sum(enrollment * rating_2027) / sum(enrollment) FROM ma_contract_qbp WHERE rating_2027 IS NOT NULL)""").fetchall()[0]
+assert abs(chk[0] - 4.01) < 0.02 and abs(chk[2] - 3.99) < 0.02 and abs(qbp[9] - 0.71) < 0.01, chk
+
+# ---------------------------------------------------------------- CMS Plan Payment Data, Part C, 2024 (the latest reconciled year): per plan, the average risk score,
+# the average A/B payment STANDARDIZED TO A 1.0 RISK SCORE (the plan's standardized bid when it bids below the benchmark) and the average rebate, $ per member per month
+PP = RAW / "plan_payment" / "pp2024" / "2024PartCPlanLevel.xlsx"
+pp_rows = [list(r) for r in openpyxl.load_workbook(PP, read_only=True).worksheets[0].iter_rows(values_only=True)]
+phi = next(i for i, r in enumerate(pp_rows) if r and str(r[0]).strip() == "Contract Number")
+assert [str(c).strip() for c in pp_rows[phi]] == ['Contract Number', 'Plan Benefit Package', 'Contract Name', 'Plan Type', 'Average A/B PM/PM Payment', 'Average Part C Risk Score', 'Average Rebate PM/PM Payment'], pp_rows[phi]
+def _f(v):
+    t = "" if v is None else str(v).strip()
+    return None if t in ("", "None", "*") else float(t)     # float() raises on anything else
+pay = [(str(r[0]).strip(), str(r[1]).strip().zfill(3), str(r[3]).strip() if r[3] else None, _f(r[4]), _f(r[5]), _f(r[6])) for r in pp_rows[phi + 1:] if r and r[0] and re.fullmatch(r"[A-Z]\d{4}", str(r[0]).strip())]
+assert len(pay) == len({(a, b) for a, b, *_ in pay}) and len(pay) > 4000, len(pay)
+con.execute("CREATE OR REPLACE TABLE ma_plan_pay (contract_id VARCHAR, plan_id VARCHAR, plan_type VARCHAR, ab_std DOUBLE, risk DOUBLE, rebate DOUBLE)")
+con.executemany("INSERT INTO ma_plan_pay VALUES (?,?,?,?,?,?)", pay)
+assert one("SELECT count(*) FROM ma_plan_pay WHERE risk NOT BETWEEN 0.3 AND 5 OR ab_std NOT BETWEEN 200 AND 4000 OR rebate < 0 OR rebate > 1500") == 0, "a 2024 plan payment value is outside a plausible range"
+
+# MA plan x county, visible enrollment only ('*' = 10 or fewer enrollees, never treated as zero); PDPs are not health plans for this purpose.
+# Grouped by payment tier so the app can price each member at their own contract's benchmark; the *_x columns are enrollment-weighted sums of the 2024 plan figures.
 con.execute("""CREATE OR REPLACE TABLE ma_parent_county AS
   SELECT coalesce(c.parent_org, c.org_marketing_name, c.org_name, e.contract_id) AS parent_org, e.fips, c.segment, (c.snp = 'Yes') AS snp, (c.eghp = 'Yes') AS eghp,
-         sum(e.enrollment) AS enrollment, count(*) FILTER (WHERE e.suppressed) AS suppressed_cells, count(*) AS plan_cells, count(DISTINCT e.contract_id) AS contracts
+         q.bonus, q.rebate_pct, q.qbp_rating AS stars, q.basis,
+         sum(e.enrollment) AS enrollment, count(*) FILTER (WHERE e.suppressed) AS suppressed_cells, count(*) AS plan_cells, count(DISTINCT e.contract_id) AS contracts,
+         sum(e.enrollment) FILTER (WHERE q.rating_2027 IS NOT NULL) AS enr_next, sum(e.enrollment * q.rating_2027) AS stars_next_x, sum(e.enrollment) FILTER (WHERE q.rating_2027 >= 4) AS enr_next4,
+         sum(e.enrollment) FILTER (WHERE p.risk IS NOT NULL AND p.ab_std IS NOT NULL AND p.rebate IS NOT NULL) AS enr_pay,
+         sum(e.enrollment * p.risk) FILTER (WHERE p.ab_std IS NOT NULL AND p.rebate IS NOT NULL) AS risk_x, sum(e.enrollment * p.rebate) FILTER (WHERE p.risk IS NOT NULL AND p.ab_std IS NOT NULL) AS rebate_x,
+         sum(e.enrollment * p.ab_std * p.risk) FILTER (WHERE p.rebate IS NOT NULL) AS base_x,
+         -- the plan's own standardized bid, and the benchmark-minus-bid gap its 2024 rebate implies: rebate = rebate share x risk x (benchmark - bid). The rebate share is the
+         -- contract's 2027 one (its 2024 share is not loaded), so the implied bid ratio ab_x / (ab_x + gap_x) is an estimate and is labelled as one.
+         -- Employer-group plans are left out of both: CMS pays them a set rate with no separate rebate, so their payments say nothing about a bid.
+         sum(e.enrollment * p.ab_std) FILTER (WHERE p.risk IS NOT NULL AND p.rebate IS NOT NULL AND c.eghp <> 'Yes') AS ab_x,
+         sum(e.enrollment * p.rebate / (q.rebate_pct / 100.0 * p.risk)) FILTER (WHERE p.ab_std IS NOT NULL AND c.eghp <> 'Yes') AS gap_x
   FROM ma_enroll e JOIN ma_contract c ON c.contract_id = e.contract_id AND c.plan_id IS NOT DISTINCT FROM e.plan_id
+  LEFT JOIN ma_contract_qbp q ON q.contract_id = e.contract_id AND c.segment = 'MA'
+  LEFT JOIN ma_plan_pay p ON p.contract_id = e.contract_id AND p.plan_id = e.plan_id AND c.segment = 'MA'
   WHERE e.fips IS NOT NULL AND c.segment <> 'PDP'
   GROUP BY ALL""")
+assert one("SELECT count(*) FROM ma_parent_county WHERE segment = 'MA' AND (bonus IS NULL OR rebate_pct IS NULL)") == 0, "an MA contract has no payment tier"
+pay24 = con.execute("""SELECT sum(enr_pay) / sum(enrollment), sum(risk_x) / sum(enr_pay), sum(base_x) / sum(enr_pay), sum(rebate_x) / sum(enr_pay), sum(ab_x) / (sum(ab_x) + sum(gap_x)),
+     sum(rebate_x) FILTER (WHERE NOT eghp AND NOT snp) / sum(enr_pay) FILTER (WHERE NOT eghp AND NOT snp), sum(rebate_x) FILTER (WHERE NOT eghp) / sum(enr_pay) FILTER (WHERE NOT eghp)
+     FROM ma_parent_county WHERE segment = 'MA'""").fetchall()[0]
+# Reasonableness checks against MedPAC (March 2024 report, ch. 12): 2024 rebates of $194 a month for conventional plans and $209 including special-needs plans (both from bids,
+# excluding employer plans), and bids at 82% of FFS against benchmarks at 108% (a bid-to-benchmark ratio of about 76%). CMS's actual 2024 payments should land near these.
+assert abs(pay24[5] / 194 - 1) < 0.10 and abs(pay24[6] / 209 - 1) < 0.10 and 0.74 < pay24[4] < 0.82, pay24
 cpsc = con.execute("""SELECT sum(enrollment) FILTER (WHERE segment='MA'), sum(enrollment), sum(suppressed_cells), sum(plan_cells), count(DISTINCT parent_org) FROM ma_parent_county""").fetchall()[0]
 unj = one("SELECT count(*) FROM ma_enroll e LEFT JOIN ma_contract c ON c.contract_id = e.contract_id AND c.plan_id IS NOT DISTINCT FROM e.plan_id WHERE c.contract_id IS NULL")
 assert unj == 0, f"{unj} enrollment rows have no contract record"
@@ -182,6 +288,25 @@ con.execute("CREATE OR REPLACE TABLE ma_ratebook (ssa VARCHAR, state_name VARCHA
 con.executemany("INSERT INTO ma_ratebook VALUES (?,?,?,?,?,?,?)", rb_rows)
 n_rb = one("SELECT count(*) FROM ma_ratebook"); assert n_rb > 3100 and n_rb == one("SELECT count(DISTINCT ssa) FROM ma_ratebook"), n_rb
 assert one("SELECT count(*) FROM ma_ratebook WHERE rate_5 < rate_35 OR rate_35 < rate_0") == 0, "a bonus rate is below the base rate"
+# The same ratebook publishes what CMS pays employer-group plans in each county by star category. CMS builds those from the county benchmark and the national average
+# bid-to-benchmark ratio of individual-market plans in the county's quartile (77.7% to 78.7% for 2027):   payment = benchmark x [ratio + rebate share x (1 - ratio)].
+# We read each county's ratio back out of the "<3.5 stars" column and then REQUIRE that the other four published columns are reproduced to the cent by the same formula.
+# That is the check that the payment arithmetic in the app is CMS's own.
+eg_rows = []
+with open(RAW / "ratebook" / "CSV" / "Local EGWP Rates 2027.csv", encoding="utf-8-sig", newline="") as fh:
+    ehdr = None
+    for row in _csv.reader(fh):
+        if row and row[0].strip() == "Code": ehdr = [re.sub(r"\s+", " ", h.replace("–", "-")).strip() for h in row]; continue
+        if ehdr and row and re.fullmatch(r"\d{5}", row[0].strip()): eg_rows.append((row[0].strip(), *[float(v.replace(",", "").strip()) for v in row[3:8]]))
+assert ehdr[3:8] == ['Part A/B Rate - 4.5 and 5 stars', 'Part A/B Rate - 4 stars', 'Part A/B Rate - 3.5 stars', 'Part A/B Rate - <3.5 stars', 'Part A/B Rate - low enrollment / new contract under new parent org'], ehdr
+con.execute("CREATE OR REPLACE TABLE ma_egwp (ssa VARCHAR, r45 DOUBLE, r4 DOUBLE, r35 DOUBLE, rlt35 DOUBLE, rnew DOUBLE)"); con.executemany("INSERT INTO ma_egwp VALUES (?,?,?,?,?,?)", eg_rows)
+con.execute("ALTER TABLE ma_ratebook ADD COLUMN bid_ratio DOUBLE")
+con.execute("UPDATE ma_ratebook b SET bid_ratio = (e.rlt35 / b.rate_0 - 0.5) / 0.5 FROM ma_egwp e WHERE e.ssa = b.ssa AND b.rate_0 > 0")
+egchk = con.execute("""SELECT count(*), min(bid_ratio), max(bid_ratio),
+    max(greatest(abs(r45 - rate_5 * (bid_ratio + 0.70 * (1 - bid_ratio))), abs(r4 - rate_5 * (bid_ratio + 0.65 * (1 - bid_ratio))),
+                 abs(r35 - rate_0 * (bid_ratio + 0.65 * (1 - bid_ratio))), abs(rnew - rate_35 * (bid_ratio + 0.65 * (1 - bid_ratio)))))
+    FROM ma_ratebook b JOIN ma_egwp e USING (ssa) WHERE bid_ratio IS NOT NULL""").fetchall()[0]
+assert egchk[0] > 3100 and 0.77 < egchk[1] and egchk[2] < 0.79 and egchk[3] < 0.02, egchk
 
 # ---------------------------------------------------------------- MSSP county risk scores (SSA codes) (SSA codes; crosswalk from the CPSC file)
 MS = f"read_csv('{RAW}/mssp_county_risk.csv', all_varchar=true)"
@@ -226,7 +351,7 @@ con.execute("""CREATE OR REPLACE TABLE uw_county AS
          g.hh_episodes_per_1000_benes AS ffs_hh_episodes, g.hh_mdcr_pymt_amt AS ffs_hh_pymt, g.hh_mdcr_pymt_pc AS ffs_hh_pc,
          g.dme_mdcr_pymt_pc AS ffs_dme_pc, g.hospc_mdcr_pymt_pc AS ffs_hospice_pc,
          r.avg_risk_score AS ffs_risk_score, r.person_years AS risk_person_years,
-         b.rate_0 AS ma_rate_0, b.rate_35 AS ma_rate_35, b.rate_5 AS ma_rate_5,
+         b.rate_0 AS ma_rate_0, b.rate_35 AS ma_rate_35, b.rate_5 AS ma_rate_5, b.bid_ratio AS ma_bid_ratio,
          p.ma_enrollment AS cpsc_ma_enrollment, p.suppressed_cells AS cpsc_suppressed_cells
   FROM enrollment_county e
   LEFT JOIN gv g ON g.year = 2024 AND g.geo_level = 'County' AND g.age_level = 'All' AND g.geo_code = e.fips
@@ -319,6 +444,12 @@ summary = {
     "national_ma_vs_ffs_2023": {"ma_ip_stays": natr[0], "ffs_ip_stays": natr[1], "ratio_ip_stays": round(natr[2], 4), "ma_snf_days": natr[3], "ffs_snf_days": natr[4], "ratio_snf_days": round(natr[5], 4)},
     "snf_cost": {"ccns": snf_n[0], "full_year_reports": snf_n[1], "reports_in_file": snf_n[2]}, "hospital_cost": {"ccns": hosp_n[0], "full_year_reports": hosp_n[1], "reports_in_file": hosp_n[2]},
     "snf_geo_matched": snf_geo, "hospital_geo_matched": hosp_geo,
+    "stars": {"rating_year": 2026, "payment_year": 2027, "next_rating_year": 2027, "ma_contracts": qbp[0], "share_rated": round(qbp[2], 4), "share_parent_average": round(qbp[3], 4), "share_low_enrollment": round(qbp[4], 4),
+              "share_new": round(qbp[5], 4), "share_in_5pct_bonus": round(qbp[6], 4), "share_in_3_5pct_bonus": round(qbp[7], 4), "average_rating": round(qbp[8], 3), "share_4plus_next_year": round(qbp[9], 4), "average_rebate_pct": round(qbp[10], 2),
+              "check_avg_rating_2026_nov2025_weights": round(chk[0], 3), "check_share_4plus_2026_nov2025_weights": round(chk[1], 4), "check_avg_rating_2027": round(chk[2], 3), "cms_published": {"avg_2026": 4.01, "avg_2027": 3.99, "share_4plus_2027": 0.71}},
+    "plan_payment": {"year": 2024, "plans": len(pay), "share_of_ma_enrollment_matched": round(pay24[0], 4), "average_risk_score": round(pay24[1], 4), "average_base_payment_pmpm": round(pay24[2], 2), "average_rebate_pmpm": round(pay24[3], 2), "implied_bid_ratio": round(pay24[4], 4),
+                     "rebate_conventional_plans": round(pay24[5], 2), "rebate_non_employer_plans": round(pay24[6], 2), "medpac_2024": {"rebate_conventional": 194, "rebate_with_snps": 209, "bid_pct_of_ffs": 82, "benchmark_pct_of_ffs": 108}},
+    "bid_ratio": {"counties": egchk[0], "min": round(egchk[1], 4), "max": round(egchk[2], 4), "max_error_reproducing_cms_egwp_rates_usd": round(egchk[3], 4)},
     "hrrp": {"fiscal_year": 2027, "hospitals": n_hrrp, "penalized": hr[2], "average_penalty": round(hr[3], 5), "largest_penalty": round(1 - hr[0], 4)},
     "vbp": {"fiscal_year": 2027, "proxy": True, "hospitals": n_vbp, "net_losers": vb[2], "min_factor": vb[0], "max_factor": vb[1]},
     "releases": {k: {"dataset": v["dataset"], "period_start": v["period_start"], "modified": v["modified"]} for k, v in manifest.items()},

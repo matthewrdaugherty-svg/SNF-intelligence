@@ -4,7 +4,8 @@
 //   - Original Medicare utilization and payments by county: Geographic Variation PUF, 2024
 //   - Medicare Advantage utilization by state: MA Geographic Variation PUF, 2023 (the county MA estimate = county FFS rate x that state's MA/FFS ratio; MODELED)
 //   - MA enrollment by parent organization and county: CPSC file, September 2026; county totals: Medicare Monthly Enrollment, July 2026
-//   - county benchmark rates: 2027 MA ratebook; county FFS risk scores: MSSP county file, 2025; counties to CBSAs: Census/OMB July 2023
+//   - county benchmark rates and CMS's average bid-to-benchmark ratio: 2027 MA ratebook; Star Ratings 2026 (they set 2027 payment) and 2027; plan payments and risk scores: CMS Plan Payment Data 2024
+//   - (cont.) county FFS risk scores: MSSP county file, 2025; counties to CBSAs: Census/OMB July 2023
 //   - SNF and hospital cost reports: HCRIS extracts, fiscal year 2024
 // Everything on the IMPROVEMENT side is an assumption the user sets. Presets are Minimum / Base / Stretch; none of them is a CMS number. (D-041..D-043)
 import { ensureTables, q, sqlStr, type Row } from './db'
@@ -80,11 +81,54 @@ export interface PayerBaseline {
   price: { ipPerStay: number; ipPerDay: number; snfPerDay: number; hhPerEpisode: number; irfPerStay: number | null; ltchPerStay: number | null }
   ffsRisk: number | null     // average HCC risk score of FFS assignable beneficiaries (MSSP county file, person-year weighted)
   benchmark: { r0: number | null; r35: number | null; r5: number | null }   // 2027 county benchmark, $ PMPM, member-weighted
+  rev: PlanRevenue | null
   // SNF quality in the area (Care Compare + PAC PUF), Medicare-stay weighted
   snf: { n: number; nHigh: number; lowShare: number | null; rehospLow: number | null; rehospHigh: number | null; readmLow: number | null; readmHigh: number | null
     worseShare: number | null; rehospWorse: number | null; rehospBetter: number | null }   // split at the area's stay-weighted average rehospitalization rate instead of at 4 stars
 }
 
+/** What CMS pays these plans, built the way CMS builds it (42 CFR 422.258 and 422.266; the 2027 ratebook's EGWP rates reproduce to the cent from the same formula; D-048).
+ *  Everything is per member per month at a 1.0 risk score, weighted by the plans' visible enrollment (CPSC) in each county and each contract's own payment tier. */
+export interface PlanRevenue {
+  members: number             // visible MA members with a ratebook rate
+  bench: number               // county benchmark at each contract's own quality-bonus tier (5% at 4+ stars, 3.5% new or low enrollment, else 0%)
+  bench0: number; bench5: number   // the same members with no bonus anywhere, and with the 5% bonus everywhere
+  sBr: number                 // sum of benchmark x rebate share, per member
+  sBrho: number | null        // sum of benchmark x CMS's county bid-to-benchmark ratio, per member
+  sBrhoR: number | null       // sum of benchmark x that ratio x rebate share, per member
+  bidRatio: number | null     // CMS's average bid as a share of benchmark for these counties (77.7% to 78.7% by county quartile in 2027)
+  rebatePct: number           // member-weighted rebate share, % (70 at 4.5+ stars, 65 at 3.5 to 4 and for new or low-enrollment contracts, 50 below 3.5)
+  share5: number; share35: number; share0: number
+  stars: number | null; shareRated: number; shareParentAvg: number    // rating used for 2027 payment (2026 Star Ratings), member-weighted over contracts that have one
+  starsNext: number | null; share4Next: number | null                  // 2027 Star Ratings (they set 2028 payment)
+  pay24: { coverage: number; risk: number; base: number; rebate: number; impliedBidRatio: number | null } | null   // impliedBidRatio: standardized bid / (bid + the gap the 2024 rebate implies), individual-market plans only, an estimate.
+  // CMS Plan Payment Data 2024 for the same plans: average risk score, risk-adjusted base payment and rebate, $ PMPM
+}
+async function planRevenue(g: Geo, parentText: string): Promise<PlanRevenue | null> {
+  const useParent = cleanParent(parentText).length > 0
+  const [r] = await q<Row>(`
+    WITH x AS (SELECT p.*, CASE p.bonus WHEN 5 THEN u.ma_rate_5 WHEN 3.5 THEN u.ma_rate_35 ELSE u.ma_rate_0 END AS rate, u.ma_rate_0, u.ma_rate_5, u.ma_bid_ratio AS rho, p.rebate_pct / 100.0 AS rb
+               FROM ma_parent_county p JOIN uw_county u ON u.fips = p.fips
+               WHERE p.segment = 'MA' AND ${geoWhere(g)} ${useParent ? `AND lower(p.parent_org) LIKE ${parentLike(parentText)}` : ''}),
+    y AS (SELECT * FROM x WHERE rate IS NOT NULL)
+    SELECT sum(enrollment) AS e, sum(enrollment * rate) / sum(enrollment) AS bench, sum(enrollment * ma_rate_0) / sum(enrollment) AS bench0, sum(enrollment * ma_rate_5) / sum(enrollment) AS bench5,
+      sum(enrollment * rate * rb) / sum(enrollment) AS s_br,
+      CASE WHEN count(*) = count(rho) THEN sum(enrollment * rate * rho) / sum(enrollment) END AS s_brho, CASE WHEN count(*) = count(rho) THEN sum(enrollment * rate * rho * rb) / sum(enrollment) END AS s_brhor,
+      sum(enrollment * rebate_pct) / sum(enrollment) AS rebate_pct,
+      sum(enrollment) FILTER (WHERE bonus = 5) / sum(enrollment) AS share5, sum(enrollment) FILTER (WHERE bonus = 3.5) / sum(enrollment) AS share35,
+      sum(enrollment * stars) / nullif(sum(enrollment) FILTER (WHERE stars IS NOT NULL), 0) AS stars, sum(enrollment) FILTER (WHERE basis = 'rated') / sum(enrollment) AS share_rated,
+      sum(enrollment) FILTER (WHERE basis = 'parent average') / sum(enrollment) AS share_pa,
+      sum(stars_next_x) / nullif(sum(enr_next), 0) AS stars_next, sum(enr_next4) / nullif(sum(enr_next), 0) AS share4_next,
+      sum(enr_pay) / sum(enrollment) AS pay_cov, sum(risk_x) / nullif(sum(enr_pay), 0) AS risk24, sum(base_x) / nullif(sum(enr_pay), 0) AS base24, sum(rebate_x) / nullif(sum(enr_pay), 0) AS rebate24, sum(ab_x) / nullif(sum(ab_x) + sum(gap_x), 0) AS implied_bid
+    FROM y`)
+  if (!r || !(Number(r.e) > 0)) return null
+  const n = (v: unknown) => v == null ? null : Number(v)
+  const s5 = Number(r.share5 ?? 0), s35 = Number(r.share35 ?? 0)
+  return { members: Number(r.e), bench: Number(r.bench), bench0: Number(r.bench0), bench5: Number(r.bench5), sBr: Number(r.s_br), sBrho: n(r.s_brho), sBrhoR: n(r.s_brhor),
+    bidRatio: r.s_brho == null ? null : Number(r.s_brho) / Number(r.bench), rebatePct: Number(r.rebate_pct), share5: s5, share35: s35, share0: Math.max(0, 1 - s5 - s35),
+    stars: n(r.stars), shareRated: Number(r.share_rated ?? 0), shareParentAvg: Number(r.share_pa ?? 0), starsNext: n(r.stars_next), share4Next: n(r.share4_next),
+    pay24: r.risk24 == null || !(Number(r.pay_cov) > 0) ? null : { coverage: Number(r.pay_cov), risk: Number(r.risk24), base: Number(r.base24), rebate: Number(r.rebate24), impliedBidRatio: n(r.implied_bid) } }
+}
 export async function payerBaseline(g: Geo, parentText: string): Promise<PayerBaseline | null> {
   await ensureUw()
   const useParent = cleanParent(parentText).length > 0
@@ -111,6 +155,7 @@ export async function payerBaseline(g: Geo, parentText: string): Promise<PayerBa
       ${wavg('ma_rate_0')} AS b0, ${wavg('ma_rate_35')} AS b35, ${wavg('ma_rate_5')} AS b5
     FROM base`)
   if (!r || !(Number(r.members) > 0) || r.m_snf_days == null) return null
+  const rev = await planRevenue(g, parentText)
   const [s] = await q<Row>(`
     WITH f AS (SELECT fm.overall_rating, fm.qm_521_adj, fm.qrp_004_ppr_pd_rsrr, coalesce(su.medicare_stays_2024, 0) AS stays
                FROM facility_master fm JOIN snf_geo sg ON sg.ccn = fm.ccn JOIN uw_county u ON u.fips = sg.fips LEFT JOIN snf_utilization su ON su.ccn = fm.ccn WHERE ${geoWhere(g)}),
@@ -132,7 +177,7 @@ export async function payerBaseline(g: Geo, parentText: string): Promise<PayerBa
     ma: { ipStays: Number(r.m_ip_stays), ipDays: Number(r.m_ip_days), snfStays: Number(r.m_snf_stays), snfDays: Number(r.m_snf_days), irfStays: n(r.m_irf_stays), ltchStays: n(r.m_ltch_stays) },
     ratio: { ipStays: Number(r.r_ip_stays), ipDays: Number(r.r_ip_days), snfStays: Number(r.r_snf_stays), snfDays: Number(r.r_snf_days) },
     price: { ipPerStay: Number(r.p_ip_stay), ipPerDay: Number(r.p_ip_day), snfPerDay: Number(r.p_snf_day), hhPerEpisode: Number(r.p_hh), irfPerStay: n(r.p_irf), ltchPerStay: n(r.p_ltch) },
-    ffsRisk: n(r.ffs_risk), benchmark: { r0: n(r.b0), r35: n(r.b35), r5: n(r.b5) },
+    ffsRisk: n(r.ffs_risk), benchmark: { r0: n(r.b0), r35: n(r.b35), r5: n(r.b5) }, rev,
     snf: { n: Number(s.n), nHigh: Number(s.n_high), lowShare: n(s.low_share), rehospLow: n(s.rehosp_low), rehospHigh: n(s.rehosp_high), readmLow: n(s.readm_low), readmHigh: n(s.readm_high), worseShare: n(s.worse_share), rehospWorse: n(s.rehosp_worse), rehospBetter: n(s.rehosp_better) },
   }
 }
@@ -149,8 +194,9 @@ export interface PayerAssumptions {
   priceFactor: number     // MA payment as % of Medicare FFS payment
   basis: 'ma' | 'ffs'     // utilization baseline: a typical MA plan in this state, or unmanaged (Original Medicare levels in these counties)
   acuity: number          // utilization scaled to this % of the baseline (100 = no change; above 100 for a sicker population such as a D-SNP)
-  planRisk: number        // the plan's average risk score, used ONLY to turn the county benchmark into revenue (1.00 = benchmark as published)
-  bonus: 0 | 35 | 5       // which ratebook column to use for revenue
+  risk: 'one' | 'cms' | 'own'   // risk score for revenue: 1.0 (benchmark as published), the plans' average in CMS's 2024 payment data, or the user's own
+  planRisk: number        // the user's own risk score, used when risk = 'own'. Risk scores only turn the benchmark into revenue; they never scale the dollar levers
+  bidRatio: number | null // the plan's bid as % of its benchmark; null = CMS's published average for these counties
 }
 export type Preset = 'min' | 'base' | 'stretch'
 export const PAYER_PRESETS: Record<Preset, Pick<PayerAssumptions, 'readmPts' | 'snfToHome' | 'snfLos' | 'irfToSnf' | 'ltchToSnf' | 'ipDays' | 'perDiemShare'>> = {
@@ -158,7 +204,7 @@ export const PAYER_PRESETS: Record<Preset, Pick<PayerAssumptions, 'readmPts' | '
   base: { readmPts: 1, snfToHome: 5, snfLos: 7, irfToSnf: 5, ltchToSnf: 5, ipDays: 0, perDiemShare: 0 },
   stretch: { readmPts: 2, snfToHome: 10, snfLos: 13, irfToSnf: 10, ltchToSnf: 10, ipDays: 5, perDiemShare: 20 },
 }
-export const PAYER_DEFAULTS: PayerAssumptions = { ...PAYER_PRESETS.base, umPmpm: 0, priceFactor: 100, basis: 'ma', acuity: 100, planRisk: 1, bonus: 0 }
+export const PAYER_DEFAULTS: PayerAssumptions = { ...PAYER_PRESETS.base, umPmpm: 0, priceFactor: 100, basis: 'ma', acuity: 100, risk: 'one', planRisk: 1, bidRatio: null }
 
 export interface Lever { key: string; label: string; basis: string; perYear: number; pmpm: number }
 export interface PayerValue {
@@ -167,8 +213,16 @@ export interface PayerValue {
   spendPmpm: { ip: number; snf: number; irf: number; ltch: number; total: number }
   levers: Lever[]
   totalPerYear: number; totalPmpm: number
-  revenuePmpm: number | null; pctOfRevenue: number | null; pctOfIpPac: number
-  starsAtStakePerYear: number | null
+  pctOfIpPac: number
+  riskUsed: number
+  benchRevenue: number | null    // benchmark at the plans' own star tiers x risk score: the most CMS pays before the bid is taken into account
+  payment: number | null         // expected CMS payment = base payment + rebate
+  basePayment: number | null     // risk x bid: the payment for Medicare-covered services
+  rebate: number | null          // rebate share x risk x (benchmark - bid): must be spent on extra benefits or lower premiums
+  bidRatioUsed: number | null
+  pctOfRevenue: number | null    // savings / benchmark revenue
+  pctOfPayment: number | null    // savings / expected CMS payment
+  bonusGapPmpm: number | null; bonusGapPerYear: number | null   // benchmark these members would gain if every contract were at 4 stars or more
   routingPts: number | null   // readmission points that steering ALL below-4-star SNF volume to 4-5-star SNFs would support on its own (evidence, not added to the total)
   routingPtsMeasure: number | null   // the same, steering stays in SNFs with a worse-than-average rehospitalization rate to the better-than-average ones
 }
@@ -202,15 +256,24 @@ export function payerValue(b: PayerBaseline, a: PayerAssumptions, members: numbe
   const totalPerYear = levers.reduce((s, l) => s + l.perYear, 0), totalPmpm = levers.reduce((s, l) => s + l.pmpm, 0)
   const spend = { ip: ipStays * ipPerStay / 12000, snf: snfDays * snfPerDay / 12000, irf: irfStays * irfPerStay / 12000, ltch: ltchStays * ltchPerStay / 12000, total: 0 }
   spend.total = spend.ip + spend.snf + spend.irf + spend.ltch
-  const bench = a.bonus === 5 ? b.benchmark.r5 : a.bonus === 35 ? b.benchmark.r35 : b.benchmark.r0
-  const revenuePmpm = bench == null ? null : bench * a.planRisk
-  const stars = b.benchmark.r5 != null && b.benchmark.r0 != null ? (b.benchmark.r5 - b.benchmark.r0) * a.planRisk * 12 * members : null
+  // ---- what CMS pays the plan (PlanRevenue): payment = risk x [bid + rebate share x (benchmark - bid)], with bid = ratio x benchmark
+  const R = b.rev
+  const riskUsed = a.risk === 'cms' && R?.pay24 ? R.pay24.risk : a.risk === 'own' ? a.planRisk : 1
+  const rho = a.bidRatio == null ? null : a.bidRatio / 100
+  const baseStd = !R ? null : rho != null ? rho * R.bench : R.sBrho
+  const rebateStd = !R ? null : rho != null ? (1 - rho) * R.sBr : R.sBrho == null || R.sBrhoR == null ? null : R.sBr - R.sBrhoR
+  const benchRevenue = R ? riskUsed * R.bench : null
+  const basePayment = baseStd == null ? null : riskUsed * baseStd, rebate = rebateStd == null ? null : riskUsed * Math.max(rebateStd, 0)
+  const payment = basePayment == null || rebate == null ? null : basePayment + rebate
+  const bonusGapPmpm = R ? riskUsed * (R.bench5 - R.bench) : null
   const routing = b.snf.lowShare != null && b.snf.rehospLow != null && b.snf.rehospHigh != null && ipStays > 0 ? snfStays / ipStays * b.snf.lowShare * (b.snf.rehospLow - b.snf.rehospHigh) : null
   const routingMeasure = b.snf.worseShare != null && b.snf.rehospWorse != null && b.snf.rehospBetter != null && ipStays > 0 ? snfStays / ipStays * b.snf.worseShare * (b.snf.rehospWorse - b.snf.rehospBetter) : null
   return {
     per1000: { ipStays, ipDays, snfStays, snfDays, irfStays, ltchStays, readmissionsAvoided: readmAvoided, snfStaysToHome: toHome, snfDaysSaved: daysSaved },
     snfCostPerStay, spendPmpm: spend, levers, totalPerYear, totalPmpm,
-    revenuePmpm, pctOfRevenue: revenuePmpm ? totalPmpm / revenuePmpm : null, pctOfIpPac: spend.total > 0 ? totalPmpm / spend.total : 0, starsAtStakePerYear: stars, routingPts: routing, routingPtsMeasure: routingMeasure,
+    pctOfIpPac: spend.total > 0 ? totalPmpm / spend.total : 0, riskUsed, benchRevenue, payment, basePayment, rebate, bidRatioUsed: rho ?? R?.bidRatio ?? null,
+    pctOfRevenue: benchRevenue ? totalPmpm / benchRevenue : null, pctOfPayment: payment ? totalPmpm / payment : null,
+    bonusGapPmpm, bonusGapPerYear: bonusGapPmpm == null ? null : bonusGapPmpm * 12 * members, routingPts: routing, routingPtsMeasure: routingMeasure,
   }
 }
 

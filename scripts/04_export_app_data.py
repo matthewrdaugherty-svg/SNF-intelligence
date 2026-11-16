@@ -114,7 +114,8 @@ pq("""SELECT ccn, name, state, medicare_cbsa, fy_begin, fy_end, period_days, n_r
              (SELECT hrrp_factor FROM hospital_hrrp h WHERE h.ccn = hospital_cost.ccn) AS hrrp_factor, (SELECT vbp_factor FROM hospital_vbp v WHERE v.ccn = hospital_cost.ccn) AS vbp_factor
       FROM hospital_cost""", "hospital_cost")
 # visible enrollment only: plan-county cells of 10 or fewer are suppressed by CMS and stay out (the count of suppressed cells per county is in uw_county)
-pq("""SELECT parent_org, fips, segment, snp, CAST(sum(enrollment) AS INTEGER) AS enrollment, CAST(sum(suppressed_cells) AS INTEGER) AS suppressed_cells
+pq("""SELECT parent_org, fips, segment, snp, bonus, rebate_pct, stars, basis, CAST(sum(enrollment) AS INTEGER) AS enrollment, CAST(sum(suppressed_cells) AS INTEGER) AS suppressed_cells,
+             sum(enr_next) AS enr_next, sum(stars_next_x) AS stars_next_x, sum(enr_next4) AS enr_next4, sum(enr_pay) AS enr_pay, sum(risk_x) AS risk_x, sum(rebate_x) AS rebate_x, sum(base_x) AS base_x, sum(ab_x) AS ab_x, sum(gap_x) AS gap_x
       FROM ma_parent_county GROUP BY ALL HAVING sum(enrollment) IS NOT NULL ORDER BY parent_org, fips""", "ma_parent_county")
 um=json.load(open(f"{OUT}/meta.json")); um["underwriting"]=json.load(open(f"{ROOT}/db/underwriting_summary.json"))
 json.dump(um, open(f"{OUT}/meta.json","w"), indent=1)

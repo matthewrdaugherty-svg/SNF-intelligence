@@ -71,6 +71,52 @@
    5375,
    5419
   ],
+  "stars": {
+   "rating_year": 2026,
+   "payment_year": 2027,
+   "next_rating_year": 2027,
+   "ma_contracts": 703,
+   "share_rated": 0.9718,
+   "share_parent_average": 0.0219,
+   "share_low_enrollment": 0.0053,
+   "share_new": 0.001,
+   "share_in_5pct_bonus": 0.7115,
+   "share_in_3_5pct_bonus": 0.0063,
+   "average_rating": 4.063,
+   "share_4plus_next_year": 0.7107,
+   "average_rebate_pct": 66.25,
+   "check_avg_rating_2026_nov2025_weights": 4.017,
+   "check_share_4plus_2026_nov2025_weights": 0.6745,
+   "check_avg_rating_2027": 3.991,
+   "cms_published": {
+    "avg_2026": 4.01,
+    "avg_2027": 3.99,
+    "share_4plus_2027": 0.71
+   }
+  },
+  "plan_payment": {
+   "year": 2024,
+   "plans": 5539,
+   "share_of_ma_enrollment_matched": 0.7675,
+   "average_risk_score": 1.1329,
+   "average_base_payment_pmpm": 1025.13,
+   "average_rebate_pmpm": 175.72,
+   "implied_bid_ratio": 0.7486,
+   "rebate_conventional_plans": 199.79,
+   "rebate_non_employer_plans": 216.46,
+   "medpac_2024": {
+    "rebate_conventional": 194,
+    "rebate_with_snps": 209,
+    "bid_pct_of_ffs": 82,
+    "benchmark_pct_of_ffs": 108
+   }
+  },
+  "bid_ratio": {
+   "counties": 3246,
+   "min": 0.7768,
+   "max": 0.7865,
+   "max_error_reproducing_cms_egwp_rates_usd": 0.0086
+  },
   "hrrp": {
    "fiscal_year": 2027,
    "hospitals": 2912,
@@ -146,6 +192,31 @@
     "dataset": "FY 2027 IPPS Final Rule Table 16A: updated proxy Hospital Value-Based Purchasing adjustment factors",
     "period_start": "2026-10-01",
     "modified": "2026-07-28"
+   },
+   "star_ratings_2026": {
+    "dataset": "2026 Star Ratings Data Tables: Summary Ratings (CMS update of July 22 2026); the ratings behind 2027 quality bonus payments",
+    "period_start": "2026-01-01",
+    "modified": "2026-08-17"
+   },
+   "star_ratings_2027": {
+    "dataset": "2027 Star Ratings Data Tables: Summary Ratings (Oct 8 2026); the ratings behind 2028 quality bonus payments",
+    "period_start": "2027-01-01",
+    "modified": "2026-10-08"
+   },
+   "plan_payment_2024": {
+    "dataset": "CMS Plan Payment Data 2024, Part C plan level: average risk score, A/B payment standardized to a 1.0 risk score, rebate",
+    "period_start": "2024-01-01",
+    "modified": "2026-09-30"
+   },
+   "egwp_rates_2027": {
+    "dataset": "2027 MA ratebook: Local EGWP rates by star category and bid-to-benchmark ratios",
+    "period_start": "2027-01-01",
+    "modified": "2026-04-06"
+   },
+   "contract_enrollment_2025_11": {
+    "dataset": "Monthly Enrollment by Contract, November 2025 (the month CMS weights by for 2027 quality bonus determinations)",
+    "period_start": "2025-11-01",
+    "modified": "2025-11-15"
    }
   }
  }

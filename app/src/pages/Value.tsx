@@ -62,6 +62,11 @@ function Num({ label, value, onChange, unit, help, tag, min, max, nullable, plac
     </label>
   )
 }
+function RiskInput({ value, onChange }: { value: number; onChange: (n: number) => void }) {
+  const [txt, setTxt] = useState(String(value))
+  useEffect(() => { setTxt(t => Number(t) === value ? t : String(value)) }, [value])
+  return <input className="control w-24 text-right tabular-nums" inputMode="decimal" aria-label="Your own risk score" value={txt} onChange={e => { const t = e.target.value.replace(/[^\d.]/g, ''); setTxt(t); const n = Number(t); if (t !== '' && Number.isFinite(n) && n >= 0.5 && n <= 3) onChange(n) }} onBlur={() => setTxt(String(value))} />
+}
 function Fields<T extends object>({ fields, a, limits, set }: { fields: Field<T>[]; a: T; limits: Limits<T>; set: (k: keyof T & string, v: number | null) => void }) {
   return <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">{fields.map(f => { const lim = limits[f.key] ?? [0, 1e9]; return <Num key={f.key} label={f.label} unit={f.unit} help={f.help} tag={f.tag} nullable={f.nullable} placeholder={f.placeholder} min={lim[0]} max={lim[1]} value={a[f.key] as number | null} onChange={v => set(f.key, v)} /> })}</div>
 }
@@ -120,7 +125,7 @@ function GeoPicker({ geo, info, onPick }: { geo: Geo; info: GeoInfo | null; onPi
 }
 
 // ================================================================== PAYER
-const PAYER_LIMITS: Limits<PayerAssumptions> = { readmPts: [0, 10], snfToHome: [0, 50], snfLos: [0, 50], irfToSnf: [0, 100], ltchToSnf: [0, 100], ipDays: [0, 30], perDiemShare: [0, 100], umPmpm: [0, 50], priceFactor: [50, 200], acuity: [50, 300], planRisk: [0.5, 3] }
+const PAYER_LIMITS: Limits<PayerAssumptions> = { readmPts: [0, 10], snfToHome: [0, 50], snfLos: [0, 50], irfToSnf: [0, 100], ltchToSnf: [0, 100], ipDays: [0, 30], perDiemShare: [0, 100], umPmpm: [0, 50], priceFactor: [50, 200], acuity: [50, 300], planRisk: [0.5, 3], bidRatio: [50, 100] }
 const PAYER_FIELDS: Field<PayerAssumptions>[] = [
   { key: 'readmPts', label: 'Readmission rate, points removed', unit: 'points', tag: 'Assumption', help: '1 point means 15% becomes 14%. Each avoided readmission is priced at the average inpatient payment per stay in this market.' },
   { key: 'snfToHome', label: 'SNF admissions that go home with home health instead', unit: '% of SNF stays', tag: 'Assumption', help: 'Saving per stay = the SNF stay (days per stay × payment per day) less one home-health episode.' },
@@ -132,13 +137,12 @@ const PAYER_FIELDS: Field<PayerAssumptions>[] = [
   { key: 'umPmpm', label: 'Post-acute utilization management the rails replace', unit: '$ PMPM', tag: 'Your number', help: 'What the plan pays today for post-acute prior authorization and review, in house or to a vendor. Rondo makes no coverage decisions, so this is cost the plan no longer needs.' },
   { key: 'priceFactor', label: 'What the plan pays, relative to Medicare', unit: '% of Medicare', tag: 'Your number', help: 'Prices here are what Original Medicare paid in this market in 2024. 100 means the plan pays the same.' },
   { key: 'acuity', label: 'Utilization relative to the baseline', unit: '%', tag: 'Your number', help: 'Above 100 for a sicker population (a dual-eligible special-needs plan, for example). The area\'s Original Medicare risk score is shown in the baseline below.' },
-  { key: 'planRisk', label: 'Plan average risk score', unit: '', tag: 'Your number', help: 'Used only to turn the county benchmark into revenue for the "share of revenue" figure.' },
 ]
 function PayerTab({ geo, info }: { geo: Geo; info: GeoInfo | null }) {
   const [params, setParams] = useSearchParams()
   const text = cleanParent(params.get('payer') ?? '')
   const membersOv = params.get('pm') && Number(params.get('pm')) > 0 ? Math.min(1e8, Number(params.get('pm'))) : null
-  const cs = useMemo(() => { const r = readCase(params, 'p', PAYER_DEFAULTS, PAYER_PRESETS, PAYER_LIMITS); r.a.basis = r.a.basis === 'ffs' ? 'ffs' : 'ma'; r.a.bonus = ([0, 35, 5] as const).includes(r.a.bonus) ? r.a.bonus : 0; return r }, [params])
+  const cs = useMemo(() => { const r = readCase(params, 'p', PAYER_DEFAULTS, PAYER_PRESETS, PAYER_LIMITS); r.a.basis = r.a.basis === 'ffs' ? 'ffs' : 'ma'; r.a.risk = r.a.risk === 'cms' || r.a.risk === 'own' ? r.a.risk : 'one'; return r }, [params])
   const a = cs.a
   const [draft, setDraft] = useState(text)
   const [parents, setParents] = useState<ParentRow[]>([])
@@ -221,7 +225,7 @@ function PayerResult({ b, us, a, members, preset, custom, facts, setA, pickCase,
             <Stat label="Per member per month" value={pmpm(v.totalPmpm)} note={`minimum ${pmpm(cases.min.totalPmpm)} · stretch ${pmpm(cases.stretch.totalPmpm)}`} how="The sum of the levers in the table below, each one volume × change × price, divided by 12,000 to turn dollars per 1,000 members per year into dollars per member per month." />
             <Stat label={`Per year, ${fmtInt(members)} members`} value={money(v.totalPerYear)} note={`${money(v.totalPmpm * 12 * 100000)} per 100,000 members`} how="Per member per month × 12 × members." />
             <Stat label="Share of inpatient and post-acute spend" value={pct(v.pctOfIpPac, 1)} note={`of ${pmpm(v.spendPmpm.total)} PMPM: inpatient ${pmpm(v.spendPmpm.ip)}, SNF ${pmpm(v.spendPmpm.snf)}, IRF + LTCH ${pmpm(v.spendPmpm.irf + v.spendPmpm.ltch)}`} how="Savings ÷ the plan's modeled spend on inpatient, SNF, rehab-hospital and long-term acute stays (utilization × price). Home health, physician and outpatient spend are not in the denominator." />
-            <Stat label="Share of benchmark revenue" value={v.pctOfRevenue == null ? '–' : pct(v.pctOfRevenue, 2)} note={v.revenuePmpm == null ? 'no ratebook rate for these counties' : `of ${fmtUsd(Math.round(v.revenuePmpm))} PMPM · ${uw?.ratebook_year ?? ''} county benchmark × risk score ${a.planRisk}`} how="Savings ÷ (the member-weighted county benchmark from the CMS ratebook × the plan risk score you entered). A plan's actual revenue also depends on its bid and rebate, so read this as points of medical-loss ratio against the benchmark, not against premium." />
+            <Stat label="Share of benchmark revenue" value={v.pctOfRevenue == null ? '–' : pct(v.pctOfRevenue, 2)} note={v.benchRevenue == null || !b.rev ? 'no ratebook rate for these counties' : `of ${fmtUsd(Math.round(v.benchRevenue))} PMPM${b.rev.stars != null ? ` · ${b.rev.stars.toFixed(2)}★` : ''} · risk score ${rate(v.riskUsed, 2)}${v.pctOfPayment != null ? ` · ${pct(v.pctOfPayment, 2)} of expected CMS payment` : ''}`} how={`Savings ÷ benchmark revenue. Benchmark revenue is the ${uw?.ratebook_year ?? ''} county benchmark at each contract's own quality-bonus level (from its Star Rating), weighted by where the members live, times the risk score chosen in the Plan revenue section below. The second figure divides by the payment CMS is expected to make after the plan's bid and rebate.`} />
           </StatRow>
         </div>
         <div className="mt-5"><LeverTable cases={{ min: cases.min.levers, base: cases.base.levers, stretch: cases.stretch.levers }} yours={v.levers} preset={preset} custom={custom} get={l => l.pmpm} fmtv={pmpm} unitHead="dollars per member per month" extraHead={`Per year, ${fmtInt(members)} members`} extra={l => money(l ? l.perYear : v.totalPerYear)} /></div>
@@ -241,6 +245,40 @@ function PayerResult({ b, us, a, members, preset, custom, facts, setA, pickCase,
         </div>
       </section>
 
+      {b.rev && <section className="panel panel-pad" data-testid="plan-revenue">
+        <h2 className="section-title">Plan revenue <span className="t-caption font-normal ml-1">what CMS pays {who === 'all Medicare Advantage plans' ? 'these plans' : who} here in {uw?.ratebook_year}, per member per month</span></h2>
+        <p className="t-label mt-1 max-w-3xl">Built the way CMS builds it: each member is priced at their own county's benchmark, at the quality-bonus level their contract's Star Rating earns. The plan is paid its bid, and a share of the gap between benchmark and bid comes back as a rebate. Members and Star Ratings are the plan's own; the bid is CMS's published average unless you enter the plan's.</p>
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] gap-x-10 gap-y-5 mt-4">
+          <div>
+            <table className="tbl tbl-compact" data-testid="revenue-build"><tbody>
+              <Row2 k={<>Star Rating used for {uw?.stars?.payment_year} payment</>} v={b.rev.stars == null ? 'not rated' : <span className="font-medium">{b.rev.stars.toFixed(2)}★</span>} sub={`${uw?.stars?.rating_year} Star Ratings, member-weighted · ${pct(b.rev.shareRated)} of members in contracts with their own rating${b.rev.shareParentAvg > 0.0005 ? `, ${pct(b.rev.shareParentAvg, 1)} in new contracts that take their parent's average` : ''}`} />
+              <Row2 k="Members in contracts at 4 stars or more" v={pct(b.rev.share5)} sub={`paid at the 5% bonus benchmark${b.rev.share35 > 0.0005 ? ` · ${pct(b.rev.share35, 1)} in new or low-enrollment contracts at 3.5%` : ''} · ${pct(b.rev.share0)} with no bonus`} />
+              <Row2 k="County benchmark at those ratings" v={<span className="font-medium">{usd0(b.rev.bench)}</span>} sub={`${usd0(b.rev.bench0)} with no bonus · ${usd0(b.rev.bench5)} if every contract were at 4 stars or more`} />
+              <Row2 k="× risk score" v={rate(v.riskUsed, 3)} sub={a.risk === 'cms' ? `these plans' average in CMS's ${uw?.plan_payment?.year} payment data` : a.risk === 'own' ? 'your number' : 'set to 1.0: the benchmark as published'} />
+              <Row2 k={<b className="font-semibold">Benchmark revenue</b>} v={<b className="font-semibold" data-testid="bench-revenue">{usd0(v.benchRevenue)}</b>} sub="the most CMS pays for Medicare-covered benefits, before the bid" />
+              <Row2 k="Bid as a share of benchmark" v={v.bidRatioUsed == null ? '–' : pct(v.bidRatioUsed, 1)} sub={a.bidRatio == null ? `CMS's published average for these counties (${uw?.ratebook_year} ratebook)` : 'your number'} />
+              <Row2 k="Base payment" v={usd0(v.basePayment)} sub="risk score × bid: what CMS pays for Medicare-covered services" />
+              <Row2 k={`Rebate, ${rate(b.rev.rebatePct, 0)}% of the gap`} v={usd0(v.rebate)} sub="70% at 4.5 stars or more, 65% at 3.5 to 4, 50% below; must go to extra benefits or lower premiums" />
+              <Row2 k={<b className="font-semibold">Expected CMS payment</b>} v={<b className="font-semibold" data-testid="cms-payment">{usd0(v.payment)}</b>} sub={v.payment != null && v.benchRevenue ? `${pct(v.payment / v.benchRevenue, 1)} of benchmark revenue · Part C only, before the 2% sequestration reduction; Part D and member premiums are not included` : undefined} />
+            </tbody></table>
+          </div>
+          <div className="space-y-4">
+            <div>
+              <div className="flabel flex items-center gap-1.5">Risk score<span className="pill !h-4 !text-[10px] !leading-4 !px-1.5" style={{ background: 'var(--color-accent-soft)', color: 'var(--color-accent)' }}>Your number</span></div>
+              <div className="flex flex-wrap items-center gap-2">
+                <div className="w-full sm:w-[22rem]"><Segmented value={a.risk === 'cms' && !b.rev.pay24 ? 'one' : a.risk} onChange={x2 => setA('risk', x2)} ariaLabel="Risk score" options={[{ value: 'one', label: '1.0' }, ...(b.rev.pay24 ? [{ value: 'cms' as const, label: `CMS ${uw?.plan_payment?.year}: ${b.rev.pay24.risk.toFixed(2)}` }] : []), { value: 'own', label: 'Your own' }]} /></div>
+                {a.risk === 'own' && <RiskInput value={a.planRisk} onChange={n => setA('planRisk', n)} />}
+              </div>
+              <div className="fhelp">Risk scores only turn the benchmark into revenue; they do not change the savings.{b.rev.pay24 ? ` CMS's latest reconciled payment data (${uw?.plan_payment?.year}) covers plans holding ${pct(b.rev.pay24.coverage)} of these members; newer plans have no published score.` : ' CMS has not published a risk score for these plans.'}</div>
+            </div>
+            <Num label="Plan's bid, as a share of its benchmark" unit="% of benchmark" tag="Your number" nullable placeholder={b.rev.bidRatio == null ? 'average' : (100 * b.rev.bidRatio).toFixed(1)} min={50} max={100} value={a.bidRatio} onChange={n => setA('bidRatio', n)} help={<>Leave empty to use CMS's published average bid for these counties. A lower bid means a smaller base payment and a larger rebate.{b.rev.pay24?.impliedBidRatio != null ? <> These plans' own {uw?.plan_payment?.year} payments imply a bid near <b className="text-ink">{pct(b.rev.pay24.impliedBidRatio, 1)}</b> of benchmark (an estimate, from their bid and rebate that year). <button type="button" className="text-accent hover:underline" data-testid="use-implied-bid" onClick={e => { e.preventDefault(); setA('bidRatio', Math.round(1000 * b.rev!.pay24!.impliedBidRatio!) / 10) }}>Use it</button></> : null}</>} />
+            {b.rev.pay24 && <div className="card p-3" data-testid="pay-check"><div className="card-label">Check against what CMS actually paid these plans in {uw?.plan_payment?.year}</div>
+              <div className="t-label mt-1">{usd0(b.rev.pay24.base + b.rev.pay24.rebate)} per member per month: base {usd0(b.rev.pay24.base)} + rebate {usd0(b.rev.pay24.rebate)}, at an average risk score of {b.rev.pay24.risk.toFixed(3)}.{v.payment != null ? <> The {uw?.ratebook_year} figure on the left is {pct(Math.abs(v.payment / (b.rev.pay24.base + b.rev.pay24.rebate) - 1), 0)} {v.payment >= b.rev.pay24.base + b.rev.pay24.rebate ? 'higher' : 'lower'}{a.risk !== 'cms' ? '; choose the CMS risk score above to compare like with like' : ', three years of benchmark growth later'}.</> : null}</div></div>}
+          </div>
+        </div>
+        {v.bonusGapPmpm != null && <p className="t-label mt-4 max-w-3xl" data-testid="bonus-gap">{b.rev.share5 > 0.9995 ? <>Every contract here is already at 4 stars or more, so the full quality bonus is being earned.</> : <>Not in any total: the quality bonus these members are not earning. If every contract here reached 4 stars, the benchmark would be <b className="text-ink">{pmpm(v.bonusGapPmpm)}</b> higher per member per month, <b className="text-ink">{money(v.bonusGapPerYear ?? 0)}</b> a year for {fmtInt(members)} members. Plan All-Cause Readmissions is one of the Star Ratings measures, so fewer readmissions help, but this data cannot say how much of a star they move.</>}{b.rev.starsNext != null ? <> The {uw?.stars?.next_rating_year} Star Ratings, which set {(uw?.stars?.next_rating_year ?? 0) + 1} payment, average <b className="text-ink">{b.rev.starsNext.toFixed(2)}★</b> for these members, with {pct(b.rev.share4Next)} in contracts at 4 stars or more.</> : null}</p>}
+      </section>}
+
       <section className="panel panel-pad" data-testid="payer-reading">
         <h2 className="section-title">Reading the result</h2>
         <p className="t-body text-ink-2 mt-1 max-w-3xl">The baseline matters as much as the levers. CMS shows Original Medicare in this market at <b className="text-ink">{rate(b.ffs.ipStays, 0)}</b> admissions and <b className="text-ink">{rate(b.ffs.snfStays)}</b> SNF stays per 1,000, with SNF stays of {rate(b.ffs.snfDays / b.ffs.snfStays)} days. A typical Medicare Advantage plan here runs about <b className="text-ink">{rate(b.ma.ipStays, 0)}</b> admissions and <b className="text-ink">{rate(b.ma.snfStays)}</b> SNF stays, at {rate(b.ma.snfDays / b.ma.snfStays)} days a stay: it has already taken out {pct(1 - b.ma.snfDays / b.ffs.snfDays)} of the SNF days. A savings figure built on Original Medicare volumes describes a plan with no post-acute management; switch the utilization baseline above to see both.</p>
@@ -254,7 +292,6 @@ function PayerResult({ b, us, a, members, preset, custom, facts, setA, pickCase,
             <tr className="font-semibold"><td>Total</td><td className="num">{money(v.totalPmpm * 12 * 100000)}</td><td className="num">{pmpm(v.totalPmpm)}</td></tr>
           </tbody>
         </table></div>
-        {v.starsAtStakePerYear != null && <p className="t-label mt-3 max-w-3xl">Not in any total: the quality bonus. Moving from no bonus to the 5% bonus is worth <b className="text-ink">{pmpm((b.benchmark.r5! - b.benchmark.r0!) * a.planRisk)}</b> per member per month in benchmark here ({money(v.starsAtStakePerYear)} a year for these members; CMS {uw?.ratebook_year} ratebook). Plan All-Cause Readmissions is a Star Ratings measure, so fewer readmissions help, but how much of a star they move is not something this data can say.</p>}
         {v.routingPts != null && <div className="mt-4 max-w-3xl" data-testid="routing-evidence">
           <div className="card-label mb-1">How much of the readmission assumption can routing alone support?</div>
           <div className="overflow-x-auto"><table className="tbl tbl-compact min-w-[34rem]"><thead><tr><th>If Medicare SNF stays here moved from…</th><th className="num">Share of stays</th><th className="num">Rehospitalized today</th><th className="num">At the receiving SNFs</th><th className="num">Readmission points</th></tr></thead><tbody>
@@ -269,7 +306,6 @@ function PayerResult({ b, us, a, members, preset, custom, facts, setA, pickCase,
         <h2 className="section-title">Assumptions</h2>
         <p className="t-label mt-1 max-w-3xl">Nothing in this block comes from CMS. <b className="text-ink font-medium">Assumption</b> fields are the improvement Rondo delivers and change with the case; <b className="text-ink font-medium">Your number</b> fields are facts about the plan and stay put when you switch cases.</p>
         <div className="mt-4"><Fields fields={PAYER_FIELDS} a={a} limits={PAYER_LIMITS} set={setA} /></div>
-        <div className="mt-4"><div className="flabel">Quality bonus used for revenue</div><div className="w-full sm:w-80"><Segmented value={String(a.bonus)} onChange={x2 => setA('bonus', Number(x2))} ariaLabel="Quality bonus" options={[{ value: '0', label: 'None' }, { value: '35', label: '3.5%' }, { value: '5', label: '5%' }]} /></div></div>
       </section>
 
       <section className="panel panel-pad" data-testid="payer-baseline">
@@ -293,7 +329,7 @@ function PayerResult({ b, us, a, members, preset, custom, facts, setA, pickCase,
             <Row2 k="Rehab-hospital (IRF) stay" v={usd0(b.price.irfPerStay)} />
             <Row2 k="Long-term acute (LTCH) stay" v={usd0(b.price.ltchPerStay)} />
           </tbody></table></div>
-          <div><div className="card-label mb-1">Revenue and acuity</div><table className="tbl tbl-compact"><tbody>
+          <div><div className="card-label mb-1">Benchmark and acuity in these counties</div><table className="tbl tbl-compact"><tbody>
             <Row2 k={`County benchmark, ${uw?.ratebook_year}`} v={b.benchmark.r0 == null ? '–' : `${usd0(b.benchmark.r0)} PMPM`} sub={b.benchmark.r5 == null ? undefined : `${usd0(b.benchmark.r35)} at the 3.5% bonus · ${usd0(b.benchmark.r5)} at 5%`} />
             <Row2 k="Original Medicare total cost" v={`${usd0(b.ffs.totalPc / 12)} PMPM`} sub={`${usd0(b.ffs.totalPc)} per beneficiary per year, ${uw?.gv_year}`} />
             <Row2 k="Average risk score, Original Medicare" v={rate(b.ffsRisk, 3)} sub={`United States ${rate(us?.ffsRisk, 3)} · CMS Shared Savings Program county file, ${uw?.mssp_year}`} />

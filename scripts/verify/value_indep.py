@@ -27,6 +27,32 @@ def wavg(w, x):
     den = w[ok].sum()
     return float((w[ok] * x[ok]).sum() / den) if den else None
 
+# ---------------------------------------------------------------- plan revenue (what CMS pays), row by row
+def revenue(geo, text):
+    c = in_geo(county, geo)[["fips", "ma_rate_0", "ma_rate_35", "ma_rate_5", "ma_bid_ratio"]]
+    x = parents[parents["segment"] == "MA"].merge(c, on="fips")
+    if text:
+        pat = re.compile(".*".join(re.escape(w) for w in re.sub(r"[^a-z0-9&.,\- ]", " ", text.lower()).split()))
+        x = x[x["parent_org"].str.lower().map(lambda v: bool(pat.search(v)))]
+    x = x.assign(rate=np.select([x["bonus"] == 5, x["bonus"] == 3.5], [x["ma_rate_5"], x["ma_rate_35"]], default=x["ma_rate_0"]))
+    x = x[x["rate"].notna()]
+    if not len(x): return None
+    e, E = x["enrollment"].astype(float), float(x["enrollment"].sum())
+    rb, rho = x["rebate_pct"] / 100.0, x["ma_bid_ratio"]
+    out = {"members": E, "bench": float((e * x["rate"]).sum() / E), "bench5": float((e * x["ma_rate_5"]).sum() / E), "share5": float(e[x["bonus"] == 5].sum() / E),
+           "stars": float((e * x["stars"]).sum() / e[x["stars"].notna()].sum()) if x["stars"].notna().any() else None,
+           "sBr": float((e * x["rate"] * rb).sum() / E)}
+    if rho.notna().all():
+        out["base1"] = float((e * x["rate"] * rho).sum() / E)                       # bid at CMS's county ratio, risk 1.0
+        out["rebate1"] = float((e * x["rate"] * (1 - rho) * rb).sum() / E)          # rebate share x (benchmark - bid)
+        out["payment1"] = out["base1"] + out["rebate1"]
+    ep = float(np.nansum(x["enr_pay"]))
+    if ep > 0:
+        out["risk24"] = float(np.nansum(x["risk_x"]) / ep); out["base24"] = float(np.nansum(x["base_x"]) / ep); out["rebate24"] = float(np.nansum(x["rebate_x"]) / ep)
+        ab, gap = float(np.nansum(x["ab_x"])), float(np.nansum(x["gap_x"]))
+        out["impliedBid"] = ab / (ab + gap) if ab + gap > 0 else None
+    return out
+
 # ---------------------------------------------------------------- payer
 PAYER_PRESETS = {"min": dict(readmPts=.5, snfToHome=3, snfLos=3, irfToSnf=0, ltchToSnf=0, ipDays=0, perDiemShare=0),
                  "base": dict(readmPts=1, snfToHome=5, snfLos=7, irfToSnf=5, ltchToSnf=5, ipDays=0, perDiemShare=0),
@@ -54,7 +80,7 @@ def payer(geo, text, basis="ma"):
              irf=price("ffs_irf_pymt", "ffs_irf_stays"), ltch=price("ffs_ltch_pymt", "ffs_ltch_stays"))
     bench0 = wavg(m, c["ma_rate_0"])
     u = ffs if basis == "ffs" else ma
-    out = {"members": members, "matched": matched, "ffs": ffs, "ma": ma, "price": p, "benchmark0": bench0, "cases": {}}
+    out = {"members": members, "matched": matched, "ffs": ffs, "ma": ma, "price": p, "benchmark0": bench0, "rev": revenue(geo, text), "cases": {}}
     for name, a in PAYER_PRESETS.items():
         snf_stay = u["snfDays"] / u["snfStays"] * p["snfPerDay"]
         per1000 = {
