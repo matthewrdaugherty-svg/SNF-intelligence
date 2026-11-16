@@ -8,6 +8,7 @@ export interface Underwriting { gv_year: number; ma_gv_year: number; enrollment_
   snf_cost?: { ccns: number }; hospital_cost?: { ccns: number }; hrrp?: { fiscal_year: number; hospitals: number; penalized: number }; vbp?: { fiscal_year: number; hospitals: number }
   stars?: { rating_year: number; payment_year: number; next_rating_year: number; ma_contracts: number; share_rated: number; share_in_5pct_bonus: number; average_rating: number; share_4plus_next_year: number; average_rebate_pct: number; check_avg_rating_2026_nov2025_weights: number; check_avg_rating_2027: number }
   plan_payment?: { year: number; plans: number; share_of_ma_enrollment_matched: number; average_risk_score: number; average_base_payment_pmpm: number; average_rebate_pmpm: number; implied_bid_ratio: number; rebate_conventional_plans: number; rebate_non_employer_plans: number }
+  mlr?: { year: number; contracts: number; share_of_ma_enrollment_matched: number; ma_payment_pmpm: number; total_revenue_pmpm: number; ab_claims_pmpm: number; medical_loss_ratio: number }
   bid_ratio?: { counties: number; min: number; max: number; max_error_reproducing_cms_egwp_rates_usd: number }
   releases?: Record<string, { dataset: string; period_start: string; modified: string }> }
 export interface Footnote { meaning: string; applies_to: string }

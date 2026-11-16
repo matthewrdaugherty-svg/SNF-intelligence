@@ -101,9 +101,21 @@ export interface PlanRevenue {
   share5: number; share35: number; share0: number
   stars: number | null; shareRated: number; shareParentAvg: number    // rating used for 2027 payment (2026 Star Ratings), member-weighted over contracts that have one
   starsNext: number | null; share4Next: number | null                  // 2027 Star Ratings (they set 2028 payment)
+  /** CMS Medical Loss Ratio filings for 2023, the same contracts weighted by today's members: MA payment, total revenue (Parts C and D and premiums), Parts A and B claims,
+   *  the MLR itself (numerator / denominator) and the denominator per member per month. */
+  mlr23: { coverage: number; maPay: number; revenue: number; abClaims: number; mlr: number; denPmpm: number } | null
   pay24: { coverage: number; risk: number; base: number; rebate: number; impliedBidRatio: number | null } | null   // impliedBidRatio: standardized bid / (bid + the gap the 2024 rebate implies), individual-market plans only, an estimate.
   // CMS Plan Payment Data 2024 for the same plans: average risk score, risk-adjusted base payment and rebate, $ PMPM
 }
+/** CMS's own estimates of how the average MA risk score moves after 2024, from its rate-announcement fact sheets (percent change in payment, by year).
+ *  model: the 2024 CMS-HCC ("V28") model phase-in (67% in 2025, 100% in 2026), normalization, and in 2027 the exclusion of diagnoses from audio-only visits and unlinked chart reviews.
+ *  trend: underlying coding growth, which CMS states separately. Both are industry averages; a single plan can differ. */
+export const RISK_DRIFT = { from: 2024, to: 2027,
+  model: [[2025, -2.45], [2026, -3.01], [2027, -1.12], [2027, -1.53]] as [number, number][],
+  trend: [[2025, 3.86], [2026, 2.10], [2027, 2.50]] as [number, number][] }
+const compound = (xs: [number, number][]) => xs.reduce((f, [, pct]) => f * (1 + pct / 100), 1)
+export const RISK_MODEL_FACTOR = compound(RISK_DRIFT.model)     // about 0.921
+export const RISK_TREND_FACTOR = compound(RISK_DRIFT.trend)     // about 1.087
 async function planRevenue(g: Geo, parentText: string): Promise<PlanRevenue | null> {
   const useParent = cleanParent(parentText).length > 0
   const [r] = await q<Row>(`
@@ -119,7 +131,9 @@ async function planRevenue(g: Geo, parentText: string): Promise<PlanRevenue | nu
       sum(enrollment * stars) / nullif(sum(enrollment) FILTER (WHERE stars IS NOT NULL), 0) AS stars, sum(enrollment) FILTER (WHERE basis = 'rated') / sum(enrollment) AS share_rated,
       sum(enrollment) FILTER (WHERE basis = 'parent average') / sum(enrollment) AS share_pa,
       sum(stars_next_x) / nullif(sum(enr_next), 0) AS stars_next, sum(enr_next4) / nullif(sum(enr_next), 0) AS share4_next,
-      sum(enr_pay) / sum(enrollment) AS pay_cov, sum(risk_x) / nullif(sum(enr_pay), 0) AS risk24, sum(base_x) / nullif(sum(enr_pay), 0) AS base24, sum(rebate_x) / nullif(sum(enr_pay), 0) AS rebate24, sum(ab_x) / nullif(sum(ab_x) + sum(gap_x), 0) AS implied_bid
+      sum(enr_pay) / sum(enrollment) AS pay_cov, sum(risk_x) / nullif(sum(enr_pay), 0) AS risk24, sum(base_x) / nullif(sum(enr_pay), 0) AS base24, sum(rebate_x) / nullif(sum(enr_pay), 0) AS rebate24, sum(ab_x) / nullif(sum(ab_x) + sum(gap_x), 0) AS implied_bid,
+      sum(enr_mlr) / sum(enrollment) AS mlr_cov, sum(mlr_pay_x) / nullif(sum(enr_mlr), 0) AS mlr_pay, sum(mlr_rev_x) / nullif(sum(enr_mlr), 0) AS mlr_rev, sum(mlr_ab_x) / nullif(sum(enr_mlr), 0) AS mlr_ab,
+      sum(mlr_num_x) / nullif(sum(mlr_den_x), 0) AS mlr, sum(mlr_den_x) / nullif(sum(enr_mlr), 0) AS mlr_den
     FROM y`)
   if (!r || !(Number(r.e) > 0)) return null
   const n = (v: unknown) => v == null ? null : Number(v)
@@ -127,6 +141,7 @@ async function planRevenue(g: Geo, parentText: string): Promise<PlanRevenue | nu
   return { members: Number(r.e), bench: Number(r.bench), bench0: Number(r.bench0), bench5: Number(r.bench5), sBr: Number(r.s_br), sBrho: n(r.s_brho), sBrhoR: n(r.s_brhor),
     bidRatio: r.s_brho == null ? null : Number(r.s_brho) / Number(r.bench), rebatePct: Number(r.rebate_pct), share5: s5, share35: s35, share0: Math.max(0, 1 - s5 - s35),
     stars: n(r.stars), shareRated: Number(r.share_rated ?? 0), shareParentAvg: Number(r.share_pa ?? 0), starsNext: n(r.stars_next), share4Next: n(r.share4_next),
+    mlr23: r.mlr == null || !(Number(r.mlr_cov) > 0) ? null : { coverage: Number(r.mlr_cov), maPay: Number(r.mlr_pay), revenue: Number(r.mlr_rev), abClaims: Number(r.mlr_ab), mlr: Number(r.mlr), denPmpm: Number(r.mlr_den) },
     pay24: r.risk24 == null || !(Number(r.pay_cov) > 0) ? null : { coverage: Number(r.pay_cov), risk: Number(r.risk24), base: Number(r.base24), rebate: Number(r.rebate24), impliedBidRatio: n(r.implied_bid) } }
 }
 export async function payerBaseline(g: Geo, parentText: string): Promise<PayerBaseline | null> {
@@ -194,7 +209,7 @@ export interface PayerAssumptions {
   priceFactor: number     // MA payment as % of Medicare FFS payment
   basis: 'ma' | 'ffs'     // utilization baseline: a typical MA plan in this state, or unmanaged (Original Medicare levels in these counties)
   acuity: number          // utilization scaled to this % of the baseline (100 = no change; above 100 for a sicker population such as a D-SNP)
-  risk: 'one' | 'cms' | 'own'   // risk score for revenue: 1.0 (benchmark as published), the plans' average in CMS's 2024 payment data, or the user's own
+  risk: 'one' | 'cms' | 'own'   // risk score for revenue: the plans' average in CMS's 2024 payment data where CMS has published one (the default, D-051), 1.0, or the user's own
   planRisk: number        // the user's own risk score, used when risk = 'own'. Risk scores only turn the benchmark into revenue; they never scale the dollar levers
   bidRatio: number | null // the plan's bid as % of its benchmark; null = CMS's published average for these counties
 }
@@ -204,7 +219,7 @@ export const PAYER_PRESETS: Record<Preset, Pick<PayerAssumptions, 'readmPts' | '
   base: { readmPts: 1, snfToHome: 5, snfLos: 7, irfToSnf: 5, ltchToSnf: 5, ipDays: 0, perDiemShare: 0 },
   stretch: { readmPts: 2, snfToHome: 10, snfLos: 13, irfToSnf: 10, ltchToSnf: 10, ipDays: 5, perDiemShare: 20 },
 }
-export const PAYER_DEFAULTS: PayerAssumptions = { ...PAYER_PRESETS.base, umPmpm: 0, priceFactor: 100, basis: 'ma', acuity: 100, risk: 'one', planRisk: 1, bidRatio: null }
+export const PAYER_DEFAULTS: PayerAssumptions = { ...PAYER_PRESETS.base, umPmpm: 0, priceFactor: 100, basis: 'ma', acuity: 100, risk: 'cms', planRisk: 1, bidRatio: null }
 
 export interface Lever { key: string; label: string; basis: string; perYear: number; pmpm: number }
 export interface PayerValue {
@@ -215,6 +230,9 @@ export interface PayerValue {
   totalPerYear: number; totalPmpm: number
   pctOfIpPac: number
   riskUsed: number
+  riskSource: 'cms' | 'one' | 'own'   // what riskUsed actually is: 'cms' falls back to 'one' when CMS has published no score for these plans
+  mlrPoints: number | null       // savings as points of medical loss ratio, against these contracts' 2023 MLR denominator
+  ipPacShareOfClaims: number | null   // modeled inpatient + post-acute spend / these contracts' actual 2023 Parts A and B claims: a check on the utilization baseline
   benchRevenue: number | null    // benchmark at the plans' own star tiers x risk score: the most CMS pays before the bid is taken into account
   payment: number | null         // expected CMS payment = base payment + rebate
   basePayment: number | null     // risk x bid: the payment for Medicare-covered services
@@ -258,7 +276,8 @@ export function payerValue(b: PayerBaseline, a: PayerAssumptions, members: numbe
   spend.total = spend.ip + spend.snf + spend.irf + spend.ltch
   // ---- what CMS pays the plan (PlanRevenue): payment = risk x [bid + rebate share x (benchmark - bid)], with bid = ratio x benchmark
   const R = b.rev
-  const riskUsed = a.risk === 'cms' && R?.pay24 ? R.pay24.risk : a.risk === 'own' ? a.planRisk : 1
+  const riskSource: 'cms' | 'one' | 'own' = a.risk === 'cms' ? (R?.pay24 ? 'cms' : 'one') : a.risk
+  const riskUsed = riskSource === 'cms' ? R!.pay24!.risk : riskSource === 'own' ? a.planRisk : 1
   const rho = a.bidRatio == null ? null : a.bidRatio / 100
   const baseStd = !R ? null : rho != null ? rho * R.bench : R.sBrho
   const rebateStd = !R ? null : rho != null ? (1 - rho) * R.sBr : R.sBrho == null || R.sBrhoR == null ? null : R.sBr - R.sBrhoR
@@ -271,7 +290,8 @@ export function payerValue(b: PayerBaseline, a: PayerAssumptions, members: numbe
   return {
     per1000: { ipStays, ipDays, snfStays, snfDays, irfStays, ltchStays, readmissionsAvoided: readmAvoided, snfStaysToHome: toHome, snfDaysSaved: daysSaved },
     snfCostPerStay, spendPmpm: spend, levers, totalPerYear, totalPmpm,
-    pctOfIpPac: spend.total > 0 ? totalPmpm / spend.total : 0, riskUsed, benchRevenue, payment, basePayment, rebate, bidRatioUsed: rho ?? R?.bidRatio ?? null,
+    pctOfIpPac: spend.total > 0 ? totalPmpm / spend.total : 0, riskUsed, riskSource,
+    mlrPoints: R?.mlr23 ? totalPmpm / R.mlr23.denPmpm : null, ipPacShareOfClaims: R?.mlr23 ? spend.total / R.mlr23.abClaims : null, benchRevenue, payment, basePayment, rebate, bidRatioUsed: rho ?? R?.bidRatio ?? null,
     pctOfRevenue: benchRevenue ? totalPmpm / benchRevenue : null, pctOfPayment: payment ? totalPmpm / payment : null,
     bonusGapPmpm, bonusGapPerYear: bonusGapPmpm == null ? null : bonusGapPmpm * 12 * members, routingPts: routing, routingPtsMeasure: routingMeasure,
   }

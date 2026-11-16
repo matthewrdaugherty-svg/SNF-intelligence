@@ -93,6 +93,15 @@
    "benchmark_pct_of_ffs": 108
   }
  },
+ "mlr": {
+  "year": 2023,
+  "contracts": 635,
+  "share_of_ma_enrollment_matched": 0.9462,
+  "ma_payment_pmpm": 1204.81,
+  "total_revenue_pmpm": 1309.85,
+  "ab_claims_pmpm": 915.05,
+  "medical_loss_ratio": 0.9011
+ },
  "bid_ratio": {
   "counties": 3246,
   "min": 0.7768,
@@ -199,6 +208,11 @@
    "dataset": "Monthly Enrollment by Contract, November 2025 (the month CMS weights by for 2027 quality bonus determinations)",
    "period_start": "2025-11-01",
    "modified": "2025-11-15"
+  },
+  "mlr_2023": {
+   "dataset": "Medicare Part C and D Medical Loss Ratio data release, contract year 2023",
+   "period_start": "2023-01-01",
+   "modified": "2026-01-01"
   }
  }
 }

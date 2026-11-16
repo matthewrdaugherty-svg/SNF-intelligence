@@ -238,6 +238,32 @@ con.execute("CREATE OR REPLACE TABLE ma_plan_pay (contract_id VARCHAR, plan_id V
 con.executemany("INSERT INTO ma_plan_pay VALUES (?,?,?,?,?,?)", pay)
 assert one("SELECT count(*) FROM ma_plan_pay WHERE risk NOT BETWEEN 0.3 AND 5 OR ab_std NOT BETWEEN 200 AND 4000 OR rebate < 0 OR rebate > 1500") == 0, "a 2024 plan payment value is outside a plausible range"
 
+# ---------------------------------------------------------------- CMS Medical Loss Ratio data release, contract year 2023 (the latest published): what each MA contract
+# reported to CMS as revenue, claims and its medical loss ratio. Contract level, Parts C and D together. CMS leaves out single-plan and non-credible contracts.
+MLR = RAW / "mlr" / "m2023" / "CY-2023-MLR-Data-Release-File.xlsx"
+mrows = [list(r) for r in openpyxl.load_workbook(MLR, read_only=True).worksheets[0].iter_rows(values_only=True)]
+mh = [str(c).strip() for c in mrows[0]]
+MC = {k: mh.index(k) for k in ["Contract Number", "Contract Year", "7 Total Member months", "1.2 MA Plan Payments PMPM", "1.10 Total Revenue PMPM",
+                               "2.1a Claims Incurred for benefits covered under Parts A & B PMPM", "1.3 MLR Numerator", "2.3 MLR Denominator", "4.1 Unadjusted MLR"]}   # .index raises if CMS renames a column
+def _fm(v):
+    """CMS masks some cells in this file with text such as '0.84SUPPRESSED99'; those are suppressed (None), never read as numbers. Anything else must parse."""
+    t = "" if v is None else str(v).strip()
+    return None if t in ("", "None", "*") or "SUPPRESS" in t.upper() else float(t)
+mlr = []
+for r in mrows[1:]:
+    cid = str(r[MC["Contract Number"]]).strip() if r[MC["Contract Number"]] else ""
+    if not re.fullmatch(r"[A-Z]\d{4}", cid): continue
+    assert str(r[MC["Contract Year"]]).strip() == "2023", r[:3]
+    mm, m_num, m_den = _fm(r[MC["7 Total Member months"]]), _fm(r[MC["1.3 MLR Numerator"]]), _fm(r[MC["2.3 MLR Denominator"]])
+    ok = mm is not None and mm > 0
+    mlr.append((cid, mm, _fm(r[MC["1.2 MA Plan Payments PMPM"]]), _fm(r[MC["1.10 Total Revenue PMPM"]]), _fm(r[MC["2.1a Claims Incurred for benefits covered under Parts A & B PMPM"]]),
+                m_num / mm if ok and m_num is not None else None, m_den / mm if ok and m_den is not None else None, _fm(r[MC["4.1 Unadjusted MLR"]])))
+assert len(mlr) == len({m[0] for m in mlr}) and len(mlr) > 500, len(mlr)
+con.execute("CREATE OR REPLACE TABLE ma_mlr (contract_id VARCHAR, member_months DOUBLE, ma_pay DOUBLE, revenue DOUBLE, ab_claims DOUBLE, num_pm DOUBLE, den_pm DOUBLE, mlr DOUBLE)")
+con.executemany("INSERT INTO ma_mlr VALUES (?,?,?,?,?,?,?,?)", mlr)
+# every published ratio must equal numerator / denominator (the file is internally consistent or we do not use it)
+assert one("SELECT count(*) FROM ma_mlr WHERE mlr IS NOT NULL AND den_pm > 0 AND abs(num_pm / den_pm - mlr) > 0.002") == 0, "an MLR does not equal its numerator over its denominator"
+
 # MA plan x county, visible enrollment only ('*' = 10 or fewer enrollees, never treated as zero); PDPs are not health plans for this purpose.
 # Grouped by payment tier so the app can price each member at their own contract's benchmark; the *_x columns are enrollment-weighted sums of the 2024 plan figures.
 con.execute("""CREATE OR REPLACE TABLE ma_parent_county AS
@@ -252,16 +278,27 @@ con.execute("""CREATE OR REPLACE TABLE ma_parent_county AS
          -- contract's 2027 one (its 2024 share is not loaded), so the implied bid ratio ab_x / (ab_x + gap_x) is an estimate and is labelled as one.
          -- Employer-group plans are left out of both: CMS pays them a set rate with no separate rebate, so their payments say nothing about a bid.
          sum(e.enrollment * p.ab_std) FILTER (WHERE p.risk IS NOT NULL AND p.rebate IS NOT NULL AND c.eghp <> 'Yes') AS ab_x,
-         sum(e.enrollment * p.rebate / (q.rebate_pct / 100.0 * p.risk)) FILTER (WHERE p.ab_std IS NOT NULL AND c.eghp <> 'Yes') AS gap_x
+         sum(e.enrollment * p.rebate / (q.rebate_pct / 100.0 * p.risk)) FILTER (WHERE p.ab_std IS NOT NULL AND c.eghp <> 'Yes') AS gap_x,
+         -- the contract's 2023 medical-loss-ratio filing, weighted by today's members: MA payment, total revenue (Parts C and D, premiums), Parts A and B claims, MLR numerator and denominator
+         sum(e.enrollment) FILTER (WHERE m.den_pm > 0 AND m.num_pm IS NOT NULL AND m.ma_pay > 0 AND m.revenue > 0 AND m.ab_claims > 0) AS enr_mlr,
+         sum(e.enrollment * m.ma_pay) FILTER (WHERE m.den_pm > 0 AND m.num_pm IS NOT NULL AND m.ma_pay > 0 AND m.revenue > 0 AND m.ab_claims > 0) AS mlr_pay_x,
+         sum(e.enrollment * m.revenue) FILTER (WHERE m.den_pm > 0 AND m.num_pm IS NOT NULL AND m.ma_pay > 0 AND m.revenue > 0 AND m.ab_claims > 0) AS mlr_rev_x,
+         sum(e.enrollment * m.ab_claims) FILTER (WHERE m.den_pm > 0 AND m.num_pm IS NOT NULL AND m.ma_pay > 0 AND m.revenue > 0 AND m.ab_claims > 0) AS mlr_ab_x,
+         sum(e.enrollment * m.num_pm) FILTER (WHERE m.den_pm > 0 AND m.num_pm IS NOT NULL AND m.ma_pay > 0 AND m.revenue > 0 AND m.ab_claims > 0) AS mlr_num_x,
+         sum(e.enrollment * m.den_pm) FILTER (WHERE m.den_pm > 0 AND m.num_pm IS NOT NULL AND m.ma_pay > 0 AND m.revenue > 0 AND m.ab_claims > 0) AS mlr_den_x
   FROM ma_enroll e JOIN ma_contract c ON c.contract_id = e.contract_id AND c.plan_id IS NOT DISTINCT FROM e.plan_id
   LEFT JOIN ma_contract_qbp q ON q.contract_id = e.contract_id AND c.segment = 'MA'
   LEFT JOIN ma_plan_pay p ON p.contract_id = e.contract_id AND p.plan_id = e.plan_id AND c.segment = 'MA'
+  LEFT JOIN ma_mlr m ON m.contract_id = e.contract_id AND c.segment = 'MA'
   WHERE e.fips IS NOT NULL AND c.segment <> 'PDP'
   GROUP BY ALL""")
 assert one("SELECT count(*) FROM ma_parent_county WHERE segment = 'MA' AND (bonus IS NULL OR rebate_pct IS NULL)") == 0, "an MA contract has no payment tier"
 pay24 = con.execute("""SELECT sum(enr_pay) / sum(enrollment), sum(risk_x) / sum(enr_pay), sum(base_x) / sum(enr_pay), sum(rebate_x) / sum(enr_pay), sum(ab_x) / (sum(ab_x) + sum(gap_x)),
      sum(rebate_x) FILTER (WHERE NOT eghp AND NOT snp) / sum(enr_pay) FILTER (WHERE NOT eghp AND NOT snp), sum(rebate_x) FILTER (WHERE NOT eghp) / sum(enr_pay) FILTER (WHERE NOT eghp)
      FROM ma_parent_county WHERE segment = 'MA'""").fetchall()[0]
+mlr23 = con.execute("""SELECT sum(enr_mlr) / sum(enrollment), sum(mlr_pay_x) / sum(enr_mlr), sum(mlr_rev_x) / sum(enr_mlr), sum(mlr_ab_x) / sum(enr_mlr), sum(mlr_num_x) / sum(mlr_den_x)
+     FROM ma_parent_county WHERE segment = 'MA'""").fetchall()[0]
+assert 0.80 < mlr23[4] < 0.95 and 900 < mlr23[1] < 1500, mlr23     # MA plans must spend at least 85% of revenue on care; a national figure outside 80-95% means the file was misread
 # Reasonableness checks against MedPAC (March 2024 report, ch. 12): 2024 rebates of $194 a month for conventional plans and $209 including special-needs plans (both from bids,
 # excluding employer plans), and bids at 82% of FFS against benchmarks at 108% (a bid-to-benchmark ratio of about 76%). CMS's actual 2024 payments should land near these.
 assert abs(pay24[5] / 194 - 1) < 0.10 and abs(pay24[6] / 209 - 1) < 0.10 and 0.74 < pay24[4] < 0.82, pay24
@@ -449,6 +486,7 @@ summary = {
               "check_avg_rating_2026_nov2025_weights": round(chk[0], 3), "check_share_4plus_2026_nov2025_weights": round(chk[1], 4), "check_avg_rating_2027": round(chk[2], 3), "cms_published": {"avg_2026": 4.01, "avg_2027": 3.99, "share_4plus_2027": 0.71}},
     "plan_payment": {"year": 2024, "plans": len(pay), "share_of_ma_enrollment_matched": round(pay24[0], 4), "average_risk_score": round(pay24[1], 4), "average_base_payment_pmpm": round(pay24[2], 2), "average_rebate_pmpm": round(pay24[3], 2), "implied_bid_ratio": round(pay24[4], 4),
                      "rebate_conventional_plans": round(pay24[5], 2), "rebate_non_employer_plans": round(pay24[6], 2), "medpac_2024": {"rebate_conventional": 194, "rebate_with_snps": 209, "bid_pct_of_ffs": 82, "benchmark_pct_of_ffs": 108}},
+    "mlr": {"year": 2023, "contracts": len(mlr), "share_of_ma_enrollment_matched": round(mlr23[0], 4), "ma_payment_pmpm": round(mlr23[1], 2), "total_revenue_pmpm": round(mlr23[2], 2), "ab_claims_pmpm": round(mlr23[3], 2), "medical_loss_ratio": round(mlr23[4], 4)},
     "bid_ratio": {"counties": egchk[0], "min": round(egchk[1], 4), "max": round(egchk[2], 4), "max_error_reproducing_cms_egwp_rates_usd": round(egchk[3], 4)},
     "hrrp": {"fiscal_year": 2027, "hospitals": n_hrrp, "penalized": hr[2], "average_penalty": round(hr[3], 5), "largest_penalty": round(1 - hr[0], 4)},
     "vbp": {"fiscal_year": 2027, "proxy": True, "hospitals": n_vbp, "net_losers": vb[2], "min_factor": vb[0], "max_factor": vb[1]},

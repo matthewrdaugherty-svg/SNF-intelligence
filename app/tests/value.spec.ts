@@ -21,17 +21,30 @@ test('value: payer tab matches the replica for a parent organization in a metro 
   for (const k of ['readm', 'home', 'los', 'irf', 'ltch', 'ipdays', 'um']) for (const [i, c] of ['min', 'base', 'stretch'].entries()) await expect(cell(page, k, i + 1)).toHaveText(pmpm(e.cases[c].pmpm[k]))
   await expect(page.getByTestId('payer-result')).toContainText(`${Math.round(e.members).toLocaleString('en-US')} members of UnitedHealth Group, Inc.`)
   await expect(page.getByTestId('payer-result')).toContainText(money(e.cases.base.totalPerYear))
-  // plan revenue: benchmark at the plan's own star tiers, CMS's average bid, rebate by star rating; then the published risk score and the plan's own implied bid
+  // plan revenue: benchmark at the plan's own star tiers, CMS's average bid, rebate by star rating.
+  // The risk score defaults to the one CMS published for these plans (tagged and footnoted); 1.0 and the user's own are one click away.
   const usd0 = (n: number) => `$${Math.round(n).toLocaleString('en-US')}`
   const R = e.rev
-  await expect(page.getByTestId('bench-revenue')).toHaveText(usd0(R.bench))
-  await expect(page.getByTestId('cms-payment')).toHaveText(usd0(R.payment1))
-  await expect(page.getByTestId('plan-revenue')).toContainText(`${R.stars.toFixed(2)}★`)
-  await expect(page.getByTestId('payer-result')).toContainText(`${(100 * e.cases.base.totalPmpm / R.bench).toFixed(2)}%`)
-  await page.getByRole('radio', { name: `CMS 2024: ${R.risk24.toFixed(2)}` }).click()
+  await expect(page.getByTestId('risk-tag')).toHaveText('CMS-published, 2024 †')
+  await expect(page.getByTestId('risk-footnote')).toContainText("The risk score is CMS's, not this tool's")
   await expect(page.getByTestId('bench-revenue')).toHaveText(usd0(R.bench * R.risk24))
   await expect(page.getByTestId('cms-payment')).toHaveText(usd0(R.payment1 * R.risk24))
+  await expect(page.getByTestId('plan-revenue')).toContainText(`${R.stars.toFixed(2)}★`)
+  await expect(page.getByTestId('payer-result')).toContainText(`${(100 * e.cases.base.totalPmpm / (R.bench * R.risk24)).toFixed(2)}%`)
+  await expect(page.getByTestId('payer-result')).toContainText('(CMS 2024)')
   await expect(page.getByTestId('pay-check')).toContainText(`${usd0(R.base24 + R.rebate24)} per member per month`)
+  await expect(page.getByTestId('mlr-points')).toHaveText(`${(100 * e.cases.base.totalPmpm / R.mlrDen).toFixed(2)} points`)
+  await expect(page.getByTestId('mlr-check')).toContainText(`${(100 * R.mlr23).toFixed(1)}%`)
+  await page.getByRole('radio', { name: '1.0', exact: true }).click()
+  await expect(page.getByTestId('risk-tag')).toHaveText('Set to 1.0')
+  await expect(page.getByTestId('risk-footnote')).toHaveCount(0)
+  await expect(page.getByTestId('bench-revenue')).toHaveText(usd0(R.bench))
+  await expect(page.getByTestId('cms-payment')).toHaveText(usd0(R.payment1))
+  await page.getByRole('radio', { name: 'Your own' }).click()
+  await page.getByLabel('Your own risk score').fill('1.25')
+  await expect(page.getByTestId('risk-tag')).toHaveText('Your number')
+  await expect(page.getByTestId('bench-revenue')).toHaveText(usd0(R.bench * 1.25))
+  await page.getByRole('radio', { name: `CMS 2024: ${R.risk24.toFixed(2)}` }).click()
   await page.getByTestId('use-implied-bid').click()
   const rho = Math.round(1000 * R.impliedBid) / 1000
   await expect(page.getByTestId('cms-payment')).toHaveText(usd0(R.risk24 * (rho * R.bench + (1 - rho) * R.sBr)))
@@ -53,8 +66,8 @@ test('value: payer tab for all Medicare Advantage in the United States, and an e
   await page.goto('/value')
   await expect(page.getByTestId('payer-pmpm')).toHaveText(pmpm(e.cases.base.totalPmpm), { timeout: 120_000 })
   await expect(page.getByTestId('payer-baseline')).toContainText('Medicare Advantage here')
-  await expect(page.getByTestId('bench-revenue')).toHaveText(`$${Math.round(e.rev.bench).toLocaleString('en-US')}`)
-  await expect(page.getByTestId('bonus-gap')).toContainText(`$${(e.rev.bench5 - e.rev.bench).toFixed(2)}`)
+  await expect(page.getByTestId('bench-revenue')).toHaveText(`$${Math.round(e.rev.bench * e.rev.risk24).toLocaleString('en-US')}`)
+  await expect(page.getByTestId('bonus-gap')).toContainText(`$${((e.rev.bench5 - e.rev.bench) * e.rev.risk24).toFixed(2)}`)
   await expect(page.getByTestId('routing-evidence')).toBeVisible()
   // doubling the readmission assumption doubles that lever and nothing else; the page marks the case as edited
   await page.getByLabel('Readmission rate, points removed').fill('2')

@@ -51,6 +51,10 @@ def revenue(geo, text):
         out["risk24"] = float(np.nansum(x["risk_x"]) / ep); out["base24"] = float(np.nansum(x["base_x"]) / ep); out["rebate24"] = float(np.nansum(x["rebate_x"]) / ep)
         ab, gap = float(np.nansum(x["ab_x"])), float(np.nansum(x["gap_x"]))
         out["impliedBid"] = ab / (ab + gap) if ab + gap > 0 else None
+    em = float(np.nansum(x["enr_mlr"]))
+    if em > 0:
+        out["mlr23"] = float(np.nansum(x["mlr_num_x"]) / np.nansum(x["mlr_den_x"])); out["mlrDen"] = float(np.nansum(x["mlr_den_x"]) / em)
+        out["mlrRevenue"] = float(np.nansum(x["mlr_rev_x"]) / em); out["mlrAbClaims"] = float(np.nansum(x["mlr_ab_x"]) / em)
     return out
 
 # ---------------------------------------------------------------- payer
