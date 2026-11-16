@@ -59,6 +59,30 @@ async function init(): Promise<duckdb.AsyncDuckDBConnection> {
 
 export function getDb() { if (!dbPromise) dbPromise = init(); return dbPromise }
 
+/** Tables that only some pages need (the underwriting layer) are loaded on first use, once, so the other pages start as fast as before. */
+const extraLoads = new Map<string, Promise<void>>()
+export function ensureTables(names: readonly string[]): Promise<void[]> {
+  return Promise.all(names.map(name => {
+    if (!/^[a-z_]+$/.test(name)) throw new Error(`Bad table name ${name}`)
+    let p = extraLoads.get(name)
+    if (!p) {
+      p = (async () => {
+        const conn = await getDb()
+        report(`Loading ${name.replace(/_/g, ' ')}`)
+        const res = await fetch(`${import.meta.env.BASE_URL}data/${name}.arrow`)
+        if (!res.ok) throw new Error(`Could not load ${name}.arrow (${res.status})`)
+        const table = tableFromIPC(new Uint8Array(await res.arrayBuffer()))
+        if (table.numRows === 0) throw new Error(`${name}.arrow is empty`)
+        await conn.insertArrowTable(table, { name, create: true })
+        report('Ready')
+      })()
+      extraLoads.set(name, p)
+      p.catch(() => extraLoads.delete(name))   // a failed load can be retried
+    }
+    return p
+  }))
+}
+
 /** Run a query and return plain JS rows. BigInt -> number, Arrow dates -> ISO strings. */
 export async function q<T extends Row = Row>(sql: string): Promise<T[]> {
   if (sql.includes(';')) throw new Error('Refusing to run a multi-statement query')   // every input is whitelisted or sqlStr-escaped; this is the backstop

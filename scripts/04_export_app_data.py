@@ -93,3 +93,28 @@ hm=json.load(open(f"{OUT}/meta.json")); hm.update({"hospital_layer": {"service_a
 json.dump(hm, open(f"{OUT}/meta.json","w"), indent=1)
 open(f"{OUT}/discharge_flows_template.csv","w").write("hospital_ccn,hospital_name,snf_ccn,period_start,period_end,n_discharges\n210009,Johns Hopkins Hospital (example row - delete),215001,2025-01-01,2025-12-31,0\n")
 print("footnotes:", len(fn), "| lineage rows:", len(lin), "| done")
+
+# ---------------------------------------------------------------- underwriting layer (scripts/14_load_underwriting.py)
+pq("SELECT * FROM uw_county", "uw_county")
+pq("SELECT * FROM uw_state", "uw_state")
+pq("SELECT ccn, fips, cbsa FROM snf_geo", "snf_geo")
+pq("SELECT hospital_ccn, fips, cbsa FROM hospital_geo", "hospital_geo")
+pq("""SELECT ccn, name, state, medicare_cbsa, fy_begin, fy_end, period_days, n_reports, type_of_control,
+             total_days_title_xviii AS days_medicare, total_days_title_xix AS days_medicaid, total_days_other AS days_other, total_days_total AS days_total,
+             number_of_beds AS beds, total_bed_days_available AS bed_days_available, total_discharges_title_xviii AS discharges_medicare, total_discharges_total AS discharges_total,
+             total_costs, net_patient_revenue, less_total_operating_expense AS operating_expense, net_income_from_service_to_patients AS net_income_patients, net_income, inpatient_pps_amount
+      FROM snf_cost""", "snf_cost")
+pq("""SELECT ccn, name, state, medicare_cbsa, fy_begin, fy_end, period_days, n_reports, provider_type, type_of_control,
+             total_days_title_xviii AS days_medicare, total_days_title_xix AS days_medicaid, total_days_v_xviii_xix_unknown AS days_total, number_of_beds AS beds, total_bed_days_available AS bed_days_available,
+             total_discharges_title_xviii AS discharges_medicare, total_discharges_title_xix AS discharges_medicaid, total_discharges_v_xviii_xix_unknown AS discharges_total,
+             total_costs, inpatient_total_charges, combined_outpatient_inpatient_total_charges AS total_charges, cost_to_charge_ratio,
+             coalesce(drg_amounts_other_than_outlier_payments, coalesce(drg_amounts_before_october_1, 0) + coalesce(drg_amounts_after_october_1, 0)) AS drg_payments_raw,
+             drg_amounts_other_than_outlier_payments, drg_amounts_before_october_1, drg_amounts_after_october_1, outlier_payments_for_discharges AS outlier_payments,
+             net_patient_revenue, less_total_operating_expense AS operating_expense, net_income,
+             (SELECT hrrp_factor FROM hospital_hrrp h WHERE h.ccn = hospital_cost.ccn) AS hrrp_factor, (SELECT vbp_factor FROM hospital_vbp v WHERE v.ccn = hospital_cost.ccn) AS vbp_factor
+      FROM hospital_cost""", "hospital_cost")
+# visible enrollment only: plan-county cells of 10 or fewer are suppressed by CMS and stay out (the count of suppressed cells per county is in uw_county)
+pq("""SELECT parent_org, fips, segment, snp, CAST(sum(enrollment) AS INTEGER) AS enrollment, CAST(sum(suppressed_cells) AS INTEGER) AS suppressed_cells
+      FROM ma_parent_county GROUP BY ALL HAVING sum(enrollment) IS NOT NULL ORDER BY parent_org, fips""", "ma_parent_county")
+um=json.load(open(f"{OUT}/meta.json")); um["underwriting"]=json.load(open(f"{ROOT}/db/underwriting_summary.json"))
+json.dump(um, open(f"{OUT}/meta.json","w"), indent=1)

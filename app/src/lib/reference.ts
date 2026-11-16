@@ -1,7 +1,11 @@
 // Reference data shipped as JSON next to the Parquet files (small, loaded once).
 import { q } from './db'
 
-export interface Meta { data_vintage: string; release: string; n_facilities: number; window_12m_start: string; built: string; validation: string; hospital_layer?: { pecos_release?: string; ltc671_release?: string; hwr_note?: string } }
+export interface Meta { data_vintage: string; release: string; n_facilities: number; window_12m_start: string; built: string; validation: string; hospital_layer?: { pecos_release?: string; ltc671_release?: string; hwr_note?: string }; underwriting?: Underwriting }
+/** Vintages and counts of the value-model data layer (scripts/14_load_underwriting.py writes it; nothing here is typed by hand). */
+export interface Underwriting { gv_year: number; ma_gv_year: number; enrollment_month: string; mssp_year: number; cpsc_period: string; ratebook_year: number; cbsas: number; uw_counties: number; cpsc_parent_orgs: number
+  snf_cost?: { ccns: number }; hospital_cost?: { ccns: number }; hrrp?: { fiscal_year: number; hospitals: number; penalized: number }; vbp?: { fiscal_year: number; hospitals: number }
+  releases?: Record<string, { dataset: string; period_start: string; modified: string }> }
 export interface Footnote { meaning: string; applies_to: string }
 export interface Lineage { 'Facility_Master header': string; 'db column': string; source_file: string; original_header: string; how_derived: string }
 export interface CatalogRow { source: string; measure_code: string; description: string; resident_type: string | null; used_in_5star: string | null; period: string; master_column: string | null }

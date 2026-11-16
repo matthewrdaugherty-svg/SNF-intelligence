@@ -358,7 +358,7 @@ test('hospital page names its PECOS owner and links to the whole system; facilit
 test('no page scrolls sideways at phone width', async ({ page }) => {
   test.setTimeout(400_000)
   await page.setViewportSize({ width: 390, height: 844 })
-  const urls = ['/explore?st=MD', '/explore?h=210009', '/cohorts?c=overall_rating.in.4,5&c=state.eq.MD', '/facility/215085', '/hospital/210009', '/hospitals', '/flows', '/about', '/compare']
+  const urls = ['/explore?st=MD', '/explore?h=210009', '/cohorts?c=overall_rating.in.4,5&c=state.eq.MD', '/facility/215085', '/hospital/210009', '/hospitals', '/flows', '/about', '/compare', '/value?geo=12580&payer=united&ref=11,15,20', '/value?tab=hospital&h=390133', '/value?tab=snf&geo=12580', '/scenarios?h=210009']
   const bad: string[] = []
   for (const u of urls) {
     await page.goto(u)

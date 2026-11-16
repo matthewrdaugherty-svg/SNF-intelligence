@@ -15,6 +15,7 @@ import Hospital, { HospitalSearch } from './pages/Hospitals'
 import Cohorts from './pages/Cohorts'
 import Guide from './pages/Guide'
 import Scenarios from './pages/Scenarios'
+import Value from './pages/Value'
 
 function Gate() {
   const [ready, setReady] = useState(false)
@@ -37,6 +38,7 @@ const router = createBrowserRouter([
     { path: 'about', element: <About /> },
     { path: 'guide', element: <Guide /> },
     { path: 'scenarios', element: <Scenarios /> },
+    { path: 'value', element: <Value /> },
     { path: '*', element: <Navigate to="/explore" replace /> },
   ] },
 ])

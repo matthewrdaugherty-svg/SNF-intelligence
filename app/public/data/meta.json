@@ -3,7 +3,7 @@
  "release": "2026-09-30 (nursing home + SNF QRP provider files); SNF VBP FY2026 facility file 2025-11-01",
  "n_facilities": 14690,
  "window_12m_start": "2025-09-01",
- "built": "2026-10-27",
+ "built": "2026-11-15",
  "validation": "docs/VALIDATION_REPORT_01.md, _02.md \u2014 all Facility_Master values matched raw CMS files for all 14,690 facilities; 5 facilities matched the live CMS API",
  "hospital_layer": {
   "service_area_year": 2025,
@@ -15,5 +15,138 @@
   "ltc671_release": "Q2 2026 (CMS-671 Long-Term Care Facility Characteristics, data.cms.gov, published 2026-07-29)",
   "pecos_release": "2026-09-29 (Hospital/SNF All Owners, Enrollments, Change of Ownership; data.cms.gov)",
   "hwr_note": "The hospital-wide readmission measure (Hybrid HWR) is 'Not Available' for every hospital in this release (CMS footnote 4); condition-specific 30-day readmission rates are shown instead."
+ },
+ "underwriting": {
+  "gv_year": 2024,
+  "gv_counties": 3197,
+  "ma_gv_year": 2023,
+  "ma_gv_states": 54,
+  "enrollment_month": "July 2026",
+  "enrollment_national": {
+   "total": 70736624.0,
+   "original_medicare": 34558874.0,
+   "ma_and_other": 36177750.0
+  },
+  "cbsa_counties": 1915,
+  "cbsas": 935,
+  "mssp_year": 2025,
+  "ssa_fips_person_year_coverage": 0.99945,
+  "cpsc_period": "2026-09",
+  "cpsc_ma_enrollment_visible": 35552879.0,
+  "cpsc_all_health_plan_enrollment_visible": 35825893.0,
+  "cpsc_suppressed_plan_county_cells": 2248411,
+  "cpsc_plan_county_cells": 2370198,
+  "cpsc_parent_orgs": 310,
+  "cpsc_contract_lines_transcoded": 16,
+  "ratebook_year": 2027,
+  "ratebook_counties": 3247,
+  "ma_enrollment_share_with_ratebook_rate": 0.98757,
+  "uw_counties": 3278,
+  "ma_enrollment_share_with_snf_rate": 0.97971,
+  "ma_enrollment_share_with_risk_score": 0.98752,
+  "ma_enrollment_share_in_a_cbsa": 0.9383,
+  "national_ma_vs_ffs_2023": {
+   "ma_ip_stays": 205.1642,
+   "ffs_ip_stays": 222.3068,
+   "ratio_ip_stays": 0.9229,
+   "ma_snf_days": 834.436,
+   "ffs_snf_days": 1435.7722,
+   "ratio_snf_days": 0.5812
+  },
+  "snf_cost": {
+   "ccns": 13988,
+   "full_year_reports": 12977,
+   "reports_in_file": 14587
+  },
+  "hospital_cost": {
+   "ccns": 6026,
+   "full_year_reports": 5779,
+   "reports_in_file": 6109
+  },
+  "snf_geo_matched": [
+   14689,
+   14690
+  ],
+  "hospital_geo_matched": [
+   5375,
+   5419
+  ],
+  "hrrp": {
+   "fiscal_year": 2027,
+   "hospitals": 2912,
+   "penalized": 2334,
+   "average_penalty": 0.00354,
+   "largest_penalty": 0.03
+  },
+  "vbp": {
+   "fiscal_year": 2027,
+   "proxy": true,
+   "hospitals": 2448,
+   "net_losers": 1183,
+   "min_factor": 0.98,
+   "max_factor": 1.0452995302
+  },
+  "releases": {
+   "gv_county": {
+    "dataset": "Medicare Geographic Variation - by National, State & County",
+    "period_start": "2024-01-01",
+    "modified": "2026-05-15"
+   },
+   "ma_gv_state": {
+    "dataset": "Medicare Advantage Geographic Variation - National & State",
+    "period_start": "2023-01-01",
+    "modified": "2026-07-30"
+   },
+   "monthly_enrollment": {
+    "dataset": "Medicare Monthly Enrollment",
+    "period_start": "2026-07-01",
+    "modified": "2026-10-22"
+   },
+   "mssp_county_risk": {
+    "dataset": "County-level Aggregate Expenditure and Risk Score Data on Assignable Beneficiaries",
+    "period_start": "2025-01-01",
+    "modified": "2026-11-09"
+   },
+   "snf_cost_report": {
+    "dataset": "Skilled Nursing Facility Cost Report",
+    "period_start": "2024-01-01",
+    "modified": "2026-10-05"
+   },
+   "hospital_cost_report": {
+    "dataset": "Hospital Provider Cost Report",
+    "period_start": "2024-01-01",
+    "modified": "2026-10-05"
+   },
+   "pac_hha": {
+    "dataset": "Medicare Post-Acute Care Utilization - Home Health Agency by Geography and Provider",
+    "period_start": "2024-01-01",
+    "modified": "2026-08-11"
+   },
+   "pac_irf": {
+    "dataset": "Medicare Post-Acute Care Utilization - Inpatient Rehabilitation Facility by Geography and Provider",
+    "period_start": "2024-01-01",
+    "modified": "2026-08-11"
+   },
+   "pac_ltch": {
+    "dataset": "Medicare Post-Acute Care Utilization - Long-Term Care Hospital by Geography and Provider",
+    "period_start": "2024-01-01",
+    "modified": "2026-08-11"
+   },
+   "msat_cbsa": {
+    "dataset": "Market Saturation & Utilization Core-Based Statistical Areas",
+    "period_start": "2025-01-01",
+    "modified": "2026-06-10"
+   },
+   "hrrp_fy2027": {
+    "dataset": "FY 2027 IPPS Final Rule Table 15: Hospital Readmissions Reduction Program payment adjustment factors",
+    "period_start": "2026-10-01",
+    "modified": "2026-10-07"
+   },
+   "vbp_fy2027_proxy": {
+    "dataset": "FY 2027 IPPS Final Rule Table 16A: updated proxy Hospital Value-Based Purchasing adjustment factors",
+    "period_start": "2026-10-01",
+    "modified": "2026-07-28"
+   }
+  }
  }
 }

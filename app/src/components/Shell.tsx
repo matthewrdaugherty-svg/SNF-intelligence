@@ -10,6 +10,7 @@ const NAV = [
   { to: '/map', label: 'Map' },
   { to: '/compare', label: 'Compare' },
   { to: '/scenarios', label: 'Scenarios' },
+  { to: '/value', label: 'Value' },
   { to: '/flows', label: 'Flows' },
   { to: '/guide', label: 'Guide' },
   { to: '/about', label: 'Methods' },

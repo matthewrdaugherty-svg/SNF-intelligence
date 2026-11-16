@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import type { Reference } from '../lib/reference'
 import { GROUPS } from '../lib/measures'
 import { useReference } from '../components/ui'
@@ -15,15 +15,85 @@ function DrgMapping({ ref }: { ref: Reference }) {
   )
 }
 
+/** The Value page's sources and arithmetic, in full. Vintages come from meta.json (written by scripts/14_load_underwriting.py), so this text cannot drift from the data. */
+function ValueMethods({ ref }: { ref: Reference }) {
+  const u = ref.meta.underwriting
+  if (!u) return <div className="mt-5 text-sm text-ink-2">The value-model data layer is not in this build.</div>
+  const H = ({ children }: { children: string }) => <h2 className="font-medium mt-6">{children}</h2>
+  const P = ({ children }: { children: React.ReactNode }) => <p className="mt-1 text-ink-2">{children}</p>
+  const M = ({ children }: { children: string }) => <pre className="mt-2 card p-3 text-xs leading-5 whitespace-pre-wrap font-mono text-ink">{children}</pre>
+  return (
+    <div className="mt-5 text-sm max-w-3xl" id="value">
+      <P>The Value page is the one place in this tool that goes beyond CMS's own numbers. It keeps the two kinds of number apart: every <b className="text-ink font-medium">baseline</b> (how many stays, how many days, what they cost, what a hospital or SNF reports) is a CMS figure or a labelled model built from CMS figures; every <b className="text-ink font-medium">improvement</b> (how many readmissions are avoided, how many days are saved) is an assumption that the user sets, offered as a minimum, a base and a stretch case. No improvement figure comes from CMS, and none is presented as a forecast.</P>
+      <H>Sources</H>
+      <div className="overflow-x-auto"><table className="tbl tbl-compact text-xs mt-2"><thead><tr><th>What</th><th>CMS or Census file</th><th>Period</th></tr></thead><tbody>
+        <tr><td>Original Medicare use and payments by county</td><td>Medicare Geographic Variation, by National, State & County</td><td>{u.gv_year}</td></tr>
+        <tr><td>Medicare Advantage use by state</td><td>Medicare Advantage Geographic Variation, National & State</td><td>{u.ma_gv_year}</td></tr>
+        <tr><td>Enrollment by county: total, Original Medicare, Medicare Advantage</td><td>Medicare Monthly Enrollment</td><td>{u.enrollment_month}</td></tr>
+        <tr><td>Medicare Advantage members by plan, parent organization and county</td><td>Monthly Enrollment by Contract/Plan/State/County, with the contract directory ({u.cpsc_parent_orgs} parent organizations)</td><td>{/^\d{4}-\d{2}$/.test(u.cpsc_period) ? new Date(Date.UTC(Number(u.cpsc_period.slice(0, 4)), Number(u.cpsc_period.slice(5)) - 1, 1)).toLocaleDateString('en-US', { month: 'long', year: 'numeric', timeZone: 'UTC' }) : u.cpsc_period}</td></tr>
+        <tr><td>County benchmark rates</td><td>Medicare Advantage ratebook, county rates at 0%, 3.5% and 5% bonus</td><td>{u.ratebook_year}</td></tr>
+        <tr><td>Average risk score by county</td><td>Shared Savings Program county-level expenditure and risk score file (assignable beneficiaries)</td><td>{u.mssp_year}</td></tr>
+        <tr><td>Counties to metro areas ({u.cbsas} CBSAs)</td><td>Census Bureau / OMB core-based statistical area delineation</td><td>July 2023</td></tr>
+        <tr><td>Hospital and SNF finances</td><td>Hospital Provider Cost Report; Skilled Nursing Facility Cost Report</td><td>fiscal year 2024</td></tr>
+        <tr><td>Readmission penalty by hospital</td><td>IPPS final rule Table 15, Hospital Readmissions Reduction Program payment adjustment factors ({u.hrrp?.hospitals.toLocaleString()} hospitals, {u.hrrp?.penalized.toLocaleString()} penalized)</td><td>FY {u.hrrp?.fiscal_year}</td></tr>
+        <tr><td>Value-based purchasing by hospital</td><td>IPPS final rule Table 16A, proxy adjustment factors (CMS replaces these with actual factors later in the year)</td><td>FY {u.vbp?.fiscal_year}</td></tr>
+      </tbody></table></div>
+      <P>CMS suppresses small cells in every one of these files. A suppressed value stays blank; it is never treated as zero, and the member-weighted averages leave that county out of that measure. The page states what share of the members is covered.</P>
+      <H>Payer: the baseline</H>
+      <P>Members are weighted by county: the parent organization's visible Medicare Advantage enrollment in each county of the market (plan-county cells of 10 or fewer are hidden by CMS and are missing), or all Medicare Advantage enrollment when no organization is named. The parent filter is a plain text match on CMS's parent-organization name.</P>
+      <M>{`Original Medicare rate for the market = Σ members(county) × rate(county) ÷ Σ members(county)      [counties with a published rate]
+Medicare Advantage rate (MODELED)  = Σ members(county) × rate(county) × state ratio ÷ Σ members(county)
+   state ratio = that state's Medicare Advantage rate ÷ its Original Medicare rate, ${u.ma_gv_year}
+Price per unit = Σ Original Medicare payments ÷ Σ units     (units = beneficiaries × rate ÷ 1,000; counties where both are published)
+SNF cost per stay = SNF days per stay (from the chosen utilization baseline) × SNF payment per day`}</M>
+      <P>CMS publishes Medicare Advantage utilization only by state, so the county figure is a model. As a check, the model's national figure for all Medicare Advantage members lands within about 4% of CMS's published national Medicare Advantage rates for inpatient stays, inpatient days, SNF stays and SNF days. "Unmanaged" uses the Original Medicare rates directly. The risk-adjusted comparison shown beside each rate is (market rate ÷ (market risk score ÷ national risk score)) ÷ national rate − 1; it is a benchmark for reading the market and does not enter the dollar figures.</P>
+      <H>Payer: the levers</H>
+      <M>{`Per 1,000 members per year (÷ 12,000 = per member per month):
+Readmissions            = inpatient stays × points removed ÷ 100 × inpatient payment per stay
+SNF to home health      = SNF stays × % diverted × (SNF cost per stay − home-health episode)
+Shorter SNF stays       = SNF days × (1 − % diverted) × % fewer days × SNF payment per day
+IRF step-down           = IRF stays × % stepped down × (IRF payment per stay − SNF cost per stay)
+LTCH step-down          = LTCH stays × % stepped down × (LTCH payment per stay − SNF cost per stay)
+Inpatient days          = inpatient days × % fewer × % paid per diem × inpatient payment per day
+Utilization management  = the plan's own $ per member per month × 12,000
+All utilization × the acuity factor; all prices × the plan's payment relative to Medicare.`}</M>
+      <P>The shorter-stay lever is applied only to stays that still go to a SNF, so it does not double-count the stays sent home. The levers are otherwise added; in practice some overlap (a stay sent home cannot also be readmitted from a SNF), which is one reason to read the minimum case as the floor. Under DRG payment a shorter hospital stay saves the hospital, not the plan, so the inpatient-days lever is zero unless the plan says what share of its days are paid per diem. Quality-bonus revenue is shown but never added. The routing-evidence table is arithmetic on CMS's published SNF rehospitalization rates (QM 521), weighted by each SNF's Medicare stays, and is a ceiling, not a forecast.</P>
+      <H>Hospital</H>
+      <M>{`Medicare Advantage discharges (MODELED) = Original Medicare discharges × county MA ÷ Original Medicare enrollment × state MA inpatient ratio
+SNF-bound discharges (MODELED) = discharges × 18.7% × (county SNF stays per inpatient stay ÷ national)      [MA also × state SNF ratio ÷ state inpatient ratio]
+Cost per day    = inpatient charges × cost-to-charge ratio ÷ inpatient days     (operating expense × inpatient share of charges when no ratio is reported)
+Revenue per day = net patient revenue × inpatient share of charges ÷ inpatient days
+Value of a freed day = (1 − backfill) × variable share × cost per day + backfill × (revenue per day − variable share × cost per day)
+Excess days            = SNF-bound discharges × days saved × value of a freed day
+Readmission penalty    = Σ DRG payments × (1 − FY ${u.hrrp?.fiscal_year} adjustment factor) × % removed
+Value-based purchasing = DRG payments of hospitals in the program × 2% × % earned back
+At-risk readmissions   = (Original Medicare + MA discharges) × % at risk × points ÷ 100 × Medicare payment per stay
+Case management        = SNF-bound discharges × hours saved × cost per hour`}</M>
+      <P>18.7% is MedPAC's national share of Original Medicare hospital discharges that go to a SNF, the same figure the Scenarios page uses. Cost-report amounts are annualized (× 365 ÷ days in the reporting period). A hospital's cost report is left out, not adjusted, when occupancy is above 105% or cost per day falls outside $300–$20,000. Maryland hospitals are in neither payment program and those levers are zero for them. Under DRG payment a readmission is paid for, so avoided readmissions count for a hospital only on the share of patients it is financially at risk for, which the user enters.</P>
+      <H>SNF</H>
+      <M>{`Empty bed-days = bed-days available − patient days
+Added days     = empty bed-days × % filled;  Medicare days = added × Medicare share;  Medicaid/other days = the rest
+Medicare revenue per day     = Medicare Part A (inpatient PPS) amount ÷ Original Medicare days
+Non-Medicare revenue per day = (net patient revenue − Part A amount) ÷ (patient days − Original Medicare days)      [the default Medicaid rate]
+Filled beds  = Medicare days × Medicare revenue per day × payment factor + Medicaid/other days × Medicaid rate − added days × cost per day × variable share
+Intake time  = admissions × hours saved × cost per hour
+Medicaid days one Medicare day carries = (Medicare revenue per day × payment factor − cost per day) ÷ (cost per day − Medicaid rate)      [at full cost]`}</M>
+      <P>A SNF cost report is left out, not adjusted, when occupancy is outside 10–102%, operating expense is more than twice or less than half of patient revenue (which usually means the report covers more than the nursing facility), or it has no Medicare Part A revenue; about 96% of reports pass. Placement moves patients between SNFs and does not create them, so the SNF figure is a gain for the chosen facilities, not for a market as a whole.</P>
+      <H>Checks</H>
+      <P>An independent replica (scripts/verify/value_indep.py, written in pandas and sharing no query with the app) recomputes all three tabs for a set of fixed selections, and the automated tests compare the page with it lever by lever.</P>
+    </div>
+  )
+}
+
 export default function About() {
   const ref = useReference()
-  const [tab, setTab] = useState<'overview' | 'measures' | 'lineage' | 'footnotes' | 'limits' | 'checks'>('overview')
+  const [tab, setTab] = useState<'overview' | 'measures' | 'lineage' | 'footnotes' | 'limits' | 'value' | 'checks'>(typeof location !== 'undefined' && location.hash === '#value' ? 'value' : 'overview')
   if (!ref) return <div className="p-8 text-sm text-ink-2">Loading…</div>
-  const tabs = [['overview', 'Overview'], ['measures', 'Measures and direction'], ['lineage', 'Column lineage'], ['footnotes', 'Footnote codes'], ['limits', 'Limitations'], ['checks', 'Verification']] as const
+  const tabs = [['overview', 'Overview'], ['measures', 'Measures and direction'], ['lineage', 'Column lineage'], ['footnotes', 'Footnote codes'], ['limits', 'Limitations'], ['value', 'Value model'], ['checks', 'Verification']] as const
   return (
     <div className="page">
       <h1>Methodology & trust</h1>
-      <p className="text-sm text-ink-2 mt-1 max-w-3xl">Every number in this app comes from a CMS file, unchanged, or from a count or sum of CMS rows whose rule is written down here. Nothing is estimated or filled in. Where CMS suppressed a value, it is blank and carries CMS's footnote.</p>
+      <p className="text-sm text-ink-2 mt-1 max-w-3xl">Every number in this app comes from a CMS file, unchanged, or from a count or sum of CMS rows whose rule is written down here. Nothing is estimated or filled in. Where CMS suppressed a value, it is blank and carries CMS's footnote. The one exception is the Value page: its baselines follow the same rule, but its improvement percentages are assumptions the user sets, labelled as such (see the Value model tab).</p>
       <div className="flex gap-1 mt-5 border-b border-hairline overflow-x-auto whitespace-nowrap">
         {tabs.map(([k, l]) => <button key={k} onClick={() => setTab(k)} className={`press px-3 py-2 text-sm -mb-px border-b-2 ${tab === k ? 'border-ink text-ink font-medium' : 'border-transparent text-ink-2 hover:text-ink'}`}>{l}</button>)}
       </div>
@@ -36,7 +106,7 @@ export default function About() {
           <div className="text-ink-2">State and national averages</div><div>Taken from CMS's State/US Averages file. They are simple, unweighted averages of facility values, which we confirmed by recomputing them from the facility rows (they match to the published precision).</div>
           <div className="text-ink-2">Severity letters</div><div>CMS scope-and-severity grid A–L. We label G–I “actual harm” and J–L “immediate jeopardy”. The CMS data dictionary confirms “G or greater” means harm; the full grid is defined in the CMS Five-Star Technical Users' Guide, which this project has not yet independently fetched.</div>
           <div className="text-ink-2">Derived columns</div><div>Only one: the VBP net Part A payment change, which is (incentive multiplier − 1) × 100. It is labelled “derived” wherever it appears.</div>
-          <div className="text-ink-2">What is not here</div><div>Hospital-to-SNF discharge flows (CMS does not publish them), dollar costs, payer mix, complaints filed or substantiated. See Limitations.</div>
+          <div className="text-ink-2">What is not here</div><div>Hospital-to-SNF discharge flows (CMS does not publish them), Medicare Advantage and Medicaid contract rates, complaints filed or substantiated. Dollar figures and payer mix appear only on the Value page, from CMS cost reports and payment files. See Limitations.</div>
           <div className="text-ink-2">Built</div><div>{ref.meta.built}. The database runs inside your browser, so filters, searches and anything you upload on Discharge flows stay on your machine (uploads are kept in this browser's storage until you remove them). Two optional features contact outside services: the place lookup sends the address you type to OpenStreetMap's Nominatim service, and the Map loads its street basemap from OpenFreeMap.</div>
         </div>
       )}
@@ -93,6 +163,8 @@ export default function About() {
           <p className="mt-1 text-ink-2">The Scenarios page starts from the hospital's SNF volume by facility — the modeled service-area shares, or the hospital's own counts when they have been loaded on the Flows page — and a definition of an acceptable SNF (minimum overall rating, no special-focus or abuse-icon facilities, Medicare-certified only, required dedicated units, minimum case-mix overlap). Volume in facilities that do not meet the bar is moved, in the chosen share, to the nearest acceptable facilities within the chosen distance of the facility the patient would otherwise have used (straight-line distance between the two facilities' Care Compare coordinates), split equally among them; volume with no acceptable facility in reach stays unplaced and is reported. Capacity is respected in every mode: a receiving facility can take extra Medicare stays per year only up to its empty beds (certified beds minus average residents per day, Care Compare) × 365 ÷ its own Medicare length of stay (PAC PUF days ÷ stays; the national median when missing), measured against the hospital's annual SNF discharges — the number entered on the page, or, failing that, its 2024 Medicare discharges × 18.7% (MedPAC July 2026 Data Book, Chart 8-3: the share of fee-for-service hospital discharges followed by a SNF stay, 2019). Volume that finds every acceptable facility within reach full stays where it is and is reported. "Optimize" is the ceiling: all of the volume below the bar goes to the best acceptable facility within reach that still has room, "best" meaning the objective chosen on the page. The default, Balanced, scores every SNF by its national percentile on each of four measures — readmission after SNF discharge, short-stay rehospitalization, discharge to community, Medicare payment per stay (1 = best in the country, direction-aware) — and averages them equally; Custom blend uses the weights you set; a measure CMS has not published for a SNF drops out of its average. The single-measure objectives rank by that measure alone. Ties are broken by rating, readmission and distance. A single-measure objective can move the other measures the wrong way, and the page shows that rather than hiding it. "Realization" is (before − your scenario) ÷ (before − optimal) on each measure: the share of the modeled opportunity a scenario captures. Before-and-after figures are volume-weighted averages of each facility's published CMS rates (readmission after SNF discharge, short-stay rehospitalization, discharge to community, overall rating) and of Medicare's average payment per stay from the Post-Acute Care PUF. The distance shown is facility-to-facility, an upper bound on the extra travel from the patient's own address, which the public data does not contain. It assumes receiving facilities keep their published rates at the new volume, have beds, and are accepted by patients; it is a sizing tool, not a forecast. The figures for the Johns Hopkins default case were reproduced independently in pure Python (scripts/verify/scenario_indep.py) before the page shipped.</p>
         </div>
       )}
+
+      {tab === 'value' && <ValueMethods ref={ref} />}
 
       {tab === 'checks' && (
         <div className="mt-5 text-sm max-w-3xl">
