@@ -151,6 +151,17 @@ test('value: SNF tab matches the replica, and refuses an implausible cost report
   await clean(page)
 })
 
+test('methods: the plain-language account of data years carries a live worked example that matches the replica', async ({ page }) => {
+  const e = X.payer_us_all, R = e.rev
+  await page.goto('/about#value')
+  await expect(page.getByTestId('plain-years')).toContainText('In one sentence:', { timeout: 120_000 })
+  const share = e.cases.base.totalPmpm / (R.base24 + R.rebate24)
+  const usd = (n: number, d = 0) => '$' + n.toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d })
+  await expect(page.getByTestId('plain-example')).toContainText(`${usd(e.cases.base.totalPmpm, 2)} of savings per member per month ÷ ${usd(R.base24 + R.rebate24)} paid in 2024 = ${(100 * share).toFixed(2)}%`, { timeout: 120_000 })
+  await expect(page.getByTestId('plain-example')).toContainText(`× ${usd(R.payment1 * R.risk24)} expected in 2027 = ${usd(share * R.payment1 * R.risk24, 2)} per member per month`)
+  await expect(page.getByTestId('plain-years')).not.toContainText('NaN')
+})
+
 test('value: market search finds a metro area and a state, and the tab is in the URL', async ({ page }) => {
   await page.goto('/value')
   await expect(page.getByTestId('payer-pmpm')).toBeVisible({ timeout: 120_000 })

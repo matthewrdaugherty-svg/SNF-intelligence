@@ -1,7 +1,8 @@
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import type { Reference } from '../lib/reference'
 import { GROUPS } from '../lib/measures'
 import { useReference } from '../components/ui'
+import { PAYER_DEFAULTS, payerBaseline, payerValue } from '../lib/value'
 
 /** The full MS-DRG → family mapping, straight from the exported table, so nobody has to trust the prose. */
 function DrgMapping({ ref }: { ref: Reference }) {
@@ -22,8 +23,43 @@ function ValueMethods({ ref }: { ref: Reference }) {
   const H = ({ children }: { children: string }) => <h2 className="font-medium mt-6">{children}</h2>
   const P = ({ children }: { children: React.ReactNode }) => <p className="mt-1 text-ink-2">{children}</p>
   const M = ({ children }: { children: string }) => <pre className="mt-2 card p-3 text-xs leading-5 whitespace-pre-wrap font-mono text-ink">{children}</pre>
+  // The worked example is computed live from the same model the Value page runs (all plans, United States, base case), so it can never drift from the page.
+  const [ex, setEx] = useState<{ savings: number; paid: number; share: number; expected: number; carried: number } | null>(null)
+  useEffect(() => { let live = true; payerBaseline({ kind: 'us' }, '').then(b => { if (!live || !b?.rev?.pay24) return; const v = payerValue(b, PAYER_DEFAULTS, Math.round(b.members)); if (v.pctOfPayment24 != null && v.payment != null && v.carried27 != null) setEx({ savings: v.totalPmpm, paid: b.rev.pay24.base + b.rev.pay24.rebate, share: v.pctOfPayment24, expected: v.payment, carried: v.carried27 }) }).catch(() => {}); return () => { live = false } }, [])
+  const usd = (n: number, d = 0) => '$' + n.toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d })
+  const payYear = u.plan_payment?.year, toYear = u.ratebook_year
+  const Li = ({ k, children }: { k: string; children: React.ReactNode }) => <li><b className="text-ink font-medium">{k}</b> {children}</li>
   return (
     <div className="mt-5 text-sm max-w-3xl" id="value">
+      <section className="card p-4 mb-5" data-testid="plain-years">
+        <h2 className="font-semibold text-ink">In plain terms: which years are compared, and how the numbers reach {toYear}</h2>
+        <p className="mt-2 text-ink"><b className="font-medium">In one sentence:</b> savings and revenue are measured in the same year ({payYear}), turned into a percentage, and that percentage is applied to what the plan is expected to be paid in {toYear}.</p>
+        <h3 className="font-medium text-ink mt-4">Step by step</h3>
+        <ol className="mt-1 space-y-1.5 text-ink-2 list-decimal pl-5">
+          <Li k="How much care members use:">{u.ma_gv_year}, the latest year the government has published for private Medicare plans.</Li>
+          <Li k="What that care costs:">{u.gv_year} prices, what traditional Medicare actually paid in each market.</Li>
+          <Li k="Savings:">steps 1 and 2 with the improvement assumptions applied. These are dollars in {u.gv_year} prices. They are not inflated.</Li>
+          <Li k="Compared with revenue from the same year:">savings are divided by what the government actually paid those same plans in {payYear}. That gives a percentage, and both halves are {payYear}.</Li>
+          <Li k={`Rolled forward to ${toYear}:`}>that percentage is applied to the plan's expected {toYear} revenue.</Li>
+        </ol>
+        {ex && <p className="mt-3 text-ink" data-testid="plain-example"><b className="font-medium">Example, all plans nationally, base case:</b> {usd(ex.savings, 2)} of savings per member per month ÷ {usd(ex.paid)} paid in {payYear} = {(100 * ex.share).toFixed(2)}%. Then {(100 * ex.share).toFixed(2)}% × {usd(ex.expected)} expected in {toYear} = {usd(ex.carried, 2)} per member per month.</p>}
+        <h3 className="font-medium text-ink mt-4">What the {toYear} revenue is built from</h3>
+        <ul className="mt-1 space-y-1.5 text-ink-2 list-disc pl-5">
+          <Li k="Government payment rates:">{toYear}, by county.</Li>
+          <Li k="Quality bonus:">each plan's {u.stars?.rating_year} quality rating, which is the one that sets {toYear} pay.</Li>
+          <Li k="Members:">where each plan's members lived in late 2026.</Li>
+          <Li k={'The plan\'s price to the government (its "bid"):'}>the average published with the {toYear} rates, unless the plan's own is entered.</Li>
+          <Li k={'How sick the members are (the "risk score"):'}>{payYear}, the latest published. This is the one older number inside the {toYear} figure, and it is labelled on the page.</Li>
+        </ul>
+        <h3 className="font-medium text-ink mt-4">The one assumption in the roll-forward</h3>
+        <p className="mt-1 text-ink-2">Savings grow at the same pace as the plan's revenue. Nothing here forecasts how much care people will use in {toYear} or what it will cost; the savings are assumed to stay the same share of revenue.</p>
+        <h3 className="font-medium text-ink mt-4">What is not rolled forward</h3>
+        <ul className="mt-1 space-y-1.5 text-ink-2 list-disc pl-5">
+          <Li k={`Care use after ${u.ma_gv_year}.`}>It has swung too much from year to year to project.</Li>
+          <Li k="Changes plans made in 2025 and 2026,">such as cutting benefits or pricing for profit. Leaving markets does show up, because 2026 membership is used.</Li>
+          <Li k={`The ${u.mlr?.year} profit-and-loss filings.`}>They are shown for background only and nothing is calculated from them.</Li>
+        </ul>
+      </section>
       <P>The Value page is the one place in this tool that goes beyond CMS's own numbers. It keeps the two kinds of number apart: every <b className="text-ink font-medium">baseline</b> (how many stays, how many days, what they cost, what a hospital or SNF reports) is a CMS figure or a labelled model built from CMS figures; every <b className="text-ink font-medium">improvement</b> (how many readmissions are avoided, how many days are saved) is an assumption that the user sets, offered as a minimum, a base and a stretch case. No improvement figure comes from CMS, and none is presented as a forecast.</P>
       <H>Sources</H>
       <div className="overflow-x-auto"><table className="tbl tbl-compact text-xs mt-2"><thead><tr><th>What</th><th>CMS or Census file</th><th>Period</th></tr></thead><tbody>
