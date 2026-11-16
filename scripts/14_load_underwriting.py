@@ -72,8 +72,12 @@ con.execute(f"""CREATE OR REPLACE TABLE ma_gv AS SELECT CAST(YEAR AS INTEGER) AS
 ma_year = one("SELECT max(year) FROM ma_gv")
 assert ma_year == 2023 and one("SELECT count(*) FROM ma_gv WHERE year=2023") == 54
 
-# state table: MA rate (2023) beside the Original Medicare rate for the SAME year and state, and their ratio.
-# The ratio is how the model turns a county's FFS utilization into an MA estimate (MODELED; D-041).
+# state table. Two different comparisons, kept apart so that years are never mixed silently (D-053):
+#   ffs_*  = Original Medicare in the SAME year as the MA figures (2023): the like-for-like "MA vs Original Medicare" statistics.
+#   r_*    = the state's MA rate (2023, the latest CMS publishes) divided by the state's Original Medicare rate in the COUNTY file's year (2024).
+#            Multiplying a county's 2024 Original Medicare rate by r_* gives:  state MA rate (2023, observed) x the county's position relative to its state (2024).
+#            So the MA level is anchored to its own observed year, and the 2024 file is used only for geography within the state. An earlier version divided by the
+#            2023 Original Medicare rate, which silently assumed MA use moved from 2023 to 2024 the way Original Medicare did (it has not tracked it: see the trend table).
 con.execute(f"""CREATE OR REPLACE TABLE uw_state AS
   SELECT m.state, m.state_fips, m.year AS ma_year, m.benes_ma_cnt AS ma_benes,
          m.ip_stays_per_1000_benes AS ma_ip_stays, m.ip_days_per_1000_benes AS ma_ip_days,
@@ -84,15 +88,27 @@ con.execute(f"""CREATE OR REPLACE TABLE uw_state AS
          g.snf_cvrd_stays_per_1000_benes AS ffs_snf_stays, g.snf_cvrd_days_per_1000_benes AS ffs_snf_days,
          g.irf_cvrd_stays_per_1000_benes AS ffs_irf_stays, g.irf_cvrd_days_per_1000_benes AS ffs_irf_days,
          g.ltch_cvrd_stays_per_1000_benes AS ffs_ltch_stays, g.ltch_cvrd_days_per_1000_benes AS ffs_ltch_days,
-         m.ip_stays_per_1000_benes / nullif(g.ip_cvrd_stays_per_1000_benes,0) AS r_ip_stays, m.ip_days_per_1000_benes / nullif(g.ip_cvrd_days_per_1000_benes,0) AS r_ip_days,
-         m.snf_stays_per_1000_benes / nullif(g.snf_cvrd_stays_per_1000_benes,0) AS r_snf_stays, m.snf_days_per_1000_benes / nullif(g.snf_cvrd_days_per_1000_benes,0) AS r_snf_days,
-         m.irf_stays_per_1000_benes / nullif(g.irf_cvrd_stays_per_1000_benes,0) AS r_irf_stays, m.ltc_stays_per_1000_benes / nullif(g.ltch_cvrd_stays_per_1000_benes,0) AS r_ltch_stays
+         h.ip_cvrd_stays_per_1000_benes AS ffs24_ip_stays, h.ip_cvrd_days_per_1000_benes AS ffs24_ip_days, h.snf_cvrd_stays_per_1000_benes AS ffs24_snf_stays, h.snf_cvrd_days_per_1000_benes AS ffs24_snf_days,
+         m.ip_stays_per_1000_benes / nullif(h.ip_cvrd_stays_per_1000_benes,0) AS r_ip_stays, m.ip_days_per_1000_benes / nullif(h.ip_cvrd_days_per_1000_benes,0) AS r_ip_days,
+         m.snf_stays_per_1000_benes / nullif(h.snf_cvrd_stays_per_1000_benes,0) AS r_snf_stays, m.snf_days_per_1000_benes / nullif(h.snf_cvrd_days_per_1000_benes,0) AS r_snf_days,
+         m.irf_stays_per_1000_benes / nullif(h.irf_cvrd_stays_per_1000_benes,0) AS r_irf_stays, m.ltc_stays_per_1000_benes / nullif(h.ltch_cvrd_stays_per_1000_benes,0) AS r_ltch_stays,
+         m.ip_stays_per_1000_benes / nullif(g.ip_cvrd_stays_per_1000_benes,0) AS same_year_ratio_ip_stays, m.snf_days_per_1000_benes / nullif(g.snf_cvrd_days_per_1000_benes,0) AS same_year_ratio_snf_days
   FROM ma_gv m
   JOIN gv g ON g.year = m.year AND g.age_level = 'All' AND ((m.state = 'National' AND g.geo_level = 'National') OR (g.geo_level = 'State' AND g.geo_desc = m.state))
+  JOIN gv h ON h.year = 2024 AND h.age_level = 'All' AND h.geo_level = g.geo_level AND h.geo_desc IS NOT DISTINCT FROM g.geo_desc
   WHERE m.year = {ma_year}""")
 n_state = one("SELECT count(*) FROM uw_state")
 assert n_state >= 52, n_state   # 50 states + DC + PR + National, minus any state code the two files spell differently
-natr = con.execute("SELECT ma_ip_stays, ffs_ip_stays, r_ip_stays, ma_snf_days, ffs_snf_days, r_snf_days FROM uw_state WHERE state='National'").fetchall()[0]
+natr = con.execute("SELECT ma_ip_stays, ffs_ip_stays, same_year_ratio_ip_stays, ma_snf_days, ffs_snf_days, same_year_ratio_snf_days FROM uw_state WHERE state='National'").fetchall()[0]
+# Year-by-year national series, straight from the two files, so the page can show how much these figures move from one year to the next (the reason years are not mixed silently)
+_g = lambda c: f"TRY_CAST({c} AS DOUBLE)"
+ffs_tr = {int(r[0]): r[1:] for r in con.execute(f"""SELECT YEAR, {_g('IP_CVRD_STAYS_PER_1000_BENES')}, {_g('SNF_CVRD_DAYS_PER_1000_BENES')},
+     {_g('SNF_MDCR_PYMT_AMT')} / ({_g('BENES_OM_CNT')} * {_g('SNF_CVRD_DAYS_PER_1000_BENES')} / 1000), {_g('IP_MDCR_PYMT_AMT')} / ({_g('BENES_OM_CNT')} * {_g('IP_CVRD_STAYS_PER_1000_BENES')} / 1000)
+     FROM {GV} WHERE BENE_GEO_LVL = 'National' AND BENE_AGE_LVL = 'All' AND CAST(YEAR AS INTEGER) >= 2019""").fetchall()}
+ma_tr = {int(r[0]): r[1:] for r in con.execute("SELECT year, ip_stays_per_1000_benes, snf_days_per_1000_benes FROM ma_gv WHERE state = 'National' AND year >= 2019").fetchall()}
+trend = [{"year": y, "ffs_ip_stays": ffs_tr[y][0], "ffs_snf_days": ffs_tr[y][1], "ffs_snf_price_per_day": round(ffs_tr[y][2], 2), "ffs_ip_price_per_stay": round(ffs_tr[y][3], 2),
+          "ma_ip_stays": ma_tr.get(y, (None, None))[0], "ma_snf_days": ma_tr.get(y, (None, None))[1]} for y in sorted(ffs_tr)]
+assert [t["year"] for t in trend] == [2019, 2020, 2021, 2022, 2023, 2024] and all(t["ffs_snf_days"] for t in trend), trend
 
 # ---------------------------------------------------------------- Medicare Monthly Enrollment (county)
 EN = f"read_csv('{RAW}/monthly_enrollment.csv', all_varchar=true)"
@@ -399,6 +415,22 @@ con.execute("""CREATE OR REPLACE TABLE uw_county AS
   LEFT JOIN ma_ratebook b ON b.ssa = x.ssa
   LEFT JOIN (SELECT fips, sum(enrollment) FILTER (WHERE segment = 'MA') AS ma_enrollment, sum(suppressed_cells) FILTER (WHERE segment = 'MA') AS suppressed_cells FROM ma_parent_county GROUP BY 1) p ON p.fips = e.fips""")
 n_uw = one("SELECT count(*) FROM uw_county"); assert n_uw == one("SELECT count(DISTINCT fips) FROM uw_county")
+# Anchor the county model to the state's OBSERVED MA rate exactly. The county position must be measured against the state's Original Medicare average as MA members
+# experience it (weighted by where MA members live, 2024, same file), not against the all-beneficiary state average: MA members are concentrated in particular counties,
+# so the plain state average would not add back up to the state's MA rate. With this, summing the model over a state's counties returns CMS's published state figure.
+for x in ("ip_stays", "ip_days", "snf_stays", "snf_days", "irf_stays", "ltch_stays"):
+    ma_col = {"ltch_stays": "ma_ltch_stays"}.get(x, f"ma_{x}")
+    con.execute(f"""UPDATE uw_state s SET r_{x} = s.{ma_col} / w.avg FROM (
+        SELECT state, sum(gv_ma_benes * ffs_{x}) / nullif(sum(CASE WHEN ffs_{x} IS NOT NULL THEN gv_ma_benes END), 0) AS avg FROM uw_county GROUP BY 1) w
+        WHERE w.state = s.state AND w.avg > 0""")
+# check: the model, summed over every county with 2024 MA enrollment as weights, must return what CMS publishes for the same states (its 2023 state figures weighted by its
+# 2023 MA enrollment). States with no county file at all (Puerto Rico: 655,000 MA members and almost no SNF use) are outside the county model and outside this comparison.
+anchor = con.execute("""SELECT sum(u.gv_ma_benes * u.ffs_ip_stays * s.r_ip_stays) / sum(CASE WHEN u.ffs_ip_stays IS NOT NULL AND s.r_ip_stays IS NOT NULL THEN u.gv_ma_benes END),
+     sum(u.gv_ma_benes * u.ffs_snf_days * s.r_snf_days) / sum(CASE WHEN u.ffs_snf_days IS NOT NULL AND s.r_snf_days IS NOT NULL THEN u.gv_ma_benes END)
+     FROM uw_county u JOIN uw_state s USING (state)""").fetchall()[0]
+pub = con.execute("""SELECT sum(ma_benes * ma_ip_stays) / sum(ma_benes), sum(ma_benes * ma_snf_days) / sum(ma_benes) FROM uw_state
+     WHERE state <> 'National' AND state IN (SELECT state FROM uw_county WHERE gv_ma_benes IS NOT NULL AND ffs_snf_days IS NOT NULL)""").fetchall()[0]
+assert abs(anchor[0] / pub[0] - 1) < 0.005 and abs(anchor[1] / pub[1] - 1) < 0.005, (anchor, pub)
 cov = con.execute("""SELECT sum(enr_ma) FILTER (WHERE ffs_snf_days IS NOT NULL) / sum(enr_ma), sum(enr_ma) FILTER (WHERE ffs_risk_score IS NOT NULL) / sum(enr_ma),
                             sum(enr_ma) FILTER (WHERE cbsa IS NOT NULL) / sum(enr_ma), sum(enr_ma), count(*) FILTER (WHERE gv_ffs_benes IS NULL) FROM uw_county""").fetchall()[0]
 assert cov[0] > 0.97 and cov[1] > 0.97, cov
@@ -480,7 +512,8 @@ summary = {
     "uw_counties": n_uw, "ma_enrollment_share_with_snf_rate": round(cov[0], 5), "ma_enrollment_share_with_risk_score": round(cov[1], 5), "ma_enrollment_share_in_a_cbsa": round(cov[2], 5),
     "national_ma_vs_ffs_2023": {"ma_ip_stays": natr[0], "ffs_ip_stays": natr[1], "ratio_ip_stays": round(natr[2], 4), "ma_snf_days": natr[3], "ffs_snf_days": natr[4], "ratio_snf_days": round(natr[5], 4)},
     "snf_cost": {"ccns": snf_n[0], "full_year_reports": snf_n[1], "reports_in_file": snf_n[2]}, "hospital_cost": {"ccns": hosp_n[0], "full_year_reports": hosp_n[1], "reports_in_file": hosp_n[2]},
-    "snf_geo_matched": snf_geo, "hospital_geo_matched": hosp_geo,
+    "snf_geo_matched": snf_geo, "hospital_geo_matched": hosp_geo, "trend": trend,
+    "ma_model_anchor": {"model_ip_stays": round(anchor[0], 2), "cms_ip_stays_same_states": round(pub[0], 2), "model_snf_days": round(anchor[1], 1), "cms_snf_days_same_states": round(pub[1], 1)},
     "stars": {"rating_year": 2026, "payment_year": 2027, "next_rating_year": 2027, "ma_contracts": qbp[0], "share_rated": round(qbp[2], 4), "share_parent_average": round(qbp[3], 4), "share_low_enrollment": round(qbp[4], 4),
               "share_new": round(qbp[5], 4), "share_in_5pct_bonus": round(qbp[6], 4), "share_in_3_5pct_bonus": round(qbp[7], 4), "average_rating": round(qbp[8], 3), "share_4plus_next_year": round(qbp[9], 4), "average_rebate_pct": round(qbp[10], 2),
               "check_avg_rating_2026_nov2025_weights": round(chk[0], 3), "check_share_4plus_2026_nov2025_weights": round(chk[1], 4), "check_avg_rating_2027": round(chk[2], 3), "cms_published": {"avg_2026": 4.01, "avg_2027": 3.99, "share_4plus_2027": 0.71}},

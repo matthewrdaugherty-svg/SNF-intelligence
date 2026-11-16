@@ -2,7 +2,8 @@
 //
 // Everything on the BASELINE side is a CMS figure or a labelled derivation of one (scripts/14_load_underwriting.py, T-026):
 //   - Original Medicare utilization and payments by county: Geographic Variation PUF, 2024
-//   - Medicare Advantage utilization by state: MA Geographic Variation PUF, 2023 (the county MA estimate = county FFS rate x that state's MA/FFS ratio; MODELED)
+//   - Medicare Advantage utilization by state: MA Geographic Variation PUF, 2023, the latest year. The county MA estimate = the state's observed MA rate (2023) x the county's
+//     Original Medicare rate relative to its state's (both 2024); MODELED. Years are never mixed silently: see D-053 and the Methods page's table of data years.
 //   - MA enrollment by parent organization and county: CPSC file, September 2026; county totals: Medicare Monthly Enrollment, July 2026
 //   - county benchmark rates and CMS's average bid-to-benchmark ratio: 2027 MA ratebook; Star Ratings 2026 (they set 2027 payment) and 2027; plan payments and risk scores: CMS Plan Payment Data 2024
 //   - (cont.) county FFS risk scores: MSSP county file, 2025; counties to CBSAs: Census/OMB July 2023
@@ -74,9 +75,9 @@ export interface PayerBaseline {
   coverage: number           // share of those members living in counties with published SNF utilization
   // Original Medicare (FFS) rates per 1,000 beneficiaries, member-weighted across the area's counties (2024)
   ffs: { ipStays: number; ipDays: number; snfStays: number; snfDays: number; irfStays: number | null; ltchStays: number | null; hhEpisodes: number; readmRate: number; totalPc: number }
-  // MA estimate per 1,000 members = county FFS rate x state MA/FFS ratio (2023), member-weighted; before any risk adjustment
+  // MA estimate per 1,000 members = the state's observed MA rate (2023) x the county's Original Medicare rate relative to its state's (2024), member-weighted
   ma: { ipStays: number; ipDays: number; snfStays: number; snfDays: number; irfStays: number | null; ltchStays: number | null }
-  ratio: { ipStays: number; ipDays: number; snfStays: number; snfDays: number }   // the member-weighted state ratios actually applied
+  maState: { ipStays: number; ipDays: number; snfStays: number; snfDays: number; irfStays: number | null; ltchStays: number | null }   // CMS's observed MA rates (2023) for the members' states, member-weighted
   // FFS payment per unit in the area (2024): total payments / total units across counties where both are published
   price: { ipPerStay: number; ipPerDay: number; snfPerDay: number; hhPerEpisode: number; irfPerStay: number | null; ltchPerStay: number | null }
   ffsRisk: number | null     // average HCC risk score of FFS assignable beneficiaries (MSSP county file, person-year weighted)
@@ -153,7 +154,8 @@ export async function payerBaseline(g: Geo, parentText: string): Promise<PayerBa
   const price = (pay: string, rate: string) => `sum(CASE WHEN ${pay} IS NOT NULL AND ${rate} IS NOT NULL THEN ${pay} END) / nullif(sum(CASE WHEN ${pay} IS NOT NULL AND ${rate} IS NOT NULL THEN gv_ffs_benes * ${rate} / 1000.0 END), 0)`
   const [r] = await q<Row>(`
     WITH base AS (
-      SELECT u.*, ${mExpr} AS m, s.r_ip_stays, s.r_ip_days, s.r_snf_stays, s.r_snf_days, s.r_irf_stays, s.r_ltch_stays
+      SELECT u.*, ${mExpr} AS m, s.r_ip_stays, s.r_ip_days, s.r_snf_stays, s.r_snf_days, s.r_irf_stays, s.r_ltch_stays,
+        s.ma_ip_stays AS st_ip_stays, s.ma_ip_days AS st_ip_days, s.ma_snf_stays AS st_snf_stays, s.ma_snf_days AS st_snf_days, s.ma_irf_stays AS st_irf_stays, s.ma_ltch_stays AS st_ltch_stays
       FROM uw_county u ${useParent ? `LEFT JOIN (SELECT fips, sum(enrollment) AS e FROM ma_parent_county WHERE segment = 'MA' AND lower(parent_org) LIKE ${parentLike(parentText)} GROUP BY 1) p ON p.fips = u.fips` : ''}
       LEFT JOIN uw_state s ON s.state = u.state
       WHERE ${geoWhere(g)})
@@ -163,7 +165,7 @@ export async function payerBaseline(g: Geo, parentText: string): Promise<PayerBa
       sum(gv_ffs_benes * ffs_ip_stays * ffs_readm_rate) / nullif(sum(CASE WHEN ffs_readm_rate IS NOT NULL THEN gv_ffs_benes * ffs_ip_stays END), 0) AS f_readm,
       ${wavg('ffs_ip_stays * r_ip_stays')} AS m_ip_stays, ${wavg('ffs_ip_days * r_ip_days')} AS m_ip_days, ${wavg('ffs_snf_stays * r_snf_stays')} AS m_snf_stays, ${wavg('ffs_snf_days * r_snf_days')} AS m_snf_days,
       ${wavg('ffs_irf_stays * r_irf_stays')} AS m_irf_stays, ${wavg('ffs_ltch_stays * r_ltch_stays')} AS m_ltch_stays,
-      ${wavg('r_ip_stays')} AS r_ip_stays, ${wavg('r_ip_days')} AS r_ip_days, ${wavg('r_snf_stays')} AS r_snf_stays, ${wavg('r_snf_days')} AS r_snf_days,
+      ${wavg('st_ip_stays')} AS st_ip_stays, ${wavg('st_ip_days')} AS st_ip_days, ${wavg('st_snf_stays')} AS st_snf_stays, ${wavg('st_snf_days')} AS st_snf_days, ${wavg('st_irf_stays')} AS st_irf_stays, ${wavg('st_ltch_stays')} AS st_ltch_stays,
       ${price('ffs_ip_pymt', 'ffs_ip_stays')} AS p_ip_stay, ${price('ffs_ip_pymt', 'ffs_ip_days')} AS p_ip_day, ${price('ffs_snf_pymt', 'ffs_snf_days')} AS p_snf_day,
       ${price('ffs_hh_pymt', 'ffs_hh_episodes')} AS p_hh, ${price('ffs_irf_pymt', 'ffs_irf_stays')} AS p_irf, ${price('ffs_ltch_pymt', 'ffs_ltch_stays')} AS p_ltch,
       sum(risk_person_years * ffs_risk_score) / nullif(sum(CASE WHEN ffs_risk_score IS NOT NULL THEN risk_person_years END), 0) AS ffs_risk,
@@ -190,7 +192,7 @@ export async function payerBaseline(g: Geo, parentText: string): Promise<PayerBa
     members: Number(r.members), membersSource: useParent ? 'parent' : 'all', matchedParents: matched, areaMa: Number(r.area_ma ?? 0), coverage: Number(r.coverage ?? 0),
     ffs: { ipStays: Number(r.f_ip_stays), ipDays: Number(r.f_ip_days), snfStays: Number(r.f_snf_stays), snfDays: Number(r.f_snf_days), irfStays: n(r.f_irf_stays), ltchStays: n(r.f_ltch_stays), hhEpisodes: Number(r.f_hh), readmRate: Number(r.f_readm), totalPc: Number(r.f_total_pc) },
     ma: { ipStays: Number(r.m_ip_stays), ipDays: Number(r.m_ip_days), snfStays: Number(r.m_snf_stays), snfDays: Number(r.m_snf_days), irfStays: n(r.m_irf_stays), ltchStays: n(r.m_ltch_stays) },
-    ratio: { ipStays: Number(r.r_ip_stays), ipDays: Number(r.r_ip_days), snfStays: Number(r.r_snf_stays), snfDays: Number(r.r_snf_days) },
+    maState: { ipStays: Number(r.st_ip_stays), ipDays: Number(r.st_ip_days), snfStays: Number(r.st_snf_stays), snfDays: Number(r.st_snf_days), irfStays: n(r.st_irf_stays), ltchStays: n(r.st_ltch_stays) },
     price: { ipPerStay: Number(r.p_ip_stay), ipPerDay: Number(r.p_ip_day), snfPerDay: Number(r.p_snf_day), hhPerEpisode: Number(r.p_hh), irfPerStay: n(r.p_irf), ltchPerStay: n(r.p_ltch) },
     ffsRisk: n(r.ffs_risk), benchmark: { r0: n(r.b0), r35: n(r.b35), r5: n(r.b5) }, rev,
     snf: { n: Number(s.n), nHigh: Number(s.n_high), lowShare: n(s.low_share), rehospLow: n(s.rehosp_low), rehospHigh: n(s.rehosp_high), readmLow: n(s.readm_low), readmHigh: n(s.readm_high), worseShare: n(s.worse_share), rehospWorse: n(s.rehosp_worse), rehospBetter: n(s.rehosp_better) },
@@ -231,8 +233,9 @@ export interface PayerValue {
   pctOfIpPac: number
   riskUsed: number
   riskSource: 'cms' | 'one' | 'own'   // what riskUsed actually is: 'cms' falls back to 'one' when CMS has published no score for these plans
-  mlrPoints: number | null       // savings as points of medical loss ratio, against these contracts' 2023 MLR denominator
-  ipPacShareOfClaims: number | null   // modeled inpatient + post-acute spend / these contracts' actual 2023 Parts A and B claims: a check on the utilization baseline
+  /** Like for like (D-053): savings are priced at 2024 Original Medicare prices, so they are divided by what CMS actually paid these plans in 2024, not by 2027 revenue. */
+  pctOfPayment24: number | null
+  carried27: number | null       // that same share applied to the expected 2027 payment, $ PMPM: what the savings are worth at today's revenue if they keep pace with it
   benchRevenue: number | null    // benchmark at the plans' own star tiers x risk score: the most CMS pays before the bid is taken into account
   payment: number | null         // expected CMS payment = base payment + rebate
   basePayment: number | null     // risk x bid: the payment for Medicare-covered services
@@ -291,7 +294,8 @@ export function payerValue(b: PayerBaseline, a: PayerAssumptions, members: numbe
     per1000: { ipStays, ipDays, snfStays, snfDays, irfStays, ltchStays, readmissionsAvoided: readmAvoided, snfStaysToHome: toHome, snfDaysSaved: daysSaved },
     snfCostPerStay, spendPmpm: spend, levers, totalPerYear, totalPmpm,
     pctOfIpPac: spend.total > 0 ? totalPmpm / spend.total : 0, riskUsed, riskSource,
-    mlrPoints: R?.mlr23 ? totalPmpm / R.mlr23.denPmpm : null, ipPacShareOfClaims: R?.mlr23 ? spend.total / R.mlr23.abClaims : null, benchRevenue, payment, basePayment, rebate, bidRatioUsed: rho ?? R?.bidRatio ?? null,
+    pctOfPayment24: R?.pay24 ? totalPmpm / (R.pay24.base + R.pay24.rebate) : null,
+    carried27: R?.pay24 && payment != null ? totalPmpm / (R.pay24.base + R.pay24.rebate) * payment : null, benchRevenue, payment, basePayment, rebate, bidRatioUsed: rho ?? R?.bidRatio ?? null,
     pctOfRevenue: benchRevenue ? totalPmpm / benchRevenue : null, pctOfPayment: payment ? totalPmpm / payment : null,
     bonusGapPmpm, bonusGapPerYear: bonusGapPmpm == null ? null : bonusGapPmpm * 12 * members, routingPts: routing, routingPtsMeasure: routingMeasure,
   }
@@ -301,7 +305,7 @@ export function payerValue(b: PayerBaseline, a: PayerAssumptions, members: numbe
 export interface HospitalBaseline {
   n: number; names: string[]; nNoCostReport: number   // nNoCostReport: no FY 2024 cost report, or one whose figures fail HOSP_OK and are left out
   dischargesTotal: number; dischargesFfs: number; daysTotal: number; beds: number; bedDays: number
-  maDischarges: number       // MODELED: FFS discharges x (county MA / FFS enrollment) x state MA/FFS inpatient ratio
+  maDischarges: number       // MODELED: FFS discharges x (county MA / FFS enrollment, 2024) x state MA/FFS inpatient ratio
   placementsFfs: number; placementsMa: number   // SNF-bound discharges: discharges x MedPAC's national SNF share (18.7%) x the county's SNF stays per inpatient stay relative to the nation's; MA also x the state MA ratios
   costPerDay: number | null  // estimated inpatient cost per day: inpatient charges x cost-to-charge ratio / inpatient days (operating expense share when no ratio is reported)
   revPerDay: number | null   // net patient revenue x inpatient share of charges / inpatient days
@@ -322,11 +326,12 @@ const HOSP_OK = `c.discharges_total > 0 AND c.days_total > 0 AND c.bed_days_avai
   AND coalesce((${HOSP_COST}) / c.days_total BETWEEN 300 AND 20000, false)`
 export async function hospitalBaseline(g: Geo, ccns: string[] | null): Promise<HospitalBaseline | null> {
   await ensureUw()
+  // ma_per_ffs uses 2024 enrollment from the Geographic Variation file: the cost reports' year, and the same beneficiary definition as the utilization rates (D-053)
   const [r] = await q<Row>(`
     WITH nat AS (SELECT sum(gv_ffs_benes * ffs_snf_stays) / sum(gv_ffs_benes * ffs_ip_stays) AS snf_per_ip FROM uw_county WHERE ffs_snf_stays IS NOT NULL AND ffs_ip_stays IS NOT NULL),
     h AS (
       SELECT hg.hospital_ccn, hm.hospital_name, c.*, 365.0 / c.period_days AS ann, coalesce(${HOSP_OK}, false) AS ok, (${HOSP_COST}) AS ip_cost,
-        u.enr_ma / nullif(u.enr_ffs, 0) * s.r_ip_stays AS ma_per_ffs,
+        u.gv_ma_benes / nullif(u.gv_ffs_benes, 0) * s.r_ip_stays AS ma_per_ffs,
         ${SNF_SHARE_OF_DISCHARGES} * (u.ffs_snf_stays / nullif(u.ffs_ip_stays, 0)) / (SELECT snf_per_ip FROM nat) AS snf_share_ffs,
         ${SNF_SHARE_OF_DISCHARGES} * (u.ffs_snf_stays * s.r_snf_stays / nullif(u.ffs_ip_stays * s.r_ip_stays, 0)) / (SELECT snf_per_ip FROM nat) AS snf_share_ma
       FROM hospital_geo hg JOIN hospital_master hm ON hm.hospital_ccn = hg.hospital_ccn JOIN uw_county u ON u.fips = hg.fips

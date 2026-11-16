@@ -45,7 +45,7 @@ def revenue(geo, text):
     if rho.notna().all():
         out["base1"] = float((e * x["rate"] * rho).sum() / E)                       # bid at CMS's county ratio, risk 1.0
         out["rebate1"] = float((e * x["rate"] * (1 - rho) * rb).sum() / E)          # rebate share x (benchmark - bid)
-        out["payment1"] = out["base1"] + out["rebate1"]
+        out["payment1"] = out["base1"] + out["rebate1"]; out["bidRatio"] = out["base1"] / out["bench"]
     ep = float(np.nansum(x["enr_pay"]))
     if ep > 0:
         out["risk24"] = float(np.nansum(x["risk_x"]) / ep); out["base24"] = float(np.nansum(x["base_x"]) / ep); out["rebate24"] = float(np.nansum(x["rebate_x"]) / ep)
@@ -106,7 +106,7 @@ HOSP_PRESETS = {"min": dict(daysSaved=.25, backfill=0, penaltyRecovered=0, vbpRe
                 "stretch": dict(daysSaved=1, backfill=50, penaltyRecovered=50, vbpRecovered=10, readmPts=2, hoursSaved=2)}
 
 def hospital(geo, ccns=None):
-    g = hosp_geo.merge(hm, on="hospital_ccn").merge(county[["fips", "state", "cbsa", "enr_ma", "enr_ffs", "ffs_ip_stays", "ffs_snf_stays"]].rename(columns={"cbsa": "c_cbsa"}), on="fips")
+    g = hosp_geo.merge(hm, on="hospital_ccn").merge(county[["fips", "state", "cbsa", "gv_ma_benes", "gv_ffs_benes", "ffs_ip_stays", "ffs_snf_stays"]].rename(columns={"cbsa": "c_cbsa"}), on="fips")
     g = g[g["hospital_ccn"].isin(ccns)] if ccns else in_geo(g.assign(cbsa=g["c_cbsa"]), geo)
     h = g.merge(hosp_cost.drop(columns=["state"]), left_on="hospital_ccn", right_on="ccn", how="left").merge(state[["state", "r_ip_stays", "r_snf_stays"]], on="state", how="left")
     n_all = len(h)
@@ -122,7 +122,7 @@ def hospital(geo, ccns=None):
     ann = 365.0 / h["period_days"]
     S = lambda x: float(np.nansum(x))
     d_total, d_ffs, days, bed_days = S(h["discharges_total"] * ann), S(h["discharges_medicare"] * ann), S(h["days_total"] * ann), S(h["bed_days_available"] * ann)
-    ma_ratio = h["enr_ma"] / h["enr_ffs"].where(h["enr_ffs"] != 0)
+    ma_ratio = h["gv_ma_benes"] / h["gv_ffs_benes"].where(h["gv_ffs_benes"] != 0)     # 2024 enrollment: the cost reports' year
     d_ma = S(h["discharges_medicare"] * ann * ma_ratio * h["r_ip_stays"])
     p_ffs = S(h["discharges_medicare"] * ann * MEDPAC * (h["ffs_snf_stays"] / h["ffs_ip_stays"]) / nat)
     p_ma = S(h["discharges_medicare"] * ann * ma_ratio * h["r_ip_stays"] * MEDPAC * (h["ffs_snf_stays"] * h["r_snf_stays"]) / (h["ffs_ip_stays"] * h["r_ip_stays"]) / nat)

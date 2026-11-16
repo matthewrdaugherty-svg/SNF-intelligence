@@ -71,6 +71,68 @@
    5375,
    5419
   ],
+  "trend": [
+   {
+    "year": 2019,
+    "ffs_ip_stays": 261.5235,
+    "ffs_snf_days": 1528.4159,
+    "ffs_snf_price_per_day": 489.61,
+    "ffs_ip_price_per_stay": 13464.57,
+    "ma_ip_stays": 211.7426,
+    "ma_snf_days": 945.1343
+   },
+   {
+    "year": 2020,
+    "ffs_ip_stays": 223.4531,
+    "ffs_snf_days": 1501.0237,
+    "ffs_snf_price_per_day": 534.14,
+    "ffs_ip_price_per_stay": 15079.28,
+    "ma_ip_stays": 188.4099,
+    "ma_snf_days": 764.757
+   },
+   {
+    "year": 2021,
+    "ffs_ip_stays": 219.5426,
+    "ffs_snf_days": 1429.5446,
+    "ffs_snf_price_per_day": 550.38,
+    "ffs_ip_price_per_stay": 16053.77,
+    "ma_ip_stays": 197.0544,
+    "ma_snf_days": 792.7625
+   },
+   {
+    "year": 2022,
+    "ffs_ip_stays": 218.2738,
+    "ffs_snf_days": 1544.9442,
+    "ffs_snf_price_per_day": 558.77,
+    "ffs_ip_price_per_stay": 16240.27,
+    "ma_ip_stays": 199.2673,
+    "ma_snf_days": 783.1412
+   },
+   {
+    "year": 2023,
+    "ffs_ip_stays": 222.3068,
+    "ffs_snf_days": 1435.7722,
+    "ffs_snf_price_per_day": 579.6,
+    "ffs_ip_price_per_stay": 16308.77,
+    "ma_ip_stays": 205.1642,
+    "ma_snf_days": 834.436
+   },
+   {
+    "year": 2024,
+    "ffs_ip_stays": 224.8391,
+    "ffs_snf_days": 1396.138,
+    "ffs_snf_price_per_day": 616.73,
+    "ffs_ip_price_per_stay": 16932.82,
+    "ma_ip_stays": null,
+    "ma_snf_days": null
+   }
+  ],
+  "ma_model_anchor": {
+   "model_ip_stays": 205.7,
+   "cms_ip_stays_same_states": 205.71,
+   "model_snf_days": 850.7,
+   "cms_snf_days_same_states": 850.7
+  },
   "stars": {
    "rating_year": 2026,
    "payment_year": 2027,

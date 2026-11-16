@@ -30,11 +30,14 @@ test('value: payer tab matches the replica for a parent organization in a metro 
   await expect(page.getByTestId('bench-revenue')).toHaveText(usd0(R.bench * R.risk24))
   await expect(page.getByTestId('cms-payment')).toHaveText(usd0(R.payment1 * R.risk24))
   await expect(page.getByTestId('plan-revenue')).toContainText(`${R.stars.toFixed(2)}★`)
-  await expect(page.getByTestId('payer-result')).toContainText(`${(100 * e.cases.base.totalPmpm / (R.bench * R.risk24)).toFixed(2)}%`)
-  await expect(page.getByTestId('payer-result')).toContainText('(CMS 2024)')
+  // the revenue share is like for like: 2024-price savings over what CMS paid these plans in 2024, then that share applied to the 2027 payment
+  const share24 = e.cases.base.totalPmpm / (R.base24 + R.rebate24)
+  await expect(page.getByTestId('like-for-like')).toHaveText(`${(100 * share24).toFixed(2)}%`)
+  await expect(page.getByTestId('carried')).toHaveText(pmpm(share24 * R.payment1 * R.risk24))
   await expect(page.getByTestId('pay-check')).toContainText(`${usd0(R.base24 + R.rebate24)} per member per month`)
-  await expect(page.getByTestId('mlr-points')).toHaveText(`${(100 * e.cases.base.totalPmpm / R.mlrDen).toFixed(2)} points`)
   await expect(page.getByTestId('mlr-check')).toContainText(`${(100 * R.mlr23).toFixed(1)}%`)
+  await expect(page.getByTestId('mlr-check')).toContainText('no figure on this page is calculated from it')
+  await expect(page.getByTestId('trend')).toContainText('MA level used')
   await page.getByRole('radio', { name: '1.0', exact: true }).click()
   await expect(page.getByTestId('risk-tag')).toHaveText('Set to 1.0')
   await expect(page.getByTestId('risk-footnote')).toHaveCount(0)
@@ -45,8 +48,10 @@ test('value: payer tab matches the replica for a parent organization in a metro 
   await expect(page.getByTestId('risk-tag')).toHaveText('Your number')
   await expect(page.getByTestId('bench-revenue')).toHaveText(usd0(R.bench * 1.25))
   await page.getByRole('radio', { name: `CMS 2024: ${R.risk24.toFixed(2)}` }).click()
+  // the plan's 2024 bid position is carried to today's average, never used as it stood in 2024
   await page.getByTestId('use-implied-bid').click()
-  const rho = Math.round(1000 * R.impliedBid) / 1000
+  const nat24 = JSON.parse(fs.readFileSync(path.resolve('public/data/meta.json'), 'utf8')).underwriting.plan_payment.implied_bid_ratio
+  const rho = Math.round(1000 * Math.min(1, Math.max(0.5, R.bidRatio + (R.impliedBid - nat24)))) / 1000
   await expect(page.getByTestId('cms-payment')).toHaveText(usd0(R.risk24 * (rho * R.bench + (1 - rho) * R.sBr)))
   await expect(page.getByTestId('payer-pmpm')).toHaveText(pmpm(e.cases.base.totalPmpm))   // revenue settings never change the savings
   await page.goto('/value?geo=12580&payer=united')
